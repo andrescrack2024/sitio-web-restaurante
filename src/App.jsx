@@ -79,8 +79,11 @@ export default function App() {
           item.category === 'fuertes' ||
           item.category === 'postres'
         );
+        const hasOutdatedImages = items.some(item => 
+          item.image && item.image.includes('w=800')
+        );
 
-        if (hasGourmet || items.length === 0) {
+        if (hasGourmet || hasOutdatedImages || items.length === 0) {
           console.log("Migración o inicialización requerida. Limpiando colección...");
           setLoading(true);
 

@@ -5,7 +5,7 @@ export default function Hero() {
   return (
     <section id="inicio" className="hero">
       <img 
-        src="https://images.unsplash.com/photo-1594212699903-ec8a3eca50f5?auto=format&fit=crop&q=80&w=1200" 
+        src="https://images.unsplash.com/photo-1594212699903-ec8a3eca50f5?auto=format&fit=crop&q=60&w=800" 
         alt="Hamburguesas y papas fritas gourmet" 
         className="hero-overlay-img"
       />

@@ -32,7 +32,7 @@ export default function About() {
           {/* Image Right */}
           <div className="about-image-container animate-fade-in">
             <img 
-              src="https://images.unsplash.com/photo-1550547660-d9450f859349?auto=format&fit=crop&q=80&w=800" 
+              src="https://images.unsplash.com/photo-1550547660-d9450f859349?auto=format&fit=crop&q=60&w=500" 
               alt="Hamburguesa premium con papas fritas crujientes" 
               className="about-img"
             />

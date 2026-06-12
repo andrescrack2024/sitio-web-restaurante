@@ -8,7 +8,7 @@ export const MENU_ITEMS = [
     category: 'rapida',
     price: 18000,
     description: 'Carne de res premium de 150g, queso cheddar fundido, lechuga fresca, tomate, cebolla caramelizada y salsa especial de la casa en pan brioche artesanal.',
-    image: 'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?auto=format&fit=crop&q=80&w=800',
+    image: 'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?auto=format&fit=crop&q=80&w=500&q=60',
     badge: 'Popular'
   },
   {
@@ -17,7 +17,7 @@ export const MENU_ITEMS = [
     category: 'rapida',
     price: 26000,
     description: 'Dos carnes de res de 150g, tocineta ahumada crujiente, queso cheddar doble, aros de cebolla crujientes y salsa BBQ artesanal en pan brioche.',
-    image: 'https://images.unsplash.com/photo-1586190848861-99aa4a171e90?auto=format&fit=crop&q=80&w=800',
+    image: 'https://images.unsplash.com/photo-1586190848861-99aa4a171e90?auto=format&fit=crop&q=80&w=500&q=60',
     badge: 'Recomendada'
   },
   {
@@ -26,7 +26,7 @@ export const MENU_ITEMS = [
     category: 'rapida',
     price: 15000,
     description: 'Salchicha tipo americana gigante, queso fundido, ripio de papa crujiente, tocineta picada, cebolla caramelizada y salsas tradicionales de la casa.',
-    image: 'https://images.unsplash.com/photo-1619740455993-9e612b1af08a?auto=format&fit=crop&q=80&w=800',
+    image: 'https://images.unsplash.com/photo-1619740455993-9e612b1af08a?auto=format&fit=crop&q=80&w=500&q=60',
     badge: 'El Favorito'
   },
   {
@@ -35,7 +35,7 @@ export const MENU_ITEMS = [
     category: 'rapida',
     price: 19000,
     description: 'Cama de papas a la francesa doradas, salchicha premium seleccionada, queso gratinado, tocineta picada, maíz dulce y salsa tártara artesanal.',
-    image: 'https://images.unsplash.com/photo-1585109649139-366815a0d713?auto=format&fit=crop&q=80&w=800',
+    image: 'https://images.unsplash.com/photo-1585109649139-366815a0d713?auto=format&fit=crop&q=80&w=500&q=60',
     badge: 'Gran Tamaño'
   },
   {
@@ -44,7 +44,7 @@ export const MENU_ITEMS = [
     category: 'acompanamientos',
     price: 8000,
     description: 'Porción generosa de papas fritas rústicas con piel, sazonadas con sal marina, romero fresco y un toque de paprika, servidas con salsa de ajo.',
-    image: 'https://images.unsplash.com/photo-1573080496219-bb080dd4f877?auto=format&fit=crop&q=80&w=800',
+    image: 'https://images.unsplash.com/photo-1573080496219-bb080dd4f877?auto=format&fit=crop&q=80&w=500&q=60',
     badge: 'Crujiente'
   },
   {
@@ -53,7 +53,7 @@ export const MENU_ITEMS = [
     category: 'acompanamientos',
     price: 9000,
     description: 'Anillos de cebolla tiernos rebozados en panko crujiente y fritos a la perfección, acompañados de salsa BBQ de la casa.',
-    image: 'https://images.unsplash.com/photo-1639024471283-2bc7b3c6a267?auto=format&fit=crop&q=80&w=800',
+    image: 'https://images.unsplash.com/photo-1639024471283-2bc7b3c6a267?auto=format&fit=crop&q=80&w=500&q=60',
     badge: 'Adicional'
   },
   {
@@ -62,7 +62,7 @@ export const MENU_ITEMS = [
     category: 'helados',
     price: 12000,
     description: 'Deliciosa copa con dos bolas de helado artesanal de vainilla Bourbon y chocolate, galletas Oreo trituradas, salsa de chocolate fudge y crema batida.',
-    image: 'https://images.unsplash.com/photo-1563805042-7684c019e1cb?auto=format&fit=crop&q=80&w=800',
+    image: 'https://images.unsplash.com/photo-1563805042-7684c019e1cb?auto=format&fit=crop&q=80&w=500&q=60',
     badge: 'Especial'
   },
   {
@@ -71,7 +71,7 @@ export const MENU_ITEMS = [
     category: 'helados',
     price: 16000,
     description: 'Banano maduro entero acompañado de tres bolas de helado (fresa natural, chocolate suizo y vainilla), bañado en salsa de caramelo, chispas de colores y cereza.',
-    image: 'https://images.unsplash.com/photo-1579954115545-a95591f28bfc?auto=format&fit=crop&q=80&w=800',
+    image: 'https://images.unsplash.com/photo-1579954115545-a95591f28bfc?auto=format&fit=crop&q=80&w=500&q=60',
     badge: 'Clásico'
   },
   {
@@ -80,7 +80,7 @@ export const MENU_ITEMS = [
     category: 'helados',
     price: 11000,
     description: 'Batido ultra-cremoso elaborado con helado de fresa natural, leche entera y decorado con crema chantilly, fresa fresca y chispas de chocolate.',
-    image: 'https://images.unsplash.com/photo-1572490122747-3968b75cc699?auto=format&fit=crop&q=80&w=800',
+    image: 'https://images.unsplash.com/photo-1572490122747-3968b75cc699?auto=format&fit=crop&q=80&w=500&q=60',
     badge: 'Deliciosa'
   },
   {
@@ -89,7 +89,7 @@ export const MENU_ITEMS = [
     category: 'bebidas',
     price: 9000,
     description: 'Refrescante limonada granizada licuada con limones recién exprimidos y un delicioso sirope artesanal de cereza silvestre.',
-    image: 'https://images.unsplash.com/photo-1513558161293-cdaf765ed2fd?auto=format&fit=crop&q=80&w=800',
+    image: 'https://images.unsplash.com/photo-1513558161293-cdaf765ed2fd?auto=format&fit=crop&q=80&w=500&q=60',
     badge: 'Refrescante'
   },
   {
@@ -98,7 +98,7 @@ export const MENU_ITEMS = [
     category: 'bebidas',
     price: 4500,
     description: 'Bebida gaseosa helada en presentación personal a su elección (Coca-Cola, Sprite, Fanta o Colombiana).',
-    image: 'https://images.unsplash.com/photo-1622483767028-3f66f32aef97?auto=format&fit=crop&q=80&w=800',
+    image: 'https://images.unsplash.com/photo-1622483767028-3f66f32aef97?auto=format&fit=crop&q=80&w=500&q=60',
     badge: 'Bebida'
   },
   {
@@ -107,7 +107,7 @@ export const MENU_ITEMS = [
     category: 'rapida',
     price: 11000,
     description: 'Salchicha clásica de 15cm, queso mozzarella fundido, abundante ripio de papa crujiente y salsa rosada tradicional en pan tierno.',
-    image: 'https://images.unsplash.com/photo-1627059313833-0a29507f4b22?auto=format&fit=crop&q=80&w=800',
+    image: 'https://images.unsplash.com/photo-1627059313833-0a29507f4b22?auto=format&fit=crop&q=80&w=500&q=60',
     badge: 'Mediano'
   },
   {
@@ -116,7 +116,7 @@ export const MENU_ITEMS = [
     category: 'rapida',
     price: 8000,
     description: 'Salchicha junior de 10cm, ripio de papa crujiente y salsas tradicionales (ketchup y mostaza). El tamaño ideal para los más pequeños.',
-    image: 'https://images.unsplash.com/photo-1541232264-8066f8e0b4c1?auto=format&fit=crop&q=80&w=800',
+    image: 'https://images.unsplash.com/photo-1541232264-8066f8e0b4c1?auto=format&fit=crop&q=80&w=500&q=60',
     badge: 'Infantil'
   },
   {
@@ -125,7 +125,7 @@ export const MENU_ITEMS = [
     category: 'rapida',
     price: 13000,
     description: 'Papas fritas a la francesa doradas, salchicha clásica picada, salsas de la casa y coronada con un toque de queso costeño rallado.',
-    image: 'https://images.unsplash.com/photo-1585109649139-366815a0d713?auto=format&fit=crop&q=80&w=800',
+    image: 'https://images.unsplash.com/photo-1585109649139-366815a0d713?auto=format&fit=crop&q=80&w=500&q=60',
     badge: 'Clásica'
   },
   {
@@ -134,7 +134,7 @@ export const MENU_ITEMS = [
     category: 'rapida',
     price: 9000,
     description: 'Porción individual para calmar el antojo: papas fritas doradas acompañadas de salchicha picada y salsas básicas.',
-    image: 'https://images.unsplash.com/photo-1576107232684-1279f390859f?auto=format&fit=crop&q=80&w=800',
+    image: 'https://images.unsplash.com/photo-1576107232684-1279f390859f?auto=format&fit=crop&q=80&w=500&q=60',
     badge: 'Individual'
   },
   {
@@ -143,7 +143,7 @@ export const MENU_ITEMS = [
     category: 'rapida',
     price: 18000,
     description: 'Cama de papas fritas coronada con maíz tierno salteado con tocineta crujiente, abundante queso mozzarella gratinado, ripio de papa y salsa tártara.',
-    image: 'https://images.unsplash.com/photo-1551504734-5ee1c4a1479b?auto=format&fit=crop&q=80&w=800',
+    image: 'https://images.unsplash.com/photo-1551504734-5ee1c4a1479b?auto=format&fit=crop&q=80&w=500&q=60',
     badge: 'Recomendado'
   }
 ];
