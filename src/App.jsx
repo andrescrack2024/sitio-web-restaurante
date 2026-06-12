@@ -79,9 +79,8 @@ export default function App() {
           item.category === 'fuertes' ||
           item.category === 'postres'
         );
-        const isOutdated = items.length > 0 && items.length < MENU_ITEMS.length;
 
-        if (hasGourmet || isOutdated || items.length === 0) {
+        if (hasGourmet || items.length === 0) {
           console.log("Migración o inicialización requerida. Limpiando colección...");
           setLoading(true);
 
