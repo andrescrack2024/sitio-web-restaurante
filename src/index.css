@@ -472,7 +472,7 @@ button {
 
 @media (max-width: 576px) {
   .hero-title {
-    font-size: 2.8rem;
+    font-size: 2.3rem;
   }
 }
 
@@ -1450,6 +1450,30 @@ button {
   flex-direction: column;
 }
 
+.detail-modal-content .modal-close-btn {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  z-index: 10;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background-color: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(4px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: #ffffff !important;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all var(--transition-fast);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+.detail-modal-content .modal-close-btn:hover {
+  background-color: rgba(0, 0, 0, 0.7);
+  transform: scale(1.05);
+}
+
 .detail-modal-img-wrapper {
   width: 100%;
   height: 350px;
@@ -1604,6 +1628,57 @@ button {
     right: 20px;
     padding: 12px 18px;
     font-size: 0.88rem;
+  }
+
+  /* Navbar & Logo title fixes on mobile to prevent clutter */
+  .logo {
+    font-size: 1.3rem !important;
+    letter-spacing: 0.5px !important;
+  }
+  .logo img {
+    height: 32px !important;
+    width: 32px !important;
+  }
+  .nav-actions {
+    gap: 8px !important;
+  }
+  .btn-icon-round {
+    width: 36px !important;
+    height: 36px !important;
+  }
+
+  /* Detail Modal layout & squish fixes on mobile */
+  .detail-modal-header {
+    flex-direction: column;
+    align-items: flex-start !important;
+    gap: 4px !important;
+  }
+  .detail-modal-title {
+    font-size: 1.4rem !important;
+  }
+  .detail-modal-price {
+    font-size: 1.3rem !important;
+    margin-top: 2px;
+  }
+  .detail-modal-desc {
+    font-size: 0.9rem !important;
+    line-height: 1.4 !important;
+    margin-bottom: 16px !important;
+  }
+  .detail-modal-body {
+    padding: 16px !important;
+  }
+  .detail-modal-img-wrapper {
+    height: 200px !important;
+  }
+}
+
+@media (max-width: 380px) {
+  .logo span {
+    font-size: 1.15rem !important;
+  }
+  .hero-title {
+    font-size: 2.0rem !important;
   }
 }
 
