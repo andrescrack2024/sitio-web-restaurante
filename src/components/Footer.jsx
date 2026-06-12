@@ -90,9 +90,12 @@ export default function Footer() {
         </div>
 
         {/* Footer Bottom */}
-        <div className="footer-bottom">
+        <div className="footer-bottom" style={{ display: 'flex', flexDirection: 'column', gap: '8px', alignItems: 'center' }}>
           <p>&copy; {currentYear} Rápido & Deli. Todos los derechos reservados.</p>
-          <p style={{ fontSize: '0.8rem' }}>
+          <p style={{ fontSize: '0.8rem', opacity: 0.8 }}>
+            Desarrollado con tecnología optimizada por <strong>Sharly Mosquera - Ingeniería de Sistemas</strong>
+          </p>
+          <p style={{ fontSize: '0.75rem', color: 'var(--accent-gold)' }}>
             Comida Rápida • Sabor al Instante
           </p>
         </div>

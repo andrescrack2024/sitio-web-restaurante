@@ -272,7 +272,7 @@ export default function App() {
           target={cartCount > 0 ? undefined : "_blank"}
           rel={cartCount > 0 ? undefined : "noopener noreferrer"}
           onClick={cartCount > 0 ? () => setIsCartOpen(true) : undefined}
-          className="whatsapp-sticky-btn animate-fade-in"
+          className="btn-whatsapp-fixed animate-fade-in"
           title={cartCount > 0 ? "Completar mi pedido por WhatsApp" : "Escríbenos por WhatsApp"}
         >
           <svg viewBox="0 0 24 24" width="22" height="22" fill="currentColor">

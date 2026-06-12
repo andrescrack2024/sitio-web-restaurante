@@ -370,16 +370,45 @@ export default function Menu({ menuItems = [], addToCart, cartItems, loading }) 
                 </div>
               </div>
 
-              <button
-                onClick={() => {
-                  handleAddClick(selectedProduct);
-                  setSelectedProduct(null);
-                }}
-                className="btn btn-primary"
-                style={{ width: '100%', textTransform: 'none', letterSpacing: '0.5px' }}
-              >
-                Agregar a mi pedido • {formatPrice(selectedProduct.price)}
-              </button>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginTop: '16px' }}>
+                <button
+                  onClick={() => {
+                    handleAddClick(selectedProduct);
+                    setSelectedProduct(null);
+                  }}
+                  className="btn btn-primary"
+                  style={{ width: '100%', textTransform: 'none', letterSpacing: '0.5px' }}
+                >
+                  Agregar al Carrito • {formatPrice(selectedProduct.price)}
+                </button>
+                <button
+                  onClick={() => {
+                    const number = "573126602583";
+                    const priceFormatted = formatPrice(selectedProduct.price);
+                    const text = `Hola! Quisiera ordenar a domicilio: *${selectedProduct.name}* (${priceFormatted}). ¿Me confirman disponibilidad y tiempo de entrega?`;
+                    window.open(`https://wa.me/${number}?text=${encodeURIComponent(text)}`, '_blank');
+                    setSelectedProduct(null);
+                  }}
+                  className="btn btn-secondary"
+                  style={{ 
+                    width: '100%', 
+                    textTransform: 'none', 
+                    letterSpacing: '0.5px', 
+                    backgroundColor: '#25D366', 
+                    color: '#ffffff',
+                    borderColor: '#25D366',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: '8px'
+                  }}
+                >
+                  <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor">
+                    <path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946C.06 5.348 5.397.01 12.008.01c3.202.001 6.212 1.246 8.477 3.514 2.266 2.268 3.507 5.28 3.505 8.484-.004 6.657-5.34 11.997-11.953 11.997-2.005-.001-3.973-.502-5.724-1.457L0 24zm6.59-4.846c1.6.95 3.188 1.449 4.825 1.451 5.436 0 9.86-4.37 9.864-9.799.002-2.63-1.023-5.101-2.885-6.968C16.592 1.97 14.12 .946 11.5 .946c-5.423 0-9.842 4.37-9.846 9.8.001 1.93.523 3.8 1.511 5.4l-.993 3.625 3.73-.977zm11.536-6.52c-.27-.135-1.595-.788-1.842-.877-.248-.09-.427-.135-.607.135-.179.27-.697.877-.854 1.057-.158.18-.315.202-.586.067-1.18-.592-1.96-1.01-2.735-2.338-.204-.352.204-.326.583-1.085.09-.18.045-.337-.022-.472-.068-.135-.608-1.464-.833-2.005-.22-.529-.462-.458-.63-.466-.153-.008-.329-.01-.505-.01-.176 0-.463.067-.704.326-.241.26-.92.9-.92 2.196 0 1.297.945 2.546 1.077 2.726.133.18 1.861 2.842 4.508 3.982.63.272 1.12.434 1.503.555.632.201 1.21.172 1.665.105.508-.075 1.595-.653 1.82-.1282.225-.63.225-1.17.157-1.26-.068-.09-.248-.135-.518-.27z" />
+                  </svg>
+                  Pedir ahora por WhatsApp
+                </button>
+              </div>
             </div>
           </div>
         </div>

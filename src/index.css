@@ -1594,36 +1594,36 @@ button {
 }
 
 /* WhatsApp Sticky Floating Button */
-.whatsapp-sticky-btn {
+.btn-whatsapp-fixed {
   position: fixed;
-  bottom: 24px;
-  right: 24px;
+  bottom: 20px;
+  right: 20px;
   background-color: #25D366;
-  color: #ffffff !important;
-  padding: 14px 22px;
-  border-radius: 30px;
-  font-weight: 600;
+  color: white !important;
+  padding: 15px 25px;
+  border-radius: 50px;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+  z-index: 1000;
+  font-weight: bold;
   font-size: 0.95rem;
-  box-shadow: 0 4px 16px rgba(37, 211, 102, 0.4);
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 8px;
-  z-index: 140;
   transition: all var(--transition-fast);
   text-decoration: none;
   cursor: pointer;
   letter-spacing: 0.5px;
 }
 
-.whatsapp-sticky-btn:hover {
+.btn-whatsapp-fixed:hover {
   transform: translateY(-2px) scale(1.03);
   background-color: #20ba59;
   box-shadow: 0 6px 20px rgba(37, 211, 102, 0.6);
 }
 
 @media (max-width: 576px) {
-  .whatsapp-sticky-btn {
+  .btn-whatsapp-fixed {
     bottom: 20px;
     right: 20px;
     padding: 12px 18px;
