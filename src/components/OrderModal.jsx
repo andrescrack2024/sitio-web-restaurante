@@ -58,7 +58,7 @@ export default function OrderModal({ isOpen, onClose, cartItems, clearCart }) {
       .map((item) => `• *${item.name}* x${item.quantity} - _${formatPrice(item.price * item.quantity)}_`)
       .join('\n');
 
-    const message = `¡Hola, L'Ambroisie! 🍽️✨
+    const message = `¡Hola, Rápido & Deli! 🍔🍟🥤
 Quisiera realizar el siguiente pedido a domicilio:
 
 *Detalles del Pedido:*

@@ -79,7 +79,7 @@ export default function Footer() {
               </li>
               <li style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
                 <MapPin size={18} className="text-gold" />
-                <span>Calle 85 # 11 - 53, Bogotá, Colombia</span>
+                <span>Carrera 3 # 24 - 45, Quibdó, Chocó, Colombia</span>
               </li>
               <li style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
                 <Mail size={18} className="text-gold" />

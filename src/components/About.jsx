@@ -1,4 +1,5 @@
 import React from 'react';
+import { MapPin, Clock } from 'lucide-react';
 
 export default function About() {
   return (
@@ -17,7 +18,7 @@ export default function About() {
             </p>
             
             {/* Stats */}
-            <div className="about-stats">
+            <div className="about-stats" style={{ marginBottom: '24px' }}>
               <div className="stat-item">
                 <div className="stat-number">12+</div>
                 <div className="stat-label">Años de Sabor</div>
@@ -26,6 +27,32 @@ export default function About() {
                 <div className="stat-number">100%</div>
                 <div className="stat-label">Artesanal y Fresco</div>
               </div>
+            </div>
+
+            {/* Ubicación y Horarios */}
+            <div className="about-info-block" style={{ marginTop: '28px', padding: '20px', border: '1px solid var(--border-color)', borderRadius: '12px', backgroundColor: 'var(--bg-secondary)', textAlign: 'left' }}>
+              <h4 style={{ fontFamily: 'var(--font-serif)', fontSize: '1.2rem', marginBottom: '12px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <MapPin size={20} className="text-gold" /> Ubicación y Horarios en Quibdó
+              </h4>
+              <p style={{ fontSize: '0.9rem', color: 'var(--text-secondary)', marginBottom: '8px', lineHeight: '1.4', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <strong style={{ minWidth: '70px' }}>Dirección:</strong> 
+                <span>Carrera 3 # 24 - 45, Quibdó, Chocó, Colombia</span>
+              </p>
+              <p style={{ fontSize: '0.9rem', color: 'var(--text-secondary)', marginBottom: '16px', lineHeight: '1.4', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <strong style={{ minWidth: '70px' }}>Horario:</strong> 
+                <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+                  <Clock size={14} className="text-gold" /> Lunes a Sábado: 12:00 PM - 10:00 PM \| Dom: 12:00 PM - 9:00 PM
+                </span>
+              </p>
+              <a 
+                href="https://maps.google.com/?q=Carrera+3+24-45+Quibdo" 
+                target="_blank" 
+                rel="noopener noreferrer" 
+                className="btn btn-secondary" 
+                style={{ padding: '8px 16px', fontSize: '0.8rem', textTransform: 'none', letterSpacing: '0.5px', borderRadius: '20px' }}
+              >
+                Ver en Google Maps
+              </a>
             </div>
           </div>
 
