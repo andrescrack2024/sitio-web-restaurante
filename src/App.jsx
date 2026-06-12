@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import Navbar from './components/Navbar';
 import Hero from './components/Hero';
 import About from './components/About';
@@ -9,7 +9,7 @@ import Testimonials from './components/Testimonials';
 import Footer from './components/Footer';
 import Admin from './components/Admin';
 import { db, isFirebaseSupported } from './firebase';
-import { collection, onSnapshot, doc, setDoc, deleteDoc, getDocs } from 'firebase/firestore';
+import { collection, onSnapshot, doc, setDoc, deleteDoc } from 'firebase/firestore';
 import { ShoppingBag } from 'lucide-react';
 
 export default function App() {
@@ -27,6 +27,9 @@ export default function App() {
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [isCheckoutOpen, setIsCheckoutOpen] = useState(false);
   const [view, setView] = useState(() => window.location.hash === '#admin' ? 'admin' : 'shop');
+  
+  // Ref to ensure migration check runs exactly once when component mounts
+  const migrationCheckedRef = useRef(false);
 
   // Handle hash-based routing for admin panel
   useEffect(() => {
@@ -53,23 +56,22 @@ export default function App() {
     }
   }, [menuItems]);
 
-  // Firebase Firestore subscription & one-time migration check
+  // Firebase Firestore subscription & optimized one-time migration check
   useEffect(() => {
     if (!isFirebaseSupported) return;
 
     const menuCollection = collection(db, 'menu');
-    let unsubscribe = null;
 
-    const initializeDatabase = async () => {
-      try {
-        // Fetch current items once (one-time query)
-        const snapshot = await getDocs(menuCollection);
-        const items = [];
-        snapshot.forEach((docSnap) => {
-          items.push({ id: docSnap.id, ...docSnap.data() });
-        });
+    const unsubscribe = onSnapshot(menuCollection, async (snapshot) => {
+      const items = [];
+      snapshot.forEach((docSnap) => {
+        items.push({ id: docSnap.id, ...docSnap.data() });
+      });
 
-        // Check if there are any old gourmet items or if the database is missing new additions
+      // 1. One-time migration and seed check
+      if (!migrationCheckedRef.current) {
+        migrationCheckedRef.current = true; // Mark as checked immediately to avoid any re-runs
+
         const hasGourmet = items.some(item => 
           item.name === 'Carpaccio de Lomo' || 
           item.name === 'Crema de Tomates Rostizados' ||
@@ -81,6 +83,8 @@ export default function App() {
 
         if (hasGourmet || isOutdated || items.length === 0) {
           console.log("Migración o inicialización requerida. Limpiando colección...");
+          setLoading(true);
+
           // Delete all current items sequentially to avoid race conditions
           for (const item of items) {
             try {
@@ -89,6 +93,7 @@ export default function App() {
               console.error("Error al eliminar item antiguo:", err);
             }
           }
+
           console.log("Colección limpia. Sembrando comida rápida y helados...");
           // Seed new items sequentially
           for (const item of MENU_ITEMS) {
@@ -100,33 +105,21 @@ export default function App() {
             }
           }
           console.log("Sembrado inicial exitoso.");
+          // The next firestore snapshot will carry the new items and skip this block since migrationCheckedRef is true
+          return;
         }
-      } catch (err) {
-        console.error("Error en migración/inicialización de base de datos:", err);
       }
 
-      // Now start the active snapshot subscription
-      unsubscribe = onSnapshot(menuCollection, (snapshot) => {
-        const currentItems = [];
-        snapshot.forEach((docSnap) => {
-          currentItems.push({ id: docSnap.id, ...docSnap.data() });
-        });
+      // 2. Main flow: Sort items by ID so they maintain order and display
+      items.sort((a, b) => (Number(a.id) || 0) - (Number(b.id) || 0));
+      setMenuItems(items);
+      setLoading(false);
+    }, (error) => {
+      console.error("Firestore loading error:", error);
+      setLoading(false);
+    });
 
-        // Sort items by ID so they maintain order
-        currentItems.sort((a, b) => (Number(a.id) || 0) - (Number(b.id) || 0));
-        setMenuItems(currentItems);
-        setLoading(false);
-      }, (error) => {
-        console.error("Firestore loading error:", error);
-        setLoading(false);
-      });
-    };
-
-    initializeDatabase();
-
-    return () => {
-      if (unsubscribe) unsubscribe();
-    };
+    return () => unsubscribe();
   }, []);
 
   const toggleTheme = () => {
