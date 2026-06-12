@@ -18,7 +18,7 @@ export default function App() {
     if (isFirebaseSupported) {
       return []; // Loaded from firestore
     } else {
-      const saved = localStorage.getItem('lambroisie_menu');
+      const saved = localStorage.getItem('rapidoydeli_menu');
       return saved ? JSON.parse(saved) : MENU_ITEMS;
     }
   });
@@ -52,7 +52,7 @@ export default function App() {
   // Sync state to LocalStorage ONLY in local fallback mode
   useEffect(() => {
     if (!isFirebaseSupported) {
-      localStorage.setItem('lambroisie_menu', JSON.stringify(menuItems));
+      localStorage.setItem('rapidoydeli_menu', JSON.stringify(menuItems));
     }
   }, [menuItems]);
 

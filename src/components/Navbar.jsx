@@ -28,8 +28,9 @@ export default function Navbar({ theme, toggleTheme, cartCount, openCart }) {
   return (
     <header className={`header ${scrolled ? 'scrolled' : ''}`}>
       <div className="container navbar-container">
-        <a href="#inicio" className="logo">
-          L'Ambroisie<span className="text-gold">.</span>
+        <a href="#inicio" className="logo" style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+          <img src="/logo.png" alt="Rápido & Deli Logo" style={{ height: '42px', width: '42px', objectFit: 'contain', borderRadius: '50%' }} />
+          <span>Rápido & Deli</span>
         </a>
 
         {/* Desktop & Mobile Navigation Links */}

@@ -10,7 +10,7 @@ export default function About() {
             <p className="about-tagline">Conócenos</p>
             <h2 className="about-title">Comida Rápida Artesanal y Helados Gourmet</h2>
             <p className="about-desc">
-              Fundado en 2012, L'Ambroisie ha redefinido el concepto de comida rápida artesanal y heladería en la ciudad. Nos esforzamos por ofrecer hamburguesas jugosas preparadas con carne 100% de res seleccionada, perros calientes gigantes con ingredientes premium y helados artesanales cremosos hechos al instante.
+              Fundado en 2012, Rápido & Deli ha redefinido el concepto de comida rápida artesanal y heladería en la ciudad. Nos esforzamos por ofrecer hamburguesas jugosas preparadas con carne 100% de res seleccionada, perros calientes gigantes con ingredientes premium y helados artesanales cremosos hechos al instante.
             </p>
             <p className="about-desc" style={{ color: 'var(--text-secondary)' }}>
               Cada producto es preparado al instante con ingredientes locales frescos y salsas secretas de la casa. Creemos que tus antojos favoritos merecen ser elevados al máximo nivel de calidad y sabor.

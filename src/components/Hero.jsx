@@ -16,7 +16,7 @@ export default function Hero() {
             Sabor irresistible en cada <span className="text-gold">bocado</span>
           </h1>
           <p className="hero-desc">
-            Bienvenidos a L'Ambroisie, el lugar donde las hamburguesas más jugosas de carne 100% de res y los helados artesanales más cremosos se encuentran para deleitar tu paladar.
+            Bienvenidos a Rápido & Deli, el lugar donde las hamburguesas más jugosas de carne 100% de res y los helados artesanales más cremosos se encuentran para deleitar tu paladar.
           </p>
           <div className="hero-btns">
             <a href="#menu" className="btn btn-primary">

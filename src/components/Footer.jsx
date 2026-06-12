@@ -9,9 +9,12 @@ export default function Footer() {
         <div className="footer-grid">
           {/* Brand Col */}
           <div className="footer-brand">
-            <h3>L'Ambroisie<span className="text-gold">.</span></h3>
+            <h3 style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <img src="/logo.png" alt="" style={{ height: '32px', width: '32px', borderRadius: '50%', objectFit: 'contain' }} />
+              Rápido & Deli
+            </h3>
             <p>
-              Alta cocina para disfrutar en casa. Elaboramos cada pedido al instante con ingredientes frescos y seleccionados.
+              Comida rápida artesanal y helados gourmet para disfrutar en casa. Elaboramos cada pedido al instante con ingredientes frescos.
             </p>
             <div className="social-links">
               <a href="https://instagram.com" target="_blank" rel="noopener noreferrer" className="btn-icon-round" aria-label="Instagram">
@@ -80,7 +83,7 @@ export default function Footer() {
               </li>
               <li style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
                 <Mail size={18} className="text-gold" />
-                <span>reservas@lambroisie.com</span>
+                <span>domicilios@rapidoydeli.com</span>
               </li>
             </ul>
           </div>
@@ -88,9 +91,9 @@ export default function Footer() {
 
         {/* Footer Bottom */}
         <div className="footer-bottom">
-          <p>&copy; {currentYear} L'Ambroisie. Todos los derechos reservados.</p>
+          <p>&copy; {currentYear} Rápido & Deli. Todos los derechos reservados.</p>
           <p style={{ fontSize: '0.8rem' }}>
-            Diseñado para amantes de la buena mesa.
+            Comida Rápida • Sabor al Instante
           </p>
         </div>
       </div>
