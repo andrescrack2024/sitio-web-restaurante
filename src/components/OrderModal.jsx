@@ -13,6 +13,16 @@ export default function OrderModal({ isOpen, onClose, cartItems, clearCart }) {
   });
   const [errors, setErrors] = useState({});
   const [isSuccess, setIsSuccess] = useState(false);
+  const [paymentMethod, setPaymentMethod] = useState('efectivo');
+  const [copiedText, setCopiedText] = useState('');
+
+  const handleCopy = (textToCopy, field) => {
+    navigator.clipboard.writeText(textToCopy);
+    setCopiedText(field);
+    setTimeout(() => {
+      setCopiedText('');
+    }, 2000);
+  };
 
   const formatPrice = (price) => {
     return new Intl.NumberFormat('es-CO', {
@@ -65,6 +75,7 @@ Quisiera realizar el siguiente pedido a domicilio:
 ${itemsText}
 
 *Total a Pagar:* ${formatPrice(total)}
+*Método de Pago:* ${paymentMethod === 'nequi' ? 'Nequi / Transferencia (Comprobante adjunto)' : 'Efectivo (Contra entrega)'}
 
 *Datos de Entrega:*
 👤 *Nombre:* ${formData.nombre}
@@ -143,6 +154,124 @@ Quedo atento a su confirmación. ¡Muchas gracias!`;
                 ></textarea>
                 {errors.direccion && <p className="form-error">{errors.direccion}</p>}
               </div>
+
+              <div className="form-group" style={{ marginBottom: '16px' }}>
+                <label className="form-label">Método de Pago</label>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', marginTop: '6px' }}>
+                  <button
+                    type="button"
+                    onClick={() => setPaymentMethod('efectivo')}
+                    className={`btn ${paymentMethod === 'efectivo' ? 'btn-primary' : 'btn-secondary'}`}
+                    style={{ textTransform: 'none', letterSpacing: '0.5px', padding: '10px 14px', fontSize: '0.9rem', borderRadius: '8px' }}
+                  >
+                    💵 Efectivo
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setPaymentMethod('nequi')}
+                    className={`btn ${paymentMethod === 'nequi' ? 'btn-primary' : 'btn-secondary'}`}
+                    style={{ 
+                      textTransform: 'none', 
+                      letterSpacing: '0.5px', 
+                      padding: '10px 14px',
+                      fontSize: '0.9rem',
+                      borderRadius: '8px',
+                      borderColor: paymentMethod === 'nequi' ? '#d4af37' : '',
+                    }}
+                  >
+                    💜 Nequi / Transferencia
+                  </button>
+                </div>
+              </div>
+
+              {paymentMethod === 'nequi' && (
+                <div style={{
+                  padding: '16px',
+                  backgroundColor: 'var(--bg-secondary)',
+                  border: '1px solid var(--border-color)',
+                  borderRadius: '12px',
+                  marginBottom: '16px'
+                }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '12px' }}>
+                    <div style={{
+                      backgroundColor: '#e6007e',
+                      color: 'white',
+                      padding: '4px 8px',
+                      borderRadius: '6px',
+                      fontSize: '0.75rem',
+                      fontWeight: 'bold',
+                      letterSpacing: '0.5px'
+                    }}>
+                      NEQUI
+                    </div>
+                    <span style={{ fontSize: '0.85rem', fontWeight: '600', color: 'var(--text-primary)' }}>
+                      Instrucciones de Pago
+                    </span>
+                  </div>
+
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                    {/* Celular Nequi */}
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '8px 10px', backgroundColor: 'var(--bg-primary)', borderRadius: '8px', border: '1px solid var(--border-color)' }}>
+                      <div>
+                        <span style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', display: 'block' }}>Celular Nequi</span>
+                        <strong style={{ fontSize: '0.95rem' }}>312 660 2583</strong>
+                      </div>
+                      <button 
+                        type="button"
+                        onClick={() => handleCopy('3126602583', 'celular')}
+                        className="btn btn-secondary" 
+                        style={{ padding: '6px 12px', fontSize: '0.75rem', textTransform: 'none', borderRadius: '6px' }}
+                      >
+                        {copiedText === 'celular' ? '¡Copiado!' : 'Copiar'}
+                      </button>
+                    </div>
+
+                    {/* Valor a pagar */}
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '8px 10px', backgroundColor: 'var(--bg-primary)', borderRadius: '8px', border: '1px solid var(--border-color)' }}>
+                      <div>
+                        <span style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', display: 'block' }}>Valor exacto a transferir</span>
+                        <strong style={{ fontSize: '0.95rem', color: 'var(--accent-gold)' }}>{formatPrice(total)}</strong>
+                      </div>
+                      <button 
+                        type="button"
+                        onClick={() => handleCopy(total.toString(), 'valor')}
+                        className="btn btn-secondary" 
+                        style={{ padding: '6px 12px', fontSize: '0.75rem', textTransform: 'none', borderRadius: '6px' }}
+                      >
+                        {copiedText === 'valor' ? '¡Copiado!' : 'Copiar'}
+                      </button>
+                    </div>
+                  </div>
+
+                  <div style={{ marginTop: '12px' }}>
+                    <a 
+                      href="https://nequi.co" 
+                      target="_blank" 
+                      rel="noopener noreferrer" 
+                      className="btn" 
+                      style={{ 
+                        width: '100%', 
+                        padding: '10px', 
+                        fontSize: '0.85rem', 
+                        backgroundColor: '#1E1E24', 
+                        color: 'white', 
+                        borderColor: '#1E1E24',
+                        textTransform: 'none',
+                        letterSpacing: '0.5px',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        gap: '6px'
+                      }}
+                    >
+                      🚀 Abrir Nequi
+                    </a>
+                    <span style={{ display: 'block', fontSize: '0.75rem', color: 'var(--text-secondary)', marginTop: '8px', textAlign: 'center', lineHeight: '1.3' }}>
+                      Copia el celular y el valor, haz la transferencia en tu app Nequi y adjunta el comprobante al enviar el WhatsApp.
+                    </span>
+                  </div>
+                </div>
+              )}
 
               <button type="submit" className="btn btn-primary" style={{ width: '100%', marginTop: '12px' }}>
                 Hacer Pedido por WhatsApp <Send size={18} style={{ marginLeft: '6px' }} />
