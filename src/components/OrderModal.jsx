@@ -68,6 +68,11 @@ export default function OrderModal({ isOpen, onClose, cartItems, clearCart }) {
       .map((item) => `• *${item.name}* x${item.quantity} - _${formatPrice(item.price * item.quantity)}_`)
       .join('\n');
 
+    // Format client's phone number as a link for the merchant
+    const cleanPhone = formData.telefono.replace(/\D/g, '');
+    const formattedPhone = cleanPhone.length === 10 && cleanPhone.startsWith('3') ? `57${cleanPhone}` : cleanPhone;
+    const clientPhoneLink = `https://wa.me/${formattedPhone}`;
+
     const message = `¡Hola, Rápido & Deli! 🍔🍟🥤
 Quisiera realizar el siguiente pedido a domicilio:
 
@@ -75,11 +80,11 @@ Quisiera realizar el siguiente pedido a domicilio:
 ${itemsText}
 
 *Total a Pagar:* ${formatPrice(total)}
-*Método de Pago:* ${paymentMethod === 'nequi' ? 'Nequi / Transferencia (Comprobante adjunto)' : 'Efectivo (Contra entrega)'}
+*Método de Pago:* ${paymentMethod === 'nequi' ? 'Nequi / Bancolombia (Comprobante adjunto)' : 'Efectivo (Contra entrega)'}
 
 *Datos de Entrega:*
 👤 *Nombre:* ${formData.nombre}
-📞 *Teléfono:* ${formData.telefono}
+📞 *Teléfono:* ${clientPhoneLink}
 📍 *Dirección:* ${formData.direccion}
 
 Quedo atento a su confirmación. ¡Muchas gracias!`;
@@ -157,44 +162,48 @@ Quedo atento a su confirmación. ¡Muchas gracias!`;
 
               <div className="form-group" style={{ marginBottom: '16px' }}>
                 <label className="form-label">Método de Pago</label>
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(90px, 1fr))', gap: '8px', marginTop: '6px' }}>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', marginTop: '6px' }}>
                   <button
                     type="button"
                     onClick={() => setPaymentMethod('efectivo')}
-                    className={`btn ${paymentMethod === 'efectivo' ? 'btn-primary' : 'btn-secondary'}`}
-                    style={{ textTransform: 'none', letterSpacing: '0.5px', padding: '10px 8px', fontSize: '0.8rem', borderRadius: '8px' }}
+                    style={{
+                      display: 'flex',
+                      flexDirection: 'column',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      padding: '12px 8px',
+                      borderRadius: '10px',
+                      border: paymentMethod === 'efectivo' ? '2px solid var(--accent-gold)' : '1px solid var(--border-color)',
+                      backgroundColor: paymentMethod === 'efectivo' ? 'var(--accent-gold-light)' : 'var(--bg-primary)',
+                      color: 'var(--text-primary)',
+                      cursor: 'pointer',
+                      transition: 'all 0.2s ease',
+                      gap: '4px'
+                    }}
                   >
-                    💵 Efectivo
+                    <span style={{ fontSize: '1.4rem' }}>💵</span>
+                    <span style={{ fontSize: '0.85rem', fontWeight: '600' }}>Pago en Efectivo</span>
                   </button>
                   <button
                     type="button"
                     onClick={() => setPaymentMethod('nequi')}
-                    className={`btn ${paymentMethod === 'nequi' ? 'btn-primary' : 'btn-secondary'}`}
-                    style={{ 
-                      textTransform: 'none', 
-                      letterSpacing: '0.5px', 
-                      padding: '10px 8px',
-                      fontSize: '0.8rem',
-                      borderRadius: '8px',
-                      borderColor: paymentMethod === 'nequi' ? '#e6007e' : '',
+                    style={{
+                      display: 'flex',
+                      flexDirection: 'column',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      padding: '12px 8px',
+                      borderRadius: '10px',
+                      border: paymentMethod === 'nequi' ? '2px solid #e6007e' : '1px solid var(--border-color)',
+                      backgroundColor: paymentMethod === 'nequi' ? 'rgba(230, 0, 126, 0.08)' : 'var(--bg-primary)',
+                      color: 'var(--text-primary)',
+                      cursor: 'pointer',
+                      transition: 'all 0.2s ease',
+                      gap: '4px'
                     }}
                   >
-                    💜 Nequi
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setPaymentMethod('banco')}
-                    className={`btn ${paymentMethod === 'banco' ? 'btn-primary' : 'btn-secondary'}`}
-                    style={{ 
-                      textTransform: 'none', 
-                      letterSpacing: '0.5px', 
-                      padding: '10px 8px',
-                      fontSize: '0.8rem',
-                      borderRadius: '8px',
-                      borderColor: paymentMethod === 'banco' ? 'var(--accent-gold)' : '',
-                    }}
-                  >
-                    🏦 Banco
+                    <span style={{ fontSize: '1.4rem' }}>💳</span>
+                    <span style={{ fontSize: '0.85rem', fontWeight: '600' }}>Nequi / Bancolombia</span>
                   </button>
                 </div>
               </div>
@@ -205,7 +214,8 @@ Quedo atento a su confirmación. ¡Muchas gracias!`;
                   backgroundColor: 'var(--bg-secondary)',
                   border: '1px solid var(--border-color)',
                   borderRadius: '12px',
-                  marginBottom: '16px'
+                  marginBottom: '16px',
+                  marginTop: '16px'
                 }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '12px' }}>
                     <div style={{
@@ -217,39 +227,65 @@ Quedo atento a su confirmación. ¡Muchas gracias!`;
                       fontWeight: 'bold',
                       letterSpacing: '0.5px'
                     }}>
-                      NEQUI
+                      TRANSFERENCIA
                     </div>
                     <span style={{ fontSize: '0.85rem', fontWeight: '600', color: 'var(--text-primary)' }}>
-                      Instrucciones de Pago
+                      Cuentas Disponibles
                     </span>
                   </div>
 
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-                    {/* Celular Nequi */}
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '8px 10px', backgroundColor: 'var(--bg-primary)', borderRadius: '8px', border: '1px solid var(--border-color)' }}>
-                      <div>
-                        <span style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', display: 'block' }}>Celular destino (Nequi / Transfiya)</span>
-                        <strong style={{ fontSize: '0.95rem' }}>
-                          <a href="tel:3126602583" style={{ color: 'var(--text-primary)', textDecoration: 'underline' }} title="Presiona para llamar o agregar a contactos">
-                            312 660 2583
-                          </a>
-                        </strong>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                    {/* Celular Nequi / Transfiya */}
+                    <div style={{ padding: '12px', backgroundColor: 'var(--bg-primary)', borderRadius: '8px', border: '1px solid var(--border-color)' }}>
+                      <span style={{ fontSize: '0.7rem', color: '#e6007e', fontWeight: 'bold', textTransform: 'uppercase', display: 'block', marginBottom: '4px' }}>
+                        Opción 1: Nequi / Daviplata / Transfiya
+                      </span>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                        <div>
+                          <span style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', display: 'block' }}>Celular destino (Cualquier Banco)</span>
+                          <strong style={{ fontSize: '0.95rem' }}>
+                            <a href="tel:3126602583" style={{ color: 'var(--text-primary)', textDecoration: 'underline' }} title="Presiona para llamar o agregar a contactos">
+                              312 660 2583
+                            </a>
+                          </strong>
+                        </div>
+                        <button 
+                          type="button"
+                          onClick={() => handleCopy('3126602583', 'celular')}
+                          className="btn btn-secondary" 
+                          style={{ padding: '6px 12px', fontSize: '0.75rem', textTransform: 'none', borderRadius: '6px' }}
+                        >
+                          {copiedText === 'celular' ? '¡Copiado!' : 'Copiar'}
+                        </button>
                       </div>
-                      <button 
-                        type="button"
-                        onClick={() => handleCopy('3126602583', 'celular')}
-                        className="btn btn-secondary" 
-                        style={{ padding: '6px 12px', fontSize: '0.75rem', textTransform: 'none', borderRadius: '6px' }}
-                      >
-                        {copiedText === 'celular' ? '¡Copiado!' : 'Copiar'}
-                      </button>
+                    </div>
+
+                    {/* Bancolombia Ahorros */}
+                    <div style={{ padding: '12px', backgroundColor: 'var(--bg-primary)', borderRadius: '8px', border: '1px solid var(--border-color)', borderLeft: '3px solid var(--accent-gold)' }}>
+                      <span style={{ fontSize: '0.7rem', color: 'var(--accent-gold)', fontWeight: 'bold', textTransform: 'uppercase', display: 'block', marginBottom: '4px' }}>
+                        Opción 2: Bancolombia (Ejemplo)
+                      </span>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                        <div>
+                          <span style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', display: 'block' }}>Bancolombia • Ahorros</span>
+                          <strong style={{ fontSize: '0.95rem' }}>507-123456-78</strong>
+                        </div>
+                        <button 
+                          type="button"
+                          onClick={() => handleCopy('507-123456-78', 'cuenta')}
+                          className="btn btn-secondary" 
+                          style={{ padding: '6px 12px', fontSize: '0.75rem', textTransform: 'none', borderRadius: '6px' }}
+                        >
+                          {copiedText === 'cuenta' ? '¡Copiado!' : 'Copiar'}
+                        </button>
+                      </div>
                     </div>
 
                     {/* Valor a pagar */}
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '8px 10px', backgroundColor: 'var(--bg-primary)', borderRadius: '8px', border: '1px solid var(--border-color)' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '10px 12px', backgroundColor: 'var(--bg-primary)', borderRadius: '8px', border: '1px solid var(--border-color)' }}>
                       <div>
                         <span style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', display: 'block' }}>Valor exacto a transferir</span>
-                        <strong style={{ fontSize: '0.95rem', color: 'var(--accent-gold)' }}>{formatPrice(total)}</strong>
+                        <strong style={{ fontSize: '1rem', color: 'var(--accent-gold)' }}>{formatPrice(total)}</strong>
                       </div>
                       <button 
                         type="button"
@@ -262,7 +298,7 @@ Quedo atento a su confirmación. ¡Muchas gracias!`;
                     </div>
                   </div>
 
-                  <div style={{ marginTop: '12px' }}>
+                  <div style={{ marginTop: '14px' }}>
                     <a 
                       href="https://nequi.co" 
                       target="_blank" 
@@ -286,79 +322,7 @@ Quedo atento a su confirmación. ¡Muchas gracias!`;
                       🚀 Abrir App Nequi
                     </a>
                     <span style={{ display: 'block', fontSize: '0.75rem', color: 'var(--text-secondary)', marginTop: '8px', textAlign: 'center', lineHeight: '1.4' }}>
-                      Copia el celular y el valor. Haz la transferencia en tu app Nequi y <strong>recuerda mandar el comprobante de pago al número de WhatsApp</strong> al finalizar tu pedido.
-                    </span>
-                  </div>
-                </div>
-              )}
-
-              {paymentMethod === 'banco' && (
-                <div style={{
-                  padding: '16px',
-                  backgroundColor: 'var(--bg-secondary)',
-                  border: '1px solid var(--border-color)',
-                  borderRadius: '12px',
-                  marginBottom: '16px'
-                }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '12px' }}>
-                    <div style={{
-                      backgroundColor: 'var(--accent-gold)',
-                      color: 'white',
-                      padding: '4px 8px',
-                      borderRadius: '6px',
-                      fontSize: '0.75rem',
-                      fontWeight: 'bold',
-                      letterSpacing: '0.5px'
-                    }}>
-                      BANCO
-                    </div>
-                    <span style={{ fontSize: '0.85rem', fontWeight: '600', color: 'var(--text-primary)' }}>
-                      Instrucciones de Pago (Ejemplo)
-                    </span>
-                  </div>
-
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-                    {/* Detalles Cuenta */}
-                    <div style={{ padding: '10px', backgroundColor: 'var(--bg-primary)', borderRadius: '8px', border: '1px solid var(--border-color)' }}>
-                      <span style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', display: 'block' }}>Banco / Tipo</span>
-                      <strong style={{ fontSize: '0.9rem', display: 'block', marginBottom: '4px' }}>Bancolombia • Ahorros</strong>
-                      
-                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '6px' }}>
-                        <div>
-                          <span style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>Número de cuenta</span>
-                          <strong style={{ fontSize: '0.95rem', display: 'block' }}>507-123456-78</strong>
-                        </div>
-                        <button 
-                          type="button"
-                          onClick={() => handleCopy('507-123456-78', 'cuenta')}
-                          className="btn btn-secondary" 
-                          style={{ padding: '6px 12px', fontSize: '0.75rem', textTransform: 'none', borderRadius: '6px' }}
-                        >
-                          {copiedText === 'cuenta' ? '¡Copiado!' : 'Copiar'}
-                        </button>
-                      </div>
-                    </div>
-
-                    {/* Valor a pagar */}
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '8px 10px', backgroundColor: 'var(--bg-primary)', borderRadius: '8px', border: '1px solid var(--border-color)' }}>
-                      <div>
-                        <span style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', display: 'block' }}>Valor exacto a transferir</span>
-                        <strong style={{ fontSize: '0.95rem', color: 'var(--accent-gold)' }}>{formatPrice(total)}</strong>
-                      </div>
-                      <button 
-                        type="button"
-                        onClick={() => handleCopy(total.toString(), 'valor')}
-                        className="btn btn-secondary" 
-                        style={{ padding: '6px 12px', fontSize: '0.75rem', textTransform: 'none', borderRadius: '6px' }}
-                      >
-                        {copiedText === 'valor' ? '¡Copiado!' : 'Copiar'}
-                      </button>
-                    </div>
-                  </div>
-
-                  <div style={{ marginTop: '12px' }}>
-                    <span style={{ display: 'block', fontSize: '0.75rem', color: 'var(--text-secondary)', textAlign: 'center', lineHeight: '1.4' }}>
-                      Realiza la transferencia desde tu cuenta bancaria y <strong>recuerda mandar el comprobante de pago al número de WhatsApp</strong> al finalizar tu pedido para poder validarlo.
+                      Realiza la transferencia desde tu banco o app Nequi. Toma una captura de pantalla del comprobante y <strong>recuerda mandar el comprobante de pago al número de WhatsApp</strong> al finalizar tu pedido.
                     </span>
                   </div>
                 </div>
