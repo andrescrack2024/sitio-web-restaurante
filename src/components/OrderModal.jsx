@@ -68,10 +68,8 @@ export default function OrderModal({ isOpen, onClose, cartItems, clearCart }) {
       .map((item) => `• *${item.name}* x${item.quantity} - _${formatPrice(item.price * item.quantity)}_`)
       .join('\n');
 
-    // Format client's phone number as a link for the merchant
+    // Format client's phone number
     const cleanPhone = formData.telefono.replace(/\D/g, '');
-    const formattedPhone = cleanPhone.length === 10 && cleanPhone.startsWith('3') ? `57${cleanPhone}` : cleanPhone;
-    const clientPhoneLink = `wa.me/${formattedPhone}`;
 
     const message = `¡Hola, Rápido & Deli! 🍔🍟🥤
 Quisiera realizar el siguiente pedido a domicilio:
@@ -84,7 +82,7 @@ ${itemsText}
 
 *Datos de Entrega:*
 👤 *Nombre:* ${formData.nombre}
-📞 *Teléfono:* ${clientPhoneLink}
+📞 *Teléfono:* ${cleanPhone}
 📍 *Dirección:* ${formData.direccion}
 
 Quedo atento a su confirmación. ¡Muchas gracias!`;
