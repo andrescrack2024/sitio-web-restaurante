@@ -71,7 +71,7 @@ export default function OrderModal({ isOpen, onClose, cartItems, clearCart }) {
     // Format client's phone number as a link for the merchant
     const cleanPhone = formData.telefono.replace(/\D/g, '');
     const formattedPhone = cleanPhone.length === 10 && cleanPhone.startsWith('3') ? `57${cleanPhone}` : cleanPhone;
-    const clientPhoneLink = `https://wa.me/${formattedPhone}`;
+    const clientPhoneLink = `wa.me/${formattedPhone}`;
 
     const message = `¡Hola, Rápido & Deli! 🍔🍟🥤
 Quisiera realizar el siguiente pedido a domicilio:
