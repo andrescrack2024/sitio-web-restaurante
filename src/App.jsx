@@ -33,7 +33,13 @@ export default function App() {
   // Auto-open tour for new users on page load
   useEffect(() => {
     if (view === 'shop') {
-      const tourCompleted = localStorage.getItem('rapido_deli_tour_completed');
+      let tourCompleted = false;
+      try {
+        tourCompleted = localStorage.getItem('rapido_deli_tour_completed') === 'true';
+      } catch (e) {
+        console.warn('LocalStorage not supported:', e);
+      }
+      
       if (!tourCompleted) {
         const timer = setTimeout(() => {
           setIsTourOpen(true);

@@ -18,6 +18,11 @@ export default function OnboardingTour({ isOpen, onClose }) {
         return;
       }
 
+      if (!selector) {
+        setRect(null);
+        return;
+      }
+
       const el = document.querySelector(selector);
       if (el) {
         setRect(el.getBoundingClientRect());
@@ -68,7 +73,11 @@ export default function OnboardingTour({ isOpen, onClose }) {
   };
 
   const completeTour = () => {
-    localStorage.setItem('rapido_deli_tour_completed', 'true');
+    try {
+      localStorage.setItem('rapido_deli_tour_completed', 'true');
+    } catch (e) {
+      console.warn('LocalStorage not supported:', e);
+    }
     onClose();
   };
 

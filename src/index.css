@@ -1869,7 +1869,11 @@ button {
 }
 
 /* Specific styling to ensure highlighted items are visible */
-#tour-first-add-btn, #tour-whatsapp-btn {
+#tour-first-add-btn {
   position: relative;
+  z-index: 100001 !important; /* Above the backdrop */
+}
+
+#tour-whatsapp-btn {
   z-index: 100001 !important; /* Above the backdrop */
 }
