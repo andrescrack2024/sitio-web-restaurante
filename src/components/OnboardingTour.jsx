@@ -45,7 +45,7 @@ export default function OnboardingTour({
     window.addEventListener('resize', updateRect);
     window.addEventListener('scroll', updateRect);
     
-    // Periodically update to align perfectly during scroll/animations
+    // Periodically update to align perfectly during scroll/layouts
     const interval = setInterval(updateRect, 100);
 
     return () => {
@@ -143,7 +143,7 @@ export default function OnboardingTour({
     },
     {
       title: "📞 Paso 5: Confirma tu Pedido",
-      desc: "Finalmente, haz clic aquí. Te redirigirá automáticamente a WhatsApp con el mensaje ya estructurado para enviarlo con un solo toque.",
+      desc: "Finalmente, haz clic aquí. Te redirigirá automáticamente a WhatsApp con la plantilla de tu pedido completa para enviarla con un solo toque.",
       btnText: "¡Entendido, a pedir! 🎉",
       showProgress: true
     }
@@ -163,7 +163,7 @@ export default function OnboardingTour({
           transform: 'translate(-50%, -50%)',
           width: '90%',
           maxWidth: '400px',
-          zIndex: 100000
+          zIndex: 100002
         },
         emoji: '👇'
       };
@@ -177,17 +177,17 @@ export default function OnboardingTour({
           left: '50%',
           transform: 'translateX(-50%)',
           fontSize: '3.5rem',
-          zIndex: 100000,
+          zIndex: 100002,
           animation: 'bounce-hand-down 1.2s infinite'
         },
         tooltipStyle: {
           position: 'fixed',
-          bottom: '180px',
+          top: '100px', // Below the sticky header to prevent cut-off
           left: '50%',
           transform: 'translateX(-50%)',
           width: '90%',
-          maxWidth: '320px',
-          zIndex: 100000
+          maxWidth: '340px',
+          zIndex: 100002
         },
         emoji: '👇'
       };
@@ -203,45 +203,57 @@ export default function OnboardingTour({
           transform: 'translate(-50%, -50%)',
           width: '90%',
           maxWidth: '320px',
-          zIndex: 100000
+          zIndex: 100002
         },
         emoji: '👇'
       };
     }
 
-    // Determine vertical layout spacing to avoid page borders
-    const spaceOnTop = rect.top > 200;
-    const emoji = spaceOnTop ? '👇' : '👆';
-    const animation = spaceOnTop ? 'bounce-hand-down 1.2s infinite' : 'bounce-hand-up 1.2s infinite';
-    
-    const pointerTop = spaceOnTop ? `${rect.top - 70}px` : `${rect.bottom + 10}px`;
-    const tooltipTop = spaceOnTop ? `${rect.top - 195}px` : `${rect.bottom + 80}px`;
+    // Determine viewport properties
+    const viewportHeight = window.innerHeight;
+    const elementCenterY = rect.top + rect.height / 2;
+    const isUpperHalf = elementCenterY < viewportHeight / 2;
 
-    // Slight adjustment for mobile checkout form
-    const isStep345 = step >= 3;
-    const tooltipLeft = isStep345 
-      ? `${rect.left + rect.width / 2 - 10}px` 
-      : `${rect.left + rect.width / 2}px`;
+    // 1. Tooltip Position: Place at the opposite half of the viewport to avoid overlapping the element
+    const tooltipStyle = {
+      position: 'fixed',
+      left: '50%',
+      transform: 'translateX(-50%)',
+      width: '90%',
+      maxWidth: '320px',
+      zIndex: 100002
+    };
+
+    if (isUpperHalf) {
+      tooltipStyle.bottom = '80px'; // Place at bottom center, safe from mobile toolbars
+    } else {
+      tooltipStyle.top = '100px'; // Place at top center, safe from header and browser address bar
+    }
+
+    // 2. Pointer Position & Emoji Direction
+    const pointerStyle = {
+      position: 'fixed',
+      left: `${rect.left + rect.width / 2}px`,
+      transform: 'translateX(-50%)',
+      fontSize: '3.5rem',
+      zIndex: 100002
+    };
+
+    let emoji = '👇';
+    // If the element is very close to the top of the viewport (less than 90px), point UP from below to avoid off-screen clipping
+    if (rect.top < 90) {
+      emoji = '👆';
+      pointerStyle.top = `${rect.bottom + 10}px`;
+      pointerStyle.animation = 'bounce-hand-up 1.2s infinite';
+    } else {
+      emoji = '👇';
+      pointerStyle.top = `${rect.top - 70}px`;
+      pointerStyle.animation = 'bounce-hand-down 1.2s infinite';
+    }
 
     return {
-      pointerStyle: {
-        position: 'fixed',
-        top: pointerTop,
-        left: `${rect.left + rect.width / 2}px`,
-        transform: 'translateX(-50%)',
-        fontSize: '3.5rem',
-        zIndex: 100002,
-        animation: animation
-      },
-      tooltipStyle: {
-        position: 'fixed',
-        top: tooltipTop,
-        left: tooltipLeft,
-        transform: 'translateX(-50%)',
-        width: '90%',
-        maxWidth: '320px',
-        zIndex: 100002
-      },
+      pointerStyle,
+      tooltipStyle,
       emoji
     };
   };
@@ -250,8 +262,8 @@ export default function OnboardingTour({
 
   return (
     <>
-      {/* Backdrop dark shadow overlay */}
-      <div className="onboarding-overlay" onClick={completeTour} />
+      {/* Backdrop dark shadow overlay (clicking backdrop no longer dismisses the tour to avoid accidental closure) */}
+      <div className="onboarding-overlay" />
 
       {/* Pointing Hand Indicator */}
       {step > 0 && (
@@ -281,9 +293,13 @@ export default function OnboardingTour({
         )}
 
         <div className="onboarding-actions">
-          {step > 0 && (
+          {step > 0 ? (
             <button className="btn btn-secondary btn-sm" onClick={handlePrev}>
               Atrás
+            </button>
+          ) : (
+            <button className="btn btn-secondary btn-sm" onClick={completeTour}>
+              Saltar
             </button>
           )}
           <button className="btn btn-primary btn-sm onboarding-next-btn" onClick={handleNext}>
