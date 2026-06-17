@@ -3,137 +3,39 @@ import { X, ArrowRight } from 'lucide-react';
 
 export default function OnboardingTour({ isOpen, onClose }) {
   const [step, setStep] = useState(0);
-  const [pointerStyle, setPointerStyle] = useState({ display: 'none' });
-  const [tooltipStyle, setTooltipStyle] = useState({ display: 'none' });
-  const [pointerEmoji, setPointerEmoji] = useState('👇');
+  const [rect, setRect] = useState(null);
 
   useEffect(() => {
     if (!isOpen || step === -1) return;
 
-    if (step === 0) {
-      // Welcome modal - Centered
-      setPointerStyle({ display: 'none' });
-      setTooltipStyle({
-        position: 'fixed',
-        top: '50%',
-        left: '50%',
-        transform: 'translate(-50%, -50%)',
-        width: '90%',
-        maxWidth: '400px',
-        zIndex: 100000
-      });
-      return;
-    }
-
-    const updatePosition = () => {
-      let targetSelector = '';
-      let emoji = '👇';
-      let isUp = false;
+    const updateRect = () => {
+      let selector = '';
+      if (step === 2) selector = '#tour-first-add-btn';
+      if (step === 3) selector = '#tour-whatsapp-btn';
 
       if (step === 1) {
-        // Scroll down step (bouncing at center-bottom)
-        setPointerEmoji('👇');
-        setPointerStyle({
-          position: 'fixed',
-          bottom: '100px',
-          left: '50%',
-          transform: 'translateX(-50%)',
-          fontSize: '3.5rem',
-          zIndex: 100000,
-          animation: 'bounce-hand-down 1.2s infinite'
-        });
-        setTooltipStyle({
-          position: 'fixed',
-          bottom: '180px',
-          left: '50%',
-          transform: 'translateX(-50%)',
-          width: '90%',
-          maxWidth: '320px',
-          zIndex: 100000
-        });
-        return;
-      } else if (step === 2) {
-        targetSelector = '#tour-first-add-btn';
-        emoji = '👆';
-        isUp = true;
-      } else if (step === 3) {
-        targetSelector = '#tour-whatsapp-btn';
-        emoji = '👇';
-        isUp = false;
-      }
-
-      const el = document.querySelector(targetSelector);
-      if (!el) {
-        // Fallback: If element not found, display tooltip in center
-        setPointerStyle({ display: 'none' });
-        setTooltipStyle({
-          position: 'fixed',
-          top: '50%',
-          left: '50%',
-          transform: 'translate(-50%, -50%)',
-          width: '90%',
-          maxWidth: '320px',
-          zIndex: 100000
-        });
+        setRect({ isScrollStep: true });
         return;
       }
 
-      const rect = el.getBoundingClientRect();
-      setPointerEmoji(emoji);
-
-      if (isUp) {
-        // Point UP (hand positioned below the button pointing UP at it)
-        setPointerStyle({
-          position: 'fixed',
-          top: `${rect.bottom + 10}px`,
-          left: `${rect.left + rect.width / 2}px`,
-          transform: 'translateX(-50%)',
-          fontSize: '3.5rem',
-          zIndex: 100000,
-          animation: 'bounce-hand-up 1.2s infinite'
-        });
-        setTooltipStyle({
-          position: 'fixed',
-          top: `${rect.bottom + 80}px`, // Place the text card below the hand
-          left: `${rect.left + rect.width / 2}px`,
-          transform: 'translateX(-50%)',
-          width: '90%',
-          maxWidth: '320px',
-          zIndex: 100000
-        });
+      const el = document.querySelector(selector);
+      if (el) {
+        setRect(el.getBoundingClientRect());
       } else {
-        // Point DOWN (hand positioned above the button pointing DOWN at it)
-        setPointerStyle({
-          position: 'fixed',
-          top: `${rect.top - 70}px`,
-          left: `${rect.left + rect.width / 2}px`,
-          transform: 'translateX(-50%)',
-          fontSize: '3.5rem',
-          zIndex: 100000,
-          animation: 'bounce-hand-down 1.2s infinite'
-        });
-        setTooltipStyle({
-          position: 'fixed',
-          top: `${rect.top - 200}px`,
-          left: `${rect.left + rect.width / 2 - 20}px`,
-          transform: 'translateX(-50%)',
-          width: '90%',
-          maxWidth: '320px',
-          zIndex: 100000
-        });
+        setRect(null);
       }
     };
 
-    updatePosition();
-    window.addEventListener('resize', updatePosition);
-    window.addEventListener('scroll', updatePosition);
+    updateRect();
+    window.addEventListener('resize', updateRect);
+    window.addEventListener('scroll', updateRect);
     
     // Periodically update to align perfectly during scroll/animations
-    const interval = setInterval(updatePosition, 100);
+    const interval = setInterval(updateRect, 100);
 
     return () => {
-      window.removeEventListener('resize', updatePosition);
-      window.removeEventListener('scroll', updatePosition);
+      window.removeEventListener('resize', updateRect);
+      window.removeEventListener('scroll', updateRect);
       clearInterval(interval);
     };
   }, [isOpen, step]);
@@ -151,10 +53,8 @@ export default function OnboardingTour({ isOpen, onClose }) {
         setStep(2);
       }, 700);
     } else if (step === 2) {
-      // Advance to step 3
       setStep(3);
     } else if (step === 3) {
-      // Finish the tour
       completeTour();
     } else {
       setStep((prev) => prev + 1);
@@ -201,6 +101,114 @@ export default function OnboardingTour({ isOpen, onClose }) {
 
   const currentContent = stepsContent[step];
 
+  // Dynamic Styles Calculation during Render
+  const getTooltipStyle = () => {
+    if (step === 0) {
+      return {
+        position: 'fixed',
+        top: '50%',
+        left: '50%',
+        transform: 'translate(-50%, -50%)',
+        width: '90%',
+        maxWidth: '400px',
+        zIndex: 100000
+      };
+    }
+    if (step === 1) {
+      return {
+        position: 'fixed',
+        bottom: '180px',
+        left: '50%',
+        transform: 'translateX(-50%)',
+        width: '90%',
+        maxWidth: '320px',
+        zIndex: 100000
+      };
+    }
+    if (!rect) {
+      return {
+        position: 'fixed',
+        top: '50%',
+        left: '50%',
+        transform: 'translate(-50%, -50%)',
+        width: '90%',
+        maxWidth: '320px',
+        zIndex: 100000
+      };
+    }
+    
+    if (step === 2) {
+      return {
+        position: 'fixed',
+        top: `${rect.bottom + 80}px`,
+        left: `${rect.left + rect.width / 2}px`,
+        transform: 'translateX(-50%)',
+        width: '90%',
+        maxWidth: '320px',
+        zIndex: 100000
+      };
+    }
+    
+    if (step === 3) {
+      return {
+        position: 'fixed',
+        top: `${rect.top - 200}px`,
+        left: `${rect.left + rect.width / 2 - 20}px`,
+        transform: 'translateX(-50%)',
+        width: '90%',
+        maxWidth: '320px',
+        zIndex: 100000
+      };
+    }
+    return {};
+  };
+
+  const getPointerStyle = () => {
+    if (step === 0) return { display: 'none' };
+    if (step === 1) {
+      return {
+        position: 'fixed',
+        bottom: '100px',
+        left: '50%',
+        transform: 'translateX(-50%)',
+        fontSize: '3.5rem',
+        zIndex: 100000,
+        animation: 'bounce-hand-down 1.2s infinite'
+      };
+    }
+    if (!rect) return { display: 'none' };
+    
+    if (step === 2) {
+      return {
+        position: 'fixed',
+        top: `${rect.bottom + 10}px`,
+        left: `${rect.left + rect.width / 2}px`,
+        transform: 'translateX(-50%)',
+        fontSize: '3.5rem',
+        zIndex: 100000,
+        animation: 'bounce-hand-up 1.2s infinite'
+      };
+    }
+    
+    if (step === 3) {
+      return {
+        position: 'fixed',
+        top: `${rect.top - 70}px`,
+        left: `${rect.left + rect.width / 2}px`,
+        transform: 'translateX(-50%)',
+        fontSize: '3.5rem',
+        zIndex: 100000,
+        animation: 'bounce-hand-down 1.2s infinite'
+      };
+    }
+    return {};
+  };
+
+  const getPointerEmoji = () => {
+    if (step === 2) return '👆';
+    return '👇';
+  };
+
   return (
     <>
       {/* Backdrop dark shadow overlay */}
@@ -208,13 +216,13 @@ export default function OnboardingTour({ isOpen, onClose }) {
 
       {/* Pointing Hand Indicator */}
       {step > 0 && (
-        <div className="onboarding-pointer" style={pointerStyle}>
-          {pointerEmoji}
+        <div className="onboarding-pointer" style={getPointerStyle()}>
+          {getPointerEmoji()}
         </div>
       )}
 
       {/* Explanatory Tooltip Card */}
-      <div className="onboarding-tooltip glassmorphic" style={tooltipStyle}>
+      <div className="onboarding-tooltip glassmorphic" style={getTooltipStyle()}>
         <button className="onboarding-close-btn" onClick={completeTour} title="Saltar guía">
           <X size={16} />
         </button>

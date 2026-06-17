@@ -1,3 +1,4 @@
+import React, { useState, useEffect } from 'react';
 import { ShoppingBag, Sun, Moon, Menu as MenuIcon, X, HelpCircle } from 'lucide-react';
 
 export default function Navbar({ theme, toggleTheme, cartCount, openCart, startTour }) {
