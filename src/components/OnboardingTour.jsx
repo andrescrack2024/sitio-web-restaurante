@@ -1,7 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import { X, ArrowRight } from 'lucide-react';
 
-export default function OnboardingTour({ isOpen, onClose }) {
+export default function OnboardingTour({ 
+  isOpen, 
+  onClose, 
+  addToCart, 
+  menuItems, 
+  openCheckout, 
+  closeCheckout, 
+  cartCount 
+}) {
   const [step, setStep] = useState(0);
   const [rect, setRect] = useState(null);
 
@@ -11,7 +19,9 @@ export default function OnboardingTour({ isOpen, onClose }) {
     const updateRect = () => {
       let selector = '';
       if (step === 2) selector = '#tour-first-add-btn';
-      if (step === 3) selector = '#tour-whatsapp-btn';
+      if (step === 3) selector = '#nombre'; // Target name input inside modal
+      if (step === 4) selector = '#tour-payment-selector'; // Target payment grid
+      if (step === 5) selector = '#tour-submit-order-btn'; // Target final submit button
 
       if (step === 1) {
         setRect({ isScrollStep: true });
@@ -58,8 +68,23 @@ export default function OnboardingTour({ isOpen, onClose }) {
         setStep(2);
       }, 700);
     } else if (step === 2) {
-      setStep(3);
+      // Automatically add the first menu item to the cart if cart is empty
+      if (cartCount === 0 && menuItems && menuItems.length > 0) {
+        addToCart(menuItems[0]);
+      }
+      // Open the checkout modal
+      openCheckout();
+      
+      // Delay step transition slightly so the modal finishes opening and DOM elements are present
+      setTimeout(() => {
+        setStep(3);
+      }, 300);
     } else if (step === 3) {
+      setStep(4);
+    } else if (step === 4) {
+      setStep(5);
+    } else if (step === 5) {
+      closeCheckout();
       completeTour();
     } else {
       setStep((prev) => prev + 1);
@@ -68,6 +93,10 @@ export default function OnboardingTour({ isOpen, onClose }) {
 
   const handlePrev = () => {
     if (step > 0) {
+      // If going back to step 2, close the checkout modal
+      if (step === 3) {
+        closeCheckout();
+      }
       setStep((prev) => prev - 1);
     }
   };
@@ -90,19 +119,31 @@ export default function OnboardingTour({ isOpen, onClose }) {
     },
     {
       title: "📜 Paso 1: Explora el Menú",
-      desc: "Desliza hacia abajo o haz clic en las categorías para ver todas nuestras hamburguesas, acompañamientos y deliciosos helados.",
+      desc: "Desliza hacia abajo o haz clic en las categorías para ver todas nuestras hamburguesas, acompañamientos y helados.",
       btnText: "Siguiente Paso",
       showProgress: true
     },
     {
       title: "🛒 Paso 2: Agrega al Pedido",
-      desc: "Haz clic en 'Agregar al Pedido' en tus platos preferidos. Se guardarán en tu carrito de compras y verás cómo el contador aumenta.",
+      desc: "Haz clic en 'Agregar al Pedido' en tu plato favorito. Se guardará en tu carrito de compras y se abrirá el formulario de envío.",
       btnText: "Siguiente Paso",
       showProgress: true
     },
     {
-      title: "📞 Paso 3: Envía por WhatsApp",
-      desc: "Cuando termines, haz clic en este botón verde flotante para rellenar tus datos de entrega y enviarnos el pedido completo a nuestro WhatsApp.",
+      title: "👤 Paso 3: Datos de Envío",
+      desc: "Escribe aquí tu Nombre, Teléfono de contacto y la Dirección exacta para poder despachar tu domicilio.",
+      btnText: "Siguiente Paso",
+      showProgress: true
+    },
+    {
+      title: "💳 Paso 4: Método de Pago",
+      desc: "Elige tu método de pago preferido: Efectivo contra entrega o Transferencia electrónica mediante Nequi / Bancolombia.",
+      btnText: "Siguiente Paso",
+      showProgress: true
+    },
+    {
+      title: "📞 Paso 5: Confirma tu Pedido",
+      desc: "Finalmente, haz clic aquí. Te redirigirá automáticamente a WhatsApp con el mensaje ya estructurado para enviarlo con un solo toque.",
       btnText: "¡Entendido, a pedir! 🎉",
       showProgress: true
     }
@@ -110,113 +151,102 @@ export default function OnboardingTour({ isOpen, onClose }) {
 
   const currentContent = stepsContent[step];
 
-  // Dynamic Styles Calculation during Render
-  const getTooltipStyle = () => {
+  // Smart coordinates calculation for tooltips & pointers
+  const getLayout = () => {
     if (step === 0) {
       return {
-        position: 'fixed',
-        top: '50%',
-        left: '50%',
-        transform: 'translate(-50%, -50%)',
-        width: '90%',
-        maxWidth: '400px',
-        zIndex: 100000
+        pointerStyle: { display: 'none' },
+        tooltipStyle: {
+          position: 'fixed',
+          top: '50%',
+          left: '50%',
+          transform: 'translate(-50%, -50%)',
+          width: '90%',
+          maxWidth: '400px',
+          zIndex: 100000
+        },
+        emoji: '👇'
       };
     }
+
     if (step === 1) {
       return {
-        position: 'fixed',
-        bottom: '180px',
-        left: '50%',
-        transform: 'translateX(-50%)',
-        width: '90%',
-        maxWidth: '320px',
-        zIndex: 100000
+        pointerStyle: {
+          position: 'fixed',
+          bottom: '100px',
+          left: '50%',
+          transform: 'translateX(-50%)',
+          fontSize: '3.5rem',
+          zIndex: 100000,
+          animation: 'bounce-hand-down 1.2s infinite'
+        },
+        tooltipStyle: {
+          position: 'fixed',
+          bottom: '180px',
+          left: '50%',
+          transform: 'translateX(-50%)',
+          width: '90%',
+          maxWidth: '320px',
+          zIndex: 100000
+        },
+        emoji: '👇'
       };
     }
+
     if (!rect) {
       return {
-        position: 'fixed',
-        top: '50%',
-        left: '50%',
-        transform: 'translate(-50%, -50%)',
-        width: '90%',
-        maxWidth: '320px',
-        zIndex: 100000
+        pointerStyle: { display: 'none' },
+        tooltipStyle: {
+          position: 'fixed',
+          top: '50%',
+          left: '50%',
+          transform: 'translate(-50%, -50%)',
+          width: '90%',
+          maxWidth: '320px',
+          zIndex: 100000
+        },
+        emoji: '👇'
       };
     }
+
+    // Determine vertical layout spacing to avoid page borders
+    const spaceOnTop = rect.top > 200;
+    const emoji = spaceOnTop ? '👇' : '👆';
+    const animation = spaceOnTop ? 'bounce-hand-down 1.2s infinite' : 'bounce-hand-up 1.2s infinite';
     
-    if (step === 2) {
-      return {
+    const pointerTop = spaceOnTop ? `${rect.top - 70}px` : `${rect.bottom + 10}px`;
+    const tooltipTop = spaceOnTop ? `${rect.top - 195}px` : `${rect.bottom + 80}px`;
+
+    // Slight adjustment for mobile checkout form
+    const isStep345 = step >= 3;
+    const tooltipLeft = isStep345 
+      ? `${rect.left + rect.width / 2 - 10}px` 
+      : `${rect.left + rect.width / 2}px`;
+
+    return {
+      pointerStyle: {
         position: 'fixed',
-        top: `${rect.bottom + 80}px`,
+        top: pointerTop,
         left: `${rect.left + rect.width / 2}px`,
         transform: 'translateX(-50%)',
-        width: '90%',
-        maxWidth: '320px',
-        zIndex: 100000
-      };
-    }
-    
-    if (step === 3) {
-      return {
+        fontSize: '3.5rem',
+        zIndex: 100002,
+        animation: animation
+      },
+      tooltipStyle: {
         position: 'fixed',
-        top: `${rect.top - 200}px`,
-        left: `${rect.left + rect.width / 2 - 20}px`,
+        top: tooltipTop,
+        left: tooltipLeft,
         transform: 'translateX(-50%)',
         width: '90%',
         maxWidth: '320px',
-        zIndex: 100000
-      };
-    }
-    return {};
+        zIndex: 100002
+      },
+      emoji
+    };
   };
 
-  const getPointerStyle = () => {
-    if (step === 0) return { display: 'none' };
-    if (step === 1) {
-      return {
-        position: 'fixed',
-        bottom: '100px',
-        left: '50%',
-        transform: 'translateX(-50%)',
-        fontSize: '3.5rem',
-        zIndex: 100000,
-        animation: 'bounce-hand-down 1.2s infinite'
-      };
-    }
-    if (!rect) return { display: 'none' };
-    
-    if (step === 2) {
-      return {
-        position: 'fixed',
-        top: `${rect.bottom + 10}px`,
-        left: `${rect.left + rect.width / 2}px`,
-        transform: 'translateX(-50%)',
-        fontSize: '3.5rem',
-        zIndex: 100000,
-        animation: 'bounce-hand-up 1.2s infinite'
-      };
-    }
-    
-    if (step === 3) {
-      return {
-        position: 'fixed',
-        top: `${rect.top - 70}px`,
-        left: `${rect.left + rect.width / 2}px`,
-        transform: 'translateX(-50%)',
-        fontSize: '3.5rem',
-        zIndex: 100000,
-        animation: 'bounce-hand-down 1.2s infinite'
-      };
-    }
-    return {};
-  };
-
-  const getPointerEmoji = () => {
-    if (step === 2) return '👆';
-    return '👇';
-  };
+  const layout = getLayout();
 
   return (
     <>
@@ -225,13 +255,13 @@ export default function OnboardingTour({ isOpen, onClose }) {
 
       {/* Pointing Hand Indicator */}
       {step > 0 && (
-        <div className="onboarding-pointer" style={getPointerStyle()}>
-          {getPointerEmoji()}
+        <div className="onboarding-pointer" style={layout.pointerStyle}>
+          {layout.emoji}
         </div>
       )}
 
       {/* Explanatory Tooltip Card */}
-      <div className="onboarding-tooltip glassmorphic" style={getTooltipStyle()}>
+      <div className="onboarding-tooltip glassmorphic" style={layout.tooltipStyle}>
         <button className="onboarding-close-btn" onClick={completeTour} title="Saltar guía">
           <X size={16} />
         </button>
@@ -242,11 +272,11 @@ export default function OnboardingTour({ isOpen, onClose }) {
         {currentContent.showProgress && (
           <div className="onboarding-progress">
             <div className="onboarding-progress-dots">
-              {[1, 2, 3].map((s) => (
+              {[1, 2, 3, 4, 5].map((s) => (
                 <span key={s} className={`progress-dot ${step === s ? 'active' : ''}`} />
               ))}
             </div>
-            <span className="onboarding-step-num">Paso {step} de 3</span>
+            <span className="onboarding-step-num">Paso {step} de 5</span>
           </div>
         )}
 
@@ -258,7 +288,7 @@ export default function OnboardingTour({ isOpen, onClose }) {
           )}
           <button className="btn btn-primary btn-sm onboarding-next-btn" onClick={handleNext}>
             {currentContent.btnText}
-            {step < 3 && <ArrowRight size={14} style={{ marginLeft: '4px' }} />}
+            {step < 5 && <ArrowRight size={14} style={{ marginLeft: '4px' }} />}
           </button>
         </div>
       </div>

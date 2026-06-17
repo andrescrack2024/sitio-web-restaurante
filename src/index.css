@@ -1877,3 +1877,8 @@ button {
 #tour-whatsapp-btn {
   z-index: 100001 !important; /* Above the backdrop */
 }
+
+#nombre, #tour-payment-selector, #tour-submit-order-btn {
+  position: relative;
+  z-index: 100001 !important; /* Above the backdrop */
+}

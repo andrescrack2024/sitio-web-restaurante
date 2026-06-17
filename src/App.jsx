@@ -16,12 +16,13 @@ import { ShoppingBag } from 'lucide-react';
 export default function App() {
   const [theme, setTheme] = useState('dark');
   const [menuItems, setMenuItems] = useState(() => {
-    if (isFirebaseSupported) {
-      return []; // Loaded from firestore
-    } else {
+    try {
       const saved = localStorage.getItem('rapidoydeli_menu');
-      return saved ? JSON.parse(saved) : MENU_ITEMS;
+      if (saved) return JSON.parse(saved);
+    } catch (e) {
+      console.warn('LocalStorage read error:', e);
     }
+    return isFirebaseSupported ? [] : MENU_ITEMS;
   });
   const [loading, setLoading] = useState(isFirebaseSupported);
   const [cartItems, setCartItems] = useState([]);
@@ -136,6 +137,11 @@ export default function App() {
       // 2. Main flow: Sort items by ID so they maintain order and display
       items.sort((a, b) => (Number(a.id) || 0) - (Number(b.id) || 0));
       setMenuItems(items);
+      try {
+        localStorage.setItem('rapidoydeli_menu', JSON.stringify(items));
+      } catch (e) {
+        console.warn('LocalStorage write error:', e);
+      }
       setLoading(false);
     }, (error) => {
       console.error("Firestore loading error:", error);
@@ -323,7 +329,18 @@ export default function App() {
 
       <OnboardingTour
         isOpen={isTourOpen}
-        onClose={() => setIsTourOpen(false)}
+        onClose={() => {
+          setIsTourOpen(false);
+          setIsCheckoutOpen(false);
+        }}
+        addToCart={addToCart}
+        menuItems={menuItems}
+        openCheckout={() => {
+          setIsCartOpen(false);
+          setIsCheckoutOpen(true);
+        }}
+        closeCheckout={() => setIsCheckoutOpen(false)}
+        cartCount={cartCount}
       />
     </>
   );

@@ -115,7 +115,7 @@ Quedo atento a su confirmación. ¡Muchas gracias!`;
               Por favor, ingrese sus datos para finalizar el pedido. Al confirmar, será redirigido a WhatsApp para coordinar el envío.
             </p>
 
-            <form onSubmit={handleSubmit}>
+            <form id="tour-client-form" onSubmit={handleSubmit}>
               <div className="form-group">
                 <label className="form-label" htmlFor="nombre">Nombre Completo</label>
                 <input
@@ -160,7 +160,7 @@ Quedo atento a su confirmación. ¡Muchas gracias!`;
 
               <div className="form-group" style={{ marginBottom: '16px' }}>
                 <label className="form-label">Método de Pago</label>
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', marginTop: '6px' }}>
+                <div id="tour-payment-selector" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', marginTop: '6px' }}>
                   <button
                     type="button"
                     onClick={() => setPaymentMethod('efectivo')}
@@ -297,28 +297,6 @@ Quedo atento a su confirmación. ¡Muchas gracias!`;
                   </div>
 
                   <div style={{ marginTop: '14px' }}>
-                    <a 
-                      href="https://nequi.co" 
-                      target="_blank" 
-                      rel="noopener noreferrer" 
-                      className="btn" 
-                      style={{ 
-                        width: '100%', 
-                        padding: '10px', 
-                        fontSize: '0.85rem', 
-                        backgroundColor: '#1E1E24', 
-                        color: 'white', 
-                        borderColor: '#1E1E24',
-                        textTransform: 'none',
-                        letterSpacing: '0.5px',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        gap: '6px'
-                      }}
-                    >
-                      🚀 Abrir App Nequi
-                    </a>
                     <span style={{ display: 'block', fontSize: '0.75rem', color: 'var(--text-secondary)', marginTop: '8px', textAlign: 'center', lineHeight: '1.4' }}>
                       Realiza la transferencia desde tu banco o app Nequi. Toma una captura de pantalla del comprobante y <strong>recuerda mandar el comprobante de pago al número de WhatsApp</strong> al finalizar tu pedido.
                     </span>
@@ -326,7 +304,7 @@ Quedo atento a su confirmación. ¡Muchas gracias!`;
                 </div>
               )}
 
-              <button type="submit" className="btn btn-primary" style={{ width: '100%', marginTop: '12px' }}>
+              <button id="tour-submit-order-btn" type="submit" className="btn btn-primary" style={{ width: '100%', marginTop: '12px' }}>
                 Hacer Pedido por WhatsApp <Send size={18} style={{ marginLeft: '6px' }} />
               </button>
             </form>
