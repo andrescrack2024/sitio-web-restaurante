@@ -1,5 +1,4 @@
-import React from 'react';
-import { ArrowRight } from 'lucide-react';
+import { ArrowRight, ChevronDown } from 'lucide-react';
 
 export default function Hero() {
   return (
@@ -28,6 +27,10 @@ export default function Hero() {
           </div>
         </div>
       </div>
+      <a href="#menu" className="scroll-indicator" aria-label="Deslizar hacia abajo para ver el menú">
+        <span>Desliza para ver el menú</span>
+        <ChevronDown size={20} className="text-gold" />
+      </a>
     </section>
   );
 }

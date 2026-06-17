@@ -252,7 +252,7 @@ export default function Menu({ menuItems = [], addToCart, cartItems, loading }) 
 
         {/* Menu Grid */}
         <div className="menu-grid">
-          {filteredItems.map((item) => {
+          {filteredItems.map((item, index) => {
             const hasAnimation = addedAnimationIds[item.id];
             const inCart = isItemInCart(item.id);
 
@@ -284,6 +284,7 @@ export default function Menu({ menuItems = [], addToCart, cartItems, loading }) 
                   <div className="menu-card-footer">
                     <button
                       onClick={() => handleAddClick(item)}
+                      id={index === 0 ? 'tour-first-add-btn' : undefined}
                       className={`btn btn-add-to-cart ${inCart || hasAnimation ? 'btn-secondary' : 'btn-primary'}`}
                       style={{
                         borderColor: hasAnimation ? 'var(--success)' : '',

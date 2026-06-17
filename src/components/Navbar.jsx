@@ -1,7 +1,6 @@
-import React, { useState, useEffect } from 'react';
-import { ShoppingBag, Sun, Moon, Menu as MenuIcon, X } from 'lucide-react';
+import { ShoppingBag, Sun, Moon, Menu as MenuIcon, X, HelpCircle } from 'lucide-react';
 
-export default function Navbar({ theme, toggleTheme, cartCount, openCart }) {
+export default function Navbar({ theme, toggleTheme, cartCount, openCart, startTour }) {
   const [scrolled, setScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
@@ -49,6 +48,16 @@ export default function Navbar({ theme, toggleTheme, cartCount, openCart }) {
 
         {/* Actions (Cart, Theme, Mobile toggle) */}
         <div className="nav-actions">
+          {/* Onboarding Guide Toggle */}
+          <button
+            onClick={startTour}
+            className="btn-icon-round"
+            aria-label="Ver guía de uso"
+            title="Guía de uso"
+          >
+            <HelpCircle size={20} />
+          </button>
+
           {/* Theme Toggle */}
           <button
             onClick={toggleTheme}

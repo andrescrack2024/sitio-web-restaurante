@@ -8,6 +8,7 @@ import OrderModal from './components/OrderModal';
 import Testimonials from './components/Testimonials';
 import Footer from './components/Footer';
 import Admin from './components/Admin';
+import OnboardingTour from './components/OnboardingTour';
 import { db, isFirebaseSupported } from './firebase';
 import { collection, onSnapshot, doc, setDoc, deleteDoc } from 'firebase/firestore';
 import { ShoppingBag } from 'lucide-react';
@@ -27,6 +28,20 @@ export default function App() {
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [isCheckoutOpen, setIsCheckoutOpen] = useState(false);
   const [view, setView] = useState(() => window.location.hash === '#admin' ? 'admin' : 'shop');
+  const [isTourOpen, setIsTourOpen] = useState(false);
+
+  // Auto-open tour for new users on page load
+  useEffect(() => {
+    if (view === 'shop') {
+      const tourCompleted = localStorage.getItem('rapido_deli_tour_completed');
+      if (!tourCompleted) {
+        const timer = setTimeout(() => {
+          setIsTourOpen(true);
+        }, 1500);
+        return () => clearTimeout(timer);
+      }
+    }
+  }, [view]);
   
   // Ref to ensure migration check runs exactly once when component mounts
   const migrationCheckedRef = useRef(false);
@@ -250,6 +265,7 @@ export default function App() {
         toggleTheme={toggleTheme}
         cartCount={cartCount}
         openCart={() => setIsCartOpen(true)}
+        startTour={() => setIsTourOpen(true)}
       />
 
       <main style={{ marginTop: '80px' }}>
@@ -268,6 +284,7 @@ export default function App() {
 
       {!isCartOpen && (
         <a
+          id="tour-whatsapp-btn"
           href={cartCount > 0 ? undefined : "https://wa.me/573126602583?text=Hola!%20Quiero%20hacer%20un%20pedido%20en%20R%C3%A1pido%20%26%20Deli%20en%20Quibdó."}
           target={cartCount > 0 ? undefined : "_blank"}
           rel={cartCount > 0 ? undefined : "noopener noreferrer"}
@@ -296,6 +313,11 @@ export default function App() {
         onClose={() => setIsCheckoutOpen(false)}
         cartItems={cartItems}
         clearCart={clearCart}
+      />
+
+      <OnboardingTour
+        isOpen={isTourOpen}
+        onClose={() => setIsTourOpen(false)}
       />
     </>
   );
