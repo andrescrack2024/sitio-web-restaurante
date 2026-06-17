@@ -334,6 +334,7 @@ export default function App() {
           setIsCheckoutOpen(false);
         }}
         addToCart={addToCart}
+        clearCart={clearCart}
         menuItems={menuItems}
         openCheckout={() => {
           setIsCartOpen(false);

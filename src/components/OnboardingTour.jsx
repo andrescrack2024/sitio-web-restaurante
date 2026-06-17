@@ -5,6 +5,7 @@ export default function OnboardingTour({
   isOpen, 
   onClose, 
   addToCart, 
+  clearCart, 
   menuItems, 
   openCheckout, 
   closeCheckout, 
@@ -12,6 +13,7 @@ export default function OnboardingTour({
 }) {
   const [step, setStep] = useState(0);
   const [rect, setRect] = useState(null);
+  const [didAutoAdd, setDidAutoAdd] = useState(false);
 
   useEffect(() => {
     if (!isOpen || step === -1) return;
@@ -71,6 +73,7 @@ export default function OnboardingTour({
       // Automatically add the first menu item to the cart if cart is empty
       if (cartCount === 0 && menuItems && menuItems.length > 0) {
         addToCart(menuItems[0]);
+        setDidAutoAdd(true);
       }
       // Open the checkout modal
       openCheckout();
@@ -106,6 +109,9 @@ export default function OnboardingTour({
       localStorage.setItem('rapido_deli_tour_completed', 'true');
     } catch (e) {
       console.warn('LocalStorage not supported:', e);
+    }
+    if (didAutoAdd && clearCart) {
+      clearCart();
     }
     onClose();
   };
