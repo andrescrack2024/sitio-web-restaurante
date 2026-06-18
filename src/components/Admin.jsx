@@ -165,7 +165,7 @@ export default function Admin({
         </style>
       </head>
       <body>
-        <div class="text-center header">CHOQUINBURGER</div>
+        <div class="text-center header">RÁPIDO & DELI</div>
         <div class="text-center">TICKET DE COCINA</div>
         <div class="divider"></div>
         <div><b>FECHA:</b> ${dateFormatted}</div>
@@ -218,15 +218,15 @@ export default function Admin({
     let message = '';
     
     if (order.status === 'pendiente') {
-      message = `¡Hola, ${order.clientName}! 🍔 Hemos recibido tu pedido #${orderNum} en Choquinburger. Estamos procesándolo y validándolo en nuestro sistema. ¡Muchas gracias por tu paciencia!`;
+      message = `¡Hola, ${order.clientName}! 🍔 Hemos recibido tu pedido #${orderNum} en Rápido & Deli. Estamos procesándolo y validándolo en nuestro sistema. ¡Muchas gracias por tu paciencia!`;
     } else if (order.status === 'en cocina') {
-      message = `¡Hola, ${order.clientName}! 🍔 Tu pedido #${orderNum} ya está en la cocina y nuestros parrilleros lo están preparando con el mejor sabor de Choquinburger. 🔥 ¡Te avisaremos apenas vaya en camino!`;
+      message = `¡Hola, ${order.clientName}! 🍔 Tu pedido #${orderNum} ya está en la cocina y nuestros cocineros lo están preparando con el mejor sabor de Rápido & Deli. 🔥 ¡Te avisaremos apenas vaya en camino!`;
     } else if (order.status === 'en camino') {
-      message = `¡Hola, ${order.clientName}! 🛵 Tu pedido #${orderNum} de Choquinburger ya va en camino a tu dirección: ${order.clientAddress}. Nuestro repartidor llegará muy pronto. ¡Buen provecho!`;
+      message = `¡Hola, ${order.clientName}! 🛵 Tu pedido #${orderNum} de Rápido & Deli ya va en camino a tu dirección: ${order.clientAddress}. Nuestro repartidor llegará muy pronto. ¡Buen provecho!`;
     } else if (order.status === 'entregado') {
-      message = `¡Hola, ${order.clientName}! 🎉 Tu pedido #${orderNum} de Choquinburger ha sido entregado con éxito. ¡Esperamos que disfrutes de tu comida! Agradecemos mucho tu compra y tu preferencia. 🍔🍟🥤`;
+      message = `¡Hola, ${order.clientName}! 🎉 Tu pedido #${orderNum} de Rápido & Deli ha sido entregado con éxito. ¡Esperamos que disfrutes de tu comida! Agradecemos mucho tu compra y tu preferencia. 🍔🍟🥤`;
     } else if (order.status === 'cancelado') {
-      message = `Hola, ${order.clientName}. Lamentamos informarte que tu pedido #${orderNum} de Choquinburger ha sido cancelado. Si tienes alguna duda, por favor comunícate con nosotros por esta línea.`;
+      message = `Hola, ${order.clientName}. Lamentamos informarte que tu pedido #${orderNum} de Rápido & Deli ha sido cancelado. Si tienes alguna duda, por favor comunícate con nosotros por esta línea.`;
     }
     
     // Format phone with Colombian country prefix if needed
