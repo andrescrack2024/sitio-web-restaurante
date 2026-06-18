@@ -118,7 +118,7 @@ export default function Admin({
   };
 
   const printComanda = (order) => {
-    const printWindow = window.open('', '_blank', 'width=800,height=800');
+    const printWindow = window.open('', '_blank', 'width=900,height=900');
     if (!printWindow) {
       alert("Por favor, permite las ventanas emergentes (popups) para poder imprimir la comanda.");
       return;
@@ -126,9 +126,9 @@ export default function Admin({
     
     const itemsHtml = order.items.map(item => `
       <tr>
-        <td style="padding: 10px 0; font-size: 20px;">${item.quantity}x</td>
-        <td style="padding: 10px 0; font-size: 20px;"><b>${item.name}</b></td>
-        <td style="text-align: right; padding: 10px 0; font-size: 20px;">$${(item.price * item.quantity).toLocaleString('es-CO')}</td>
+        <td style="padding: 15px 0; font-size: 24px; vertical-align: top;">${item.quantity}x</td>
+        <td style="padding: 15px 0; font-size: 24px; vertical-align: top;"><b>${item.name}</b></td>
+        <td style="text-align: right; padding: 15px 0; font-size: 24px; vertical-align: top;">$${(item.price * item.quantity).toLocaleString('es-CO')}</td>
       </tr>
     `).join('');
 
@@ -145,85 +145,108 @@ export default function Admin({
         <title>Comanda - Pedido #${orderNum}</title>
         <style>
           @page {
-            size: auto;
-            margin: 15mm;
+            size: letter;
+            margin: 10mm;
+          }
+          html, body {
+            height: 100%;
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
           }
           body {
             font-family: 'Courier New', Courier, monospace;
             width: 100%;
-            max-width: 800px;
-            margin: 0 auto;
+            height: 100%;
+            margin: 0;
             padding: 20px;
-            font-size: 20px;
-            line-height: 1.5;
             color: #000;
+            background-color: #fff;
+            box-sizing: border-box;
+          }
+          .ticket-container {
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            min-height: 100%;
             box-sizing: border-box;
           }
           .text-center { text-align: center; }
-          .double-divider { border-top: 3px double #000; margin: 12px 0; }
-          .dashed-divider { border-top: 1px dashed #000; margin: 12px 0; }
-          .solid-divider { border-top: 2px solid #000; margin: 12px 0; }
-          .header { font-size: 32px; font-weight: bold; letter-spacing: 1px; }
-          .subheader { font-size: 20px; font-weight: bold; margin-top: 5px; }
-          .total { font-size: 24px; font-weight: bold; margin-top: 12px; }
-          .badge { border: 2px solid #000; padding: 12px; font-weight: bold; text-align: center; font-size: 20px; margin-top: 16px; text-transform: uppercase; }
-          .info-row { display: flex; justify-content: space-between; margin-bottom: 8px; }
+          .double-divider { border-top: 5px double #000; margin: 15px 0; }
+          .dashed-divider { border-top: 3px dashed #000; margin: 15px 0; }
+          .solid-divider { border-top: 4px solid #000; margin: 15px 0; }
+          .header { font-size: 48px; font-weight: bold; letter-spacing: 1px; }
+          .subheader { font-size: 30px; font-weight: bold; margin-top: 5px; }
+          .total { font-size: 36px; font-weight: bold; }
+          .badge { border: 4px solid #000; padding: 18px; font-weight: bold; text-align: center; font-size: 28px; margin-top: 15px; text-transform: uppercase; }
+          .info-row { display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 24px; }
         </style>
       </head>
       <body>
-        <div class="text-center header">RÁPIDO & DELI</div>
-        <div class="text-center subheader">TICKET DE COCINA</div>
-        
-        <div class="double-divider"></div>
-        
-        <div class="info-row">
-          <span><b>FECHA:</b> ${dateFormatted}</span>
-          <span><b>PEDIDO:</b> #${orderNum}</span>
+        <div class="ticket-container">
+          <!-- TOP SECTIONS -->
+          <div>
+            <div class="text-center header">RÁPIDO & DELI</div>
+            <div class="text-center subheader">TICKET DE COCINA</div>
+            
+            <div class="double-divider"></div>
+            
+            <div class="info-row">
+              <span><b>FECHA:</b> ${dateFormatted}</span>
+              <span><b>PEDIDO:</b> #${orderNum}</span>
+            </div>
+            
+            <div class="solid-divider"></div>
+            
+            <div style="font-size: 24px; line-height: 1.6; margin: 15px 0;">
+              <div><b>CLIENTE:</b> ${order.clientName}</div>
+              <div><b>TELÉFONO:</b> ${order.clientPhone}</div>
+              <div><b>DIRECCIÓN:</b> ${order.clientAddress}</div>
+            </div>
+            
+            <div class="solid-divider"></div>
+          </div>
+          
+          <!-- MIDDLE ITEMS TABLE SECTION -->
+          <div style="flex-grow: 1; margin: 20px 0;">
+            <table width="100%" cellpadding="0" cellspacing="0">
+              <thead>
+                <tr style="border-bottom: 3px solid #000;">
+                  <th align="left" style="padding-bottom: 12px; font-size: 24px;">Cant</th>
+                  <th align="left" style="padding-bottom: 12px; font-size: 24px;">Producto</th>
+                  <th align="right" style="padding-bottom: 12px; font-size: 24px;">Total</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${itemsHtml}
+              </tbody>
+            </table>
+          </div>
+          
+          <!-- BOTTOM SECTIONS -->
+          <div>
+            <div class="dashed-divider"></div>
+            
+            <div class="total" style="display: flex; justify-content: space-between;">
+              <span>TOTAL DEL PEDIDO:</span>
+              <span>$${order.total.toLocaleString('es-CO')}</span>
+            </div>
+            
+            <div class="solid-divider"></div>
+            
+            <div style="font-size: 24px; margin-bottom: 15px;"><b>PAGO:</b> ${order.paymentMethod === 'nequi' ? '💳 TRANSFERENCIA' : '💵 EFECTIVO CONTRA ENTREGA'}</div>
+            
+            <div class="badge">
+              ${order.status === 'pendiente' && order.paymentMethod === 'nequi' 
+                ? '⚠️ PAGO POR VERIFICAR (WhatsApp)' 
+                : '⚠️ PEDIDO AUTORIZADO - COCINA'}
+            </div>
+            
+            <div class="double-divider"></div>
+            
+            <div class="text-center" style="font-size: 22px; font-weight: bold; margin-top: 15px;">¡A preparar con calidad y rapidez! 🍔🔥</div>
+          </div>
         </div>
-        
-        <div class="solid-divider"></div>
-        
-        <div style="font-size: 20px; line-height: 1.6;">
-          <div><b>CLIENTE:</b> ${order.clientName}</div>
-          <div><b>TELÉFONO:</b> ${order.clientPhone}</div>
-          <div><b>DIRECCIÓN:</b> ${order.clientAddress}</div>
-        </div>
-        
-        <div class="solid-divider"></div>
-        
-        <table width="100%" cellpadding="0" cellspacing="0">
-          <thead>
-            <tr style="border-bottom: 2px solid #000;">
-              <th align="left" style="padding-bottom: 8px; font-size: 20px;">Cant</th>
-              <th align="left" style="padding-bottom: 8px; font-size: 20px;">Producto</th>
-              <th align="right" style="padding-bottom: 8px; font-size: 20px;">Total</th>
-            </tr>
-          </thead>
-          <tbody>
-            ${itemsHtml}
-          </tbody>
-        </table>
-        
-        <div class="dashed-divider"></div>
-        
-        <div class="total" style="display: flex; justify-content: space-between;">
-          <span>TOTAL DEL PEDIDO:</span>
-          <span>$${order.total.toLocaleString('es-CO')}</span>
-        </div>
-        
-        <div class="solid-divider"></div>
-        
-        <div style="font-size: 20px;"><b>PAGO:</b> ${order.paymentMethod === 'nequi' ? '💳 TRANSFERENCIA' : '💵 EFECTIVO CONTRA ENTREGA'}</div>
-        
-        <div class="badge">
-          ${order.status === 'pendiente' && order.paymentMethod === 'nequi' 
-            ? '⚠️ PAGO POR VERIFICAR (WhatsApp)' 
-            : '⚠️ PEDIDO AUTORIZADO - COCINA'}
-        </div>
-        
-        <div class="double-divider"></div>
-        
-        <div class="text-center" style="font-size: 16px; font-weight: bold; margin-top: 10px;">¡A preparar con calidad y rapidez! 🍔🔥</div>
         
         <script>
           window.onload = function() {
