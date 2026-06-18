@@ -213,6 +213,32 @@ export default function Admin({
     printWindow.document.close();
   };
 
+  const sendStatusWhatsApp = (order) => {
+    const orderNum = order.id ? order.id.slice(-4).toUpperCase() : 'N/A';
+    let message = '';
+    
+    if (order.status === 'pendiente') {
+      message = `¡Hola, ${order.clientName}! 🍔 Hemos recibido tu pedido #${orderNum} en Choquinburger. Estamos procesándolo y validándolo en nuestro sistema. ¡Muchas gracias por tu paciencia!`;
+    } else if (order.status === 'en cocina') {
+      message = `¡Hola, ${order.clientName}! 🍔 Tu pedido #${orderNum} ya está en la cocina y nuestros parrilleros lo están preparando con el mejor sabor de Choquinburger. 🔥 ¡Te avisaremos apenas vaya en camino!`;
+    } else if (order.status === 'en camino') {
+      message = `¡Hola, ${order.clientName}! 🛵 Tu pedido #${orderNum} de Choquinburger ya va en camino a tu dirección: ${order.clientAddress}. Nuestro repartidor llegará muy pronto. ¡Buen provecho!`;
+    } else if (order.status === 'entregado') {
+      message = `¡Hola, ${order.clientName}! 🎉 Tu pedido #${orderNum} de Choquinburger ha sido entregado con éxito. ¡Esperamos que disfrutes de tu comida! Agradecemos mucho tu compra y tu preferencia. 🍔🍟🥤`;
+    } else if (order.status === 'cancelado') {
+      message = `Hola, ${order.clientName}. Lamentamos informarte que tu pedido #${orderNum} de Choquinburger ha sido cancelado. Si tienes alguna duda, por favor comunícate con nosotros por esta línea.`;
+    }
+    
+    // Format phone with Colombian country prefix if needed
+    let phone = order.clientPhone.replace(/\D/g, '');
+    if (phone.length === 10 && !phone.startsWith('57')) {
+      phone = '57' + phone;
+    }
+    
+    const url = `https://wa.me/${phone}?text=${encodeURIComponent(message)}`;
+    window.open(url, '_blank');
+  };
+
   const openAddModal = () => {
     setEditingProduct(null);
     setFormData({
@@ -560,6 +586,29 @@ export default function Admin({
                           ✓ Validar Transferencia
                         </button>
                       )}
+                      
+                      <button
+                        type="button"
+                        onClick={() => sendStatusWhatsApp(order)}
+                        className="btn btn-secondary"
+                        style={{
+                          textTransform: 'none',
+                          fontSize: '0.85rem',
+                          padding: '8px 16px',
+                          borderColor: '#25d366',
+                          color: '#25d366',
+                          backgroundColor: 'transparent',
+                          borderRadius: '30px',
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '6px'
+                        }}
+                      >
+                        <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor">
+                          <path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946C.06 5.348 5.397.01 12.008.01c3.202.001 6.212 1.246 8.477 3.514 2.266 2.268 3.507 5.28 3.505 8.484-.004 6.657-5.34 11.997-11.953 11.997-2.005-.001-3.973-.502-5.724-1.457L0 24zm6.59-4.846c1.6.95 3.188 1.449 4.825 1.451 5.436 0 9.86-4.37 9.864-9.799.002-2.63-1.023-5.101-2.885-6.968C16.592 1.97 14.12 .946 11.5 .946c-5.423 0-9.842 4.37-9.846 9.8.001 1.93.523 3.8 1.511 5.4l-.993 3.625 3.73-.977zm11.536-6.52c-.27-.135-1.595-.788-1.842-.877-.248-.09-.427-.135-.607.135-.179.27-.697.877-.854 1.057-.158.18-.315.202-.586.067-1.18-.592-1.96-1.01-2.735-2.338-.204-.352.204-.326.583-1.085.09-.18.045-.337-.022-.472-.068-.135-.608-1.464-.833-2.005-.22-.529-.462-.458-.63-.466-.153-.008-.329-.01-.505-.01-.176 0-.463.067-.704.326-.241.26-.92.9-.92 2.196 0 1.297.945 2.546 1.077 2.726.133.18 1.861 2.842 4.508 3.982.63.272 1.12.434 1.503.555.632.201 1.21.172 1.665.105.508-.075 1.595-.653 1.82-.1282.225-.63.225-1.17.157-1.26-.068-.09-.248-.135-.518-.27z" />
+                        </svg>
+                        Notificar WhatsApp
+                      </button>
                       
                       <button
                         type="button"
