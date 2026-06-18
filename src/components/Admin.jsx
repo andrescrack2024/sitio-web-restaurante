@@ -8,11 +8,15 @@ export default function Admin({
   onAddProduct,
   onUpdateProduct,
   onDeleteProduct,
+  orders = [],
+  onUpdateOrderStatus,
+  onDeleteOrder,
   onGoBack
 }) {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [password, setPassword] = useState('');
   const [loginError, setLoginError] = useState('');
+  const [activeTab, setActiveTab] = useState('pedidos'); // 'pedidos' or 'menu'
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState(null);
   const [formData, setFormData] = useState({
@@ -111,6 +115,102 @@ export default function Admin({
       case 'bebidas': return 'Bebidas';
       default: return cat;
     }
+  };
+
+  const printComanda = (order) => {
+    const printWindow = window.open('', '_blank', 'width=600,height=600');
+    if (!printWindow) {
+      alert("Por favor, permite las ventanas emergentes (popups) para poder imprimir la comanda.");
+      return;
+    }
+    
+    const itemsHtml = order.items.map(item => `
+      <tr>
+        <td style="padding: 6px 0; font-size: 14px;">${item.quantity}x</td>
+        <td style="padding: 6px 0; font-size: 14px;"><b>${item.name}</b></td>
+        <td style="text-align: right; padding: 6px 0; font-size: 14px;">$${(item.price * item.quantity).toLocaleString('es-CO')}</td>
+      </tr>
+    `).join('');
+
+    const dateFormatted = new Date(order.createdAt).toLocaleString('es-CO', {
+      dateStyle: 'short',
+      timeStyle: 'short'
+    });
+
+    const orderNum = order.id ? order.id.slice(-4).toUpperCase() : 'N/A';
+
+    printWindow.document.write(`
+      <html>
+      <head>
+        <title>Comanda - Pedido #${orderNum}</title>
+        <style>
+          @page {
+            size: 80mm auto;
+            margin: 0;
+          }
+          body {
+            font-family: 'Courier New', Courier, monospace;
+            width: 76mm;
+            margin: 0 auto;
+            padding: 10px 5px;
+            font-size: 13px;
+            line-height: 1.4;
+            color: #000;
+          }
+          .text-center { text-align: center; }
+          .divider { border-top: 1px dashed #000; margin: 8px 0; }
+          .header { font-size: 18px; font-weight: bold; }
+          .total { font-size: 15px; font-weight: bold; margin-top: 8px; }
+          .badge { border: 2px solid #000; padding: 8px; font-weight: bold; text-align: center; font-size: 14px; margin-top: 12px; }
+        </style>
+      </head>
+      <body>
+        <div class="text-center header">CHOQUINBURGER</div>
+        <div class="text-center">TICKET DE COCINA</div>
+        <div class="divider"></div>
+        <div><b>FECHA:</b> ${dateFormatted}</div>
+        <div><b>PEDIDO:</b> #${orderNum}</div>
+        <div class="divider"></div>
+        <div><b>CLIENTE:</b> ${order.clientName}</div>
+        <div><b>TELÉFONO:</b> ${order.clientPhone}</div>
+        <div><b>DIRECCIÓN:</b> ${order.clientAddress}</div>
+        <div class="divider"></div>
+        <table width="100%" cellpadding="0" cellspacing="0">
+          <thead>
+            <tr style="border-bottom: 1px solid #000;">
+              <th align="left" style="padding-bottom: 4px;">Cant</th>
+              <th align="left" style="padding-bottom: 4px;">Producto</th>
+              <th align="right" style="padding-bottom: 4px;">Total</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${itemsHtml}
+          </tbody>
+        </table>
+        <div class="divider"></div>
+        <div class="total" style="display: flex; justify-content: space-between;">
+          <span>TOTAL:</span>
+          <span>$${order.total.toLocaleString('es-CO')}</span>
+        </div>
+        <div class="divider"></div>
+        <div><b>PAGO:</b> ${order.paymentMethod === 'nequi' ? '💳 TRANSFERENCIA' : '💵 EFECTIVO'}</div>
+        <div class="badge">
+          ${order.status === 'pendiente' && order.paymentMethod === 'nequi' 
+            ? '⚠️ PAGO POR VERIFICAR (WhatsApp)' 
+            : '⚠️ PEDIDO AUTORIZADO - COCINA'}
+        </div>
+        <div class="divider"></div>
+        <div class="text-center" style="font-size: 11px;">¡A preparar con calidad y rapidez! 🍔🔥</div>
+        <script>
+          window.onload = function() {
+            window.print();
+            setTimeout(function() { window.close(); }, 1000);
+          }
+        </script>
+      </body>
+      </html>
+    `);
+    printWindow.document.close();
   };
 
   const openAddModal = () => {
@@ -256,17 +356,39 @@ export default function Admin({
         <div className="admin-header-row animate-slide-up">
           <div className="admin-title-group">
             <h2 className="font-serif">Panel de Control</h2>
-            <p>Gestión del menú, categorías y precios del restaurante.</p>
+            <p>Gestión de pedidos en tiempo real y catálogo de platos del restaurante.</p>
           </div>
           
           <div style={{ display: 'flex', gap: '12px' }}>
             <button onClick={onGoBack} className="btn btn-secondary" style={{ textTransform: 'none' }}>
               <ArrowLeft size={16} /> Volver al Sitio
             </button>
-            <button onClick={openAddModal} className="btn btn-primary" style={{ textTransform: 'none' }}>
-              <Plus size={16} /> Agregar Producto
-            </button>
+            {activeTab === 'menu' && (
+              <button onClick={openAddModal} className="btn btn-primary" style={{ textTransform: 'none' }}>
+                <Plus size={16} /> Agregar Producto
+              </button>
+            )}
           </div>
+        </div>
+
+        {/* Tab Selector */}
+        <div className="admin-tabs animate-slide-up" style={{ display: 'flex', gap: '12px', marginBottom: '24px', borderBottom: '1px solid var(--border-color)', paddingBottom: '14px' }}>
+          <button 
+            type="button"
+            onClick={() => setActiveTab('pedidos')} 
+            className={`btn ${activeTab === 'pedidos' ? 'btn-primary' : 'btn-secondary'}`}
+            style={{ textTransform: 'none', borderRadius: '8px', padding: '10px 20px', display: 'flex', alignItems: 'center', gap: '8px', border: activeTab !== 'pedidos' ? '1px solid var(--border-color)' : undefined }}
+          >
+            📋 Pedidos en Vivo ({orders.length})
+          </button>
+          <button 
+            type="button"
+            onClick={() => setActiveTab('menu')} 
+            className={`btn ${activeTab === 'menu' ? 'btn-primary' : 'btn-secondary'}`}
+            style={{ textTransform: 'none', borderRadius: '8px', padding: '10px 20px', display: 'flex', alignItems: 'center', gap: '8px', border: activeTab !== 'menu' ? '1px solid var(--border-color)' : undefined }}
+          >
+            🍔 Gestionar Menú ({menuItems.length})
+          </button>
         </div>
 
         {/* Info Box */}
@@ -286,82 +408,276 @@ export default function Admin({
           }}
         >
           <Info size={24} className="text-gold" style={{ flexShrink: 0 }} />
-          <p>
-            Los cambios realizados aquí se guardan localmente en el navegador (**LocalStorage**). Cualquier adición, edición de precios o eliminación de platos se reflejará de inmediato en el catálogo de clientes del sitio web.
-          </p>
-        </div>
-
-        {/* Table List */}
-        <div className="admin-table-container animate-fade-in">
-          {menuItems.length === 0 ? (
-            <div style={{ padding: '40px', textAlignment: 'center', color: 'var(--text-secondary)' }}>
-              No hay productos registrados en el menú. Utilice el botón "Agregar Producto" para comenzar.
-            </div>
+          {activeTab === 'pedidos' ? (
+            <p>
+              Aquí puedes ver los pedidos a domicilio entrantes en tiempo real. Utiliza el botón <b>Validar Transferencia</b> para confirmar pagos por Nequi/Bancolombia, o presiona <b>Imprimir Comanda</b> para generar el ticket físico para la cocina.
+            </p>
           ) : (
-            <table className="admin-table">
-              <thead>
-                <tr>
-                  <th style={{ width: '80px' }}>Imagen</th>
-                  <th>Plato</th>
-                  <th>Categoría</th>
-                  <th>Precio</th>
-                  <th>Insignia</th>
-                  <th style={{ width: '120px', textAlign: 'center' }}>Acciones</th>
-                </tr>
-              </thead>
-              <tbody>
-                {menuItems.map((item) => (
-                  <tr key={item.id}>
-                    <td>
-                      <img src={item.image} alt={item.name} className="table-img" />
-                    </td>
-                    <td>
-                      <div style={{ fontWeight: '600', fontSize: '1.05rem', marginBottom: '4px' }}>
-                        {item.name}
-                      </div>
-                      <div style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', maxWidth: '400px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                        {item.description}
-                      </div>
-                    </td>
-                    <td>
-                      <span className="badge-category">{getCategoryLabel(item.category)}</span>
-                    </td>
-                    <td>
-                      <span className="table-price">{formatPrice(item.price)}</span>
-                    </td>
-                    <td>
-                      {item.badge ? (
-                        <span className="menu-badge" style={{ position: 'static', display: 'inline-block' }}>
-                          {item.badge}
-                        </span>
-                      ) : (
-                        <span style={{ color: 'var(--text-secondary)', fontStyle: 'italic', fontSize: '0.85rem' }}>Ninguna</span>
-                      )}
-                    </td>
-                    <td>
-                      <div className="table-actions" style={{ justifyContent: 'center' }}>
-                        <button
-                          onClick={() => openEditModal(item)}
-                          className="btn-edit-action"
-                          title="Editar producto"
-                        >
-                          <Edit3 size={18} />
-                        </button>
-                        <button
-                          onClick={() => handleDeleteClick(item.id, item.name)}
-                          className="btn-delete-action"
-                          title="Eliminar producto"
-                        >
-                          <Trash2 size={18} />
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+            <p>
+              Gestiona el catálogo de platos. Los cambios realizados aquí se sincronizan automáticamente con la base de datos de Firestore en la nube y se reflejan al instante en la carta digital del cliente.
+            </p>
           )}
         </div>
+
+        {activeTab === 'pedidos' ? (
+          /* Pedidos en Vivo Grid list */
+          <div className="orders-container animate-fade-in" style={{ display: 'flex', flexDirection: 'column', gap: '16px', textAlign: 'left' }}>
+            {orders.length === 0 ? (
+              <div style={{ padding: '40px', textAlign: 'center', color: 'var(--text-secondary)', backgroundColor: 'var(--bg-secondary)', borderRadius: '12px', border: '1px solid var(--border-color)' }}>
+                No hay pedidos registrados aún. Los pedidos en tiempo real de los clientes aparecerán aquí.
+              </div>
+            ) : (
+              orders.map((order) => {
+                const dateObj = new Date(order.createdAt);
+                const timeString = dateObj.toLocaleTimeString('es-CO', { hour: '2-digit', minute: '2-digit' });
+                const dateString = dateObj.toLocaleDateString('es-CO');
+                const orderNum = order.id ? order.id.slice(-4).toUpperCase() : 'N/A';
+
+                return (
+                  <div 
+                    key={order.id} 
+                    className="order-card animate-slide-up"
+                    style={{
+                      backgroundColor: 'var(--bg-secondary)',
+                      border: '1px solid var(--border-color)',
+                      borderRadius: '12px',
+                      padding: '20px',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      gap: '16px',
+                      boxShadow: 'var(--shadow-sm)'
+                    }}
+                  >
+                    {/* Top Row: Order ID, Time and Status Dropdown */}
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '12px' }}>
+                      <div>
+                        <span style={{ fontWeight: 'bold', fontSize: '1.25rem', color: 'var(--text-primary)' }}>
+                          Pedido #{orderNum}
+                        </span>
+                        <span style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', marginLeft: '12px' }}>
+                          {dateString} • {timeString}
+                        </span>
+                      </div>
+                      
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        <span style={{ fontSize: '0.9rem', color: 'var(--text-secondary)' }}>Estado:</span>
+                        <select
+                          value={order.status}
+                          onChange={(e) => onUpdateOrderStatus(order.id, e.target.value)}
+                          className="form-control"
+                          style={{
+                            width: 'auto',
+                            padding: '6px 12px',
+                            fontSize: '0.85rem',
+                            borderRadius: '6px',
+                            height: 'auto',
+                            appearance: 'auto',
+                            WebkitAppearance: 'auto',
+                            backgroundColor: order.status === 'pendiente' ? 'rgba(222, 142, 0, 0.1)' : order.status === 'cancelado' ? 'rgba(255, 0, 0, 0.1)' : 'rgba(37, 211, 102, 0.1)',
+                            color: order.status === 'pendiente' ? 'var(--accent-gold)' : order.status === 'cancelado' ? '#ff453a' : '#25d366',
+                            border: '1px solid currentColor',
+                            fontWeight: '600'
+                          }}
+                        >
+                          <option value="pendiente">Pendiente</option>
+                          <option value="en cocina">En Cocina</option>
+                          <option value="en camino">En Camino</option>
+                          <option value="entregado">Entregado</option>
+                          <option value="cancelado">Cancelado</option>
+                        </select>
+                      </div>
+                    </div>
+
+                    <div style={{ borderTop: '1px solid var(--border-color)', width: '100%' }}></div>
+
+                    {/* Content Section: Domicilio & Productos */}
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '20px' }}>
+                      {/* Left: Shipping details */}
+                      <div>
+                        <h4 style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', textTransform: 'uppercase', marginBottom: '10px', letterSpacing: '0.5px', fontWeight: '700' }}>Datos de Entrega</h4>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                          <p style={{ margin: 0, fontSize: '1.05rem' }}>👤 <b>{order.clientName}</b></p>
+                          <p style={{ margin: 0, fontSize: '0.95rem' }}>
+                            📞 <a href={`tel:${order.clientPhone}`} style={{ color: 'var(--accent-gold)', textDecoration: 'underline' }}>{order.clientPhone}</a>
+                          </p>
+                          <p style={{ margin: 0, fontSize: '0.95rem', lineHeight: '1.4' }}>📍 {order.clientAddress}</p>
+                          <p style={{ margin: '8px 0 0 0', fontSize: '0.95rem' }}>
+                            Pago: 
+                            <span 
+                              style={{ 
+                                marginLeft: '6px', 
+                                fontWeight: '600',
+                                padding: '2px 8px',
+                                borderRadius: '4px',
+                                backgroundColor: order.paymentMethod === 'nequi' ? 'rgba(0,112,243,0.1)' : 'rgba(37,211,102,0.1)',
+                                color: order.paymentMethod === 'nequi' ? '#3291ff' : '#25d366'
+                              }}
+                            >
+                              {order.paymentMethod === 'nequi' ? '💳 Transferencia' : '💵 Domicilio Contra Entrega'}
+                            </span>
+                          </p>
+                        </div>
+                      </div>
+
+                      {/* Right: Order list */}
+                      <div>
+                        <h4 style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', textTransform: 'uppercase', marginBottom: '10px', letterSpacing: '0.5px', fontWeight: '700' }}>Detalles del Pedido</h4>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                          {order.items && order.items.map((item, idx) => (
+                            <div key={idx} style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.95rem' }}>
+                              <span>• {item.name} <b style={{ color: 'var(--accent-gold)' }}>x{item.quantity}</b></span>
+                              <span style={{ color: 'var(--text-secondary)' }}>{formatPrice(item.price * item.quantity)}</span>
+                            </div>
+                          ))}
+                        </div>
+                        <div style={{ borderTop: '1px dashed var(--border-color)', margin: '14px 0 8px 0' }}></div>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', fontWeight: 'bold', fontSize: '1.2rem' }}>
+                          <span>TOTAL:</span>
+                          <span style={{ color: 'var(--accent-gold)' }}>{formatPrice(order.total)}</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div style={{ borderTop: '1px solid var(--border-color)', width: '100%' }}></div>
+
+                    {/* Bottom Actions Row */}
+                    <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '12px', alignItems: 'center' }}>
+                      {order.paymentMethod === 'nequi' && order.status === 'pendiente' && (
+                        <button
+                          type="button"
+                          onClick={() => onUpdateOrderStatus(order.id, 'en cocina')}
+                          className="btn btn-secondary"
+                          style={{
+                            textTransform: 'none',
+                            fontSize: '0.85rem',
+                            padding: '8px 16px',
+                            borderColor: '#25d366',
+                            color: '#25d366',
+                            backgroundColor: 'transparent',
+                            borderRadius: '30px'
+                          }}
+                        >
+                          ✓ Validar Transferencia
+                        </button>
+                      )}
+                      
+                      <button
+                        type="button"
+                        onClick={() => printComanda(order)}
+                        className="btn btn-primary"
+                        style={{
+                          textTransform: 'none',
+                          fontSize: '0.85rem',
+                          padding: '8px 16px',
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '6px',
+                          borderRadius: '30px'
+                        }}
+                      >
+                        🖨️ Imprimir Comanda
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={() => onDeleteOrder(order.id)}
+                        className="btn-delete-action"
+                        style={{
+                          padding: '8px',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          borderRadius: '50%',
+                          border: '1px solid rgba(255,0,0,0.15)',
+                          backgroundColor: 'transparent',
+                          width: '36px',
+                          height: '36px'
+                        }}
+                        title="Eliminar de historial"
+                      >
+                        <Trash2 size={16} />
+                      </button>
+                    </div>
+                  </div>
+                );
+              })
+            )}
+          </div>
+        ) : (
+          /* Products Table */
+          <div className="admin-table-container animate-fade-in">
+            {menuItems.length === 0 ? (
+              <div style={{ padding: '40px', textAlign: 'center', color: 'var(--text-secondary)' }}>
+                No hay productos registrados en el menú. Utilice el botón "Agregar Producto" para comenzar.
+              </div>
+            ) : (
+              <table className="admin-table">
+                <thead>
+                  <tr>
+                    <th style={{ width: '80px' }}>Imagen</th>
+                    <th>Plato</th>
+                    <th>Categoría</th>
+                    <th>Precio</th>
+                    <th>Insignia</th>
+                    <th style={{ width: '120px', textAlign: 'center' }}>Acciones</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {menuItems.map((item) => (
+                    <tr key={item.id}>
+                      <td>
+                        <img src={item.image} alt={item.name} className="table-img" />
+                      </td>
+                      <td>
+                        <div style={{ fontWeight: '600', fontSize: '1.05rem', marginBottom: '4px' }}>
+                          {item.name}
+                        </div>
+                        <div style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', maxWidth: '400px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                          {item.description}
+                        </div>
+                      </td>
+                      <td>
+                        <span className="badge-category">{getCategoryLabel(item.category)}</span>
+                      </td>
+                      <td>
+                        <span className="table-price">{formatPrice(item.price)}</span>
+                      </td>
+                      <td>
+                        {item.badge ? (
+                          <span className="menu-badge" style={{ position: 'static', display: 'inline-block' }}>
+                            {item.badge}
+                          </span>
+                        ) : (
+                          <span style={{ color: 'var(--text-secondary)', fontStyle: 'italic', fontSize: '0.85rem' }}>Ninguna</span>
+                        )}
+                      </td>
+                      <td>
+                        <div className="table-actions" style={{ justifyContent: 'center' }}>
+                          <button
+                            type="button"
+                            onClick={() => openEditModal(item)}
+                            className="btn-edit-action"
+                            title="Editar producto"
+                          >
+                            <Edit3 size={18} />
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => handleDeleteClick(item.id, item.name)}
+                            className="btn-delete-action"
+                            title="Eliminar producto"
+                          >
+                            <Trash2 size={18} />
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            )}
+          </div>
+        )}
       </div>
 
       {/* Add / Edit Form Modal Popup */}

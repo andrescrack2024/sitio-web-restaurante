@@ -30,6 +30,15 @@ export default function App() {
   const [isCheckoutOpen, setIsCheckoutOpen] = useState(false);
   const [view, setView] = useState(() => window.location.hash === '#admin' ? 'admin' : 'shop');
   const [isTourOpen, setIsTourOpen] = useState(false);
+  const [orders, setOrders] = useState(() => {
+    try {
+      const saved = localStorage.getItem('rapidoydeli_orders');
+      if (saved) return JSON.parse(saved);
+    } catch (e) {
+      console.warn('LocalStorage orders read error:', e);
+    }
+    return [];
+  });
 
   // Auto-open tour for new users on page load
   useEffect(() => {
@@ -151,6 +160,88 @@ export default function App() {
     return () => unsubscribe();
   }, []);
 
+  // Subscribe to orders in real-time or handle local fallback
+  useEffect(() => {
+    if (!isFirebaseSupported) {
+      localStorage.setItem('rapidoydeli_orders', JSON.stringify(orders));
+      return;
+    }
+
+    const ordersCollection = collection(db, 'orders');
+    const unsubscribe = onSnapshot(ordersCollection, (snapshot) => {
+      const items = [];
+      snapshot.forEach((docSnap) => {
+        items.push({ id: docSnap.id, ...docSnap.data() });
+      });
+      // Sort by date descending (newest first)
+      items.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+      setOrders(items);
+      try {
+        localStorage.setItem('rapidoydeli_orders', JSON.stringify(items));
+      } catch (e) {
+        console.warn('LocalStorage write error:', e);
+      }
+    }, (error) => {
+      console.error("Firestore loading orders error:", error);
+    });
+
+    return () => unsubscribe();
+  }, []);
+
+  const handlePlaceOrder = async (orderData) => {
+    const newOrder = {
+      ...orderData,
+      id: String(Date.now()),
+      createdAt: new Date().toISOString()
+    };
+
+    if (isFirebaseSupported) {
+      try {
+        const ordersCol = collection(db, 'orders');
+        const newOrderRef = doc(ordersCol);
+        await setDoc(newOrderRef, {
+          ...orderData,
+          id: newOrderRef.id,
+          createdAt: new Date().toISOString()
+        });
+        console.log("Pedido guardado en Firestore:", newOrderRef.id);
+      } catch (error) {
+        console.error("Error al guardar pedido en Firestore:", error);
+      }
+    } else {
+      setOrders((prev) => [newOrder, ...prev]);
+    }
+  };
+
+  const handleUpdateOrderStatus = async (orderId, newStatus) => {
+    if (isFirebaseSupported) {
+      try {
+        const orderRef = doc(db, 'orders', orderId);
+        await setDoc(orderRef, { status: newStatus }, { merge: true });
+      } catch (error) {
+        console.error("Error al actualizar estado del pedido en Firestore:", error);
+      }
+    } else {
+      setOrders((prev) =>
+        prev.map((order) => (order.id === orderId ? { ...order, status: newStatus } : order))
+      );
+    }
+  };
+
+  const handleDeleteOrder = async (orderId) => {
+    if (window.confirm("¿Está seguro de que desea eliminar este pedido del historial?")) {
+      if (isFirebaseSupported) {
+        try {
+          await deleteDoc(doc(db, 'orders', orderId));
+        } catch (error) {
+          console.error("Error al eliminar pedido en Firestore:", error);
+        }
+      } else {
+        setOrders((prev) => prev.filter((order) => order.id !== orderId));
+      }
+    }
+  };
+
   const toggleTheme = () => {
     setTheme((prev) => (prev === 'dark' ? 'light' : 'dark'));
   };
@@ -265,6 +356,9 @@ export default function App() {
         onAddProduct={handleAddProduct}
         onUpdateProduct={handleUpdateProduct}
         onDeleteProduct={handleDeleteProduct}
+        orders={orders}
+        onUpdateOrderStatus={handleUpdateOrderStatus}
+        onDeleteOrder={handleDeleteOrder}
         onGoBack={() => { window.location.hash = ''; }}
       />
     );
@@ -325,6 +419,7 @@ export default function App() {
         onClose={() => setIsCheckoutOpen(false)}
         cartItems={cartItems}
         clearCart={clearCart}
+        onPlaceOrder={handlePlaceOrder}
       />
 
       <OnboardingTour

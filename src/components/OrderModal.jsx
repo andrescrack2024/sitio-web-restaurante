@@ -3,7 +3,7 @@ import { X, Send, CheckCircle2 } from 'lucide-react';
 
 const WHATSAPP_NUMBER = '573126602583'; // Colombian country code + 57
 
-export default function OrderModal({ isOpen, onClose, cartItems, clearCart }) {
+export default function OrderModal({ isOpen, onClose, cartItems, clearCart, onPlaceOrder }) {
   if (!isOpen) return null;
 
   const [formData, setFormData] = useState({
@@ -86,6 +86,25 @@ ${itemsText}
 📍 *Dirección:* ${formData.direccion}
 
 Quedo atento a su confirmación. ¡Muchas gracias!`;
+
+    // Save order details to Firestore/database
+    if (onPlaceOrder) {
+      const orderData = {
+        items: cartItems.map((item) => ({
+          id: item.id || '',
+          name: item.name,
+          quantity: item.quantity,
+          price: item.price
+        })),
+        total: total,
+        paymentMethod: paymentMethod,
+        clientName: formData.nombre,
+        clientPhone: cleanPhone,
+        clientAddress: formData.direccion,
+        status: 'pendiente'
+      };
+      onPlaceOrder(orderData);
+    }
 
     // Encode message for URL
     const whatsappUrl = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(message)}`;
