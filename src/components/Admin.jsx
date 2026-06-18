@@ -126,9 +126,9 @@ export default function Admin({
     
     const itemsHtml = order.items.map(item => `
       <tr>
-        <td style="padding: 6px 0; font-size: 14px;">${item.quantity}x</td>
-        <td style="padding: 6px 0; font-size: 14px;"><b>${item.name}</b></td>
-        <td style="text-align: right; padding: 6px 0; font-size: 14px;">$${(item.price * item.quantity).toLocaleString('es-CO')}</td>
+        <td style="padding: 6px 0; font-size: 16px;">${item.quantity}x</td>
+        <td style="padding: 6px 0; font-size: 16px;"><b>${item.name}</b></td>
+        <td style="text-align: right; padding: 6px 0; font-size: 16px;">$${(item.price * item.quantity).toLocaleString('es-CO')}</td>
       </tr>
     `).join('');
 
@@ -153,15 +153,15 @@ export default function Admin({
             width: 76mm;
             margin: 0 auto;
             padding: 10px 5px;
-            font-size: 13px;
+            font-size: 16px;
             line-height: 1.4;
             color: #000;
           }
           .text-center { text-align: center; }
           .divider { border-top: 1px dashed #000; margin: 8px 0; }
-          .header { font-size: 18px; font-weight: bold; }
-          .total { font-size: 15px; font-weight: bold; margin-top: 8px; }
-          .badge { border: 2px solid #000; padding: 8px; font-weight: bold; text-align: center; font-size: 14px; margin-top: 12px; }
+          .header { font-size: 22px; font-weight: bold; }
+          .total { font-size: 18px; font-weight: bold; margin-top: 8px; }
+          .badge { border: 2px solid #000; padding: 8px; font-weight: bold; text-align: center; font-size: 16px; margin-top: 12px; }
         </style>
       </head>
       <body>
@@ -200,7 +200,7 @@ export default function Admin({
             : '⚠️ PEDIDO AUTORIZADO - COCINA'}
         </div>
         <div class="divider"></div>
-        <div class="text-center" style="font-size: 11px;">¡A preparar con calidad y rapidez! 🍔🔥</div>
+        <div class="text-center" style="font-size: 12px;">¡A preparar con calidad y rapidez! 🍔🔥</div>
         <script>
           window.onload = function() {
             window.print();
