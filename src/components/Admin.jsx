@@ -118,7 +118,7 @@ export default function Admin({
   };
 
   const printComanda = (order) => {
-    const printWindow = window.open('', '_blank', 'width=600,height=600');
+    const printWindow = window.open('', '_blank', 'width=800,height=800');
     if (!printWindow) {
       alert("Por favor, permite las ventanas emergentes (popups) para poder imprimir la comanda.");
       return;
@@ -126,9 +126,9 @@ export default function Admin({
     
     const itemsHtml = order.items.map(item => `
       <tr>
-        <td style="padding: 6px 0; font-size: 16px;">${item.quantity}x</td>
-        <td style="padding: 6px 0; font-size: 16px;"><b>${item.name}</b></td>
-        <td style="text-align: right; padding: 6px 0; font-size: 16px;">$${(item.price * item.quantity).toLocaleString('es-CO')}</td>
+        <td style="padding: 10px 0; font-size: 20px;">${item.quantity}x</td>
+        <td style="padding: 10px 0; font-size: 20px;"><b>${item.name}</b></td>
+        <td style="text-align: right; padding: 10px 0; font-size: 20px;">$${(item.price * item.quantity).toLocaleString('es-CO')}</td>
       </tr>
     `).join('');
 
@@ -145,62 +145,86 @@ export default function Admin({
         <title>Comanda - Pedido #${orderNum}</title>
         <style>
           @page {
-            size: 80mm auto;
-            margin: 0;
+            size: auto;
+            margin: 15mm;
           }
           body {
             font-family: 'Courier New', Courier, monospace;
-            width: 76mm;
+            width: 100%;
+            max-width: 800px;
             margin: 0 auto;
-            padding: 10px 5px;
-            font-size: 16px;
-            line-height: 1.4;
+            padding: 20px;
+            font-size: 20px;
+            line-height: 1.5;
             color: #000;
+            box-sizing: border-box;
           }
           .text-center { text-align: center; }
-          .divider { border-top: 1px dashed #000; margin: 8px 0; }
-          .header { font-size: 22px; font-weight: bold; }
-          .total { font-size: 18px; font-weight: bold; margin-top: 8px; }
-          .badge { border: 2px solid #000; padding: 8px; font-weight: bold; text-align: center; font-size: 16px; margin-top: 12px; }
+          .double-divider { border-top: 3px double #000; margin: 12px 0; }
+          .dashed-divider { border-top: 1px dashed #000; margin: 12px 0; }
+          .solid-divider { border-top: 2px solid #000; margin: 12px 0; }
+          .header { font-size: 32px; font-weight: bold; letter-spacing: 1px; }
+          .subheader { font-size: 20px; font-weight: bold; margin-top: 5px; }
+          .total { font-size: 24px; font-weight: bold; margin-top: 12px; }
+          .badge { border: 2px solid #000; padding: 12px; font-weight: bold; text-align: center; font-size: 20px; margin-top: 16px; text-transform: uppercase; }
+          .info-row { display: flex; justify-content: space-between; margin-bottom: 8px; }
         </style>
       </head>
       <body>
         <div class="text-center header">RÁPIDO & DELI</div>
-        <div class="text-center">TICKET DE COCINA</div>
-        <div class="divider"></div>
-        <div><b>FECHA:</b> ${dateFormatted}</div>
-        <div><b>PEDIDO:</b> #${orderNum}</div>
-        <div class="divider"></div>
-        <div><b>CLIENTE:</b> ${order.clientName}</div>
-        <div><b>TELÉFONO:</b> ${order.clientPhone}</div>
-        <div><b>DIRECCIÓN:</b> ${order.clientAddress}</div>
-        <div class="divider"></div>
+        <div class="text-center subheader">TICKET DE COCINA</div>
+        
+        <div class="double-divider"></div>
+        
+        <div class="info-row">
+          <span><b>FECHA:</b> ${dateFormatted}</span>
+          <span><b>PEDIDO:</b> #${orderNum}</span>
+        </div>
+        
+        <div class="solid-divider"></div>
+        
+        <div style="font-size: 20px; line-height: 1.6;">
+          <div><b>CLIENTE:</b> ${order.clientName}</div>
+          <div><b>TELÉFONO:</b> ${order.clientPhone}</div>
+          <div><b>DIRECCIÓN:</b> ${order.clientAddress}</div>
+        </div>
+        
+        <div class="solid-divider"></div>
+        
         <table width="100%" cellpadding="0" cellspacing="0">
           <thead>
-            <tr style="border-bottom: 1px solid #000;">
-              <th align="left" style="padding-bottom: 4px;">Cant</th>
-              <th align="left" style="padding-bottom: 4px;">Producto</th>
-              <th align="right" style="padding-bottom: 4px;">Total</th>
+            <tr style="border-bottom: 2px solid #000;">
+              <th align="left" style="padding-bottom: 8px; font-size: 20px;">Cant</th>
+              <th align="left" style="padding-bottom: 8px; font-size: 20px;">Producto</th>
+              <th align="right" style="padding-bottom: 8px; font-size: 20px;">Total</th>
             </tr>
           </thead>
           <tbody>
             ${itemsHtml}
           </tbody>
         </table>
-        <div class="divider"></div>
+        
+        <div class="dashed-divider"></div>
+        
         <div class="total" style="display: flex; justify-content: space-between;">
-          <span>TOTAL:</span>
+          <span>TOTAL DEL PEDIDO:</span>
           <span>$${order.total.toLocaleString('es-CO')}</span>
         </div>
-        <div class="divider"></div>
-        <div><b>PAGO:</b> ${order.paymentMethod === 'nequi' ? '💳 TRANSFERENCIA' : '💵 EFECTIVO'}</div>
+        
+        <div class="solid-divider"></div>
+        
+        <div style="font-size: 20px;"><b>PAGO:</b> ${order.paymentMethod === 'nequi' ? '💳 TRANSFERENCIA' : '💵 EFECTIVO CONTRA ENTREGA'}</div>
+        
         <div class="badge">
           ${order.status === 'pendiente' && order.paymentMethod === 'nequi' 
             ? '⚠️ PAGO POR VERIFICAR (WhatsApp)' 
             : '⚠️ PEDIDO AUTORIZADO - COCINA'}
         </div>
-        <div class="divider"></div>
-        <div class="text-center" style="font-size: 12px;">¡A preparar con calidad y rapidez! 🍔🔥</div>
+        
+        <div class="double-divider"></div>
+        
+        <div class="text-center" style="font-size: 16px; font-weight: bold; margin-top: 10px;">¡A preparar con calidad y rapidez! 🍔🔥</div>
+        
         <script>
           window.onload = function() {
             window.print();
