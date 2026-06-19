@@ -4,6 +4,7 @@ import { X, ArrowRight } from 'lucide-react';
 export default function OnboardingTour({ 
   isOpen, 
   isCartOpen,
+  isCheckoutOpen,
   onClose, 
   addToCart, 
   clearCart, 
@@ -12,25 +13,66 @@ export default function OnboardingTour({
   closeCart,
   openCheckout, 
   closeCheckout, 
-  cartCount 
+  cartCount,
+  cartItems
 }) {
   const [step, setStep] = useState(0);
   const [rect, setRect] = useState(null);
   const [didAutoAdd, setDidAutoAdd] = useState(false);
 
-  // Auto-advance step if item is added to cart manually
+  // 1. Auto-advance step if item is added to cart manually
   useEffect(() => {
     if (isOpen && cartCount > 0 && step === 2) {
       setStep(3);
     }
   }, [cartCount, isOpen, step]);
 
-  // Auto-advance step if cart is opened manually
+  // 2. Auto-advance/revert steps based on cart drawer state
   useEffect(() => {
-    if (isOpen && isCartOpen && step === 3) {
+    if (!isOpen) return;
+    
+    if (isCartOpen && step === 3) {
       setStep(4);
+    } else if (!isCartOpen && (step === 4 || step === 5 || step === 6)) {
+      setStep(3);
     }
   }, [isCartOpen, isOpen, step]);
+
+  // 3. Auto-advance/revert steps based on checkout modal state
+  useEffect(() => {
+    if (!isOpen) return;
+
+    if (isCheckoutOpen && step === 6) {
+      setStep(7);
+    } else if (!isCheckoutOpen && (step === 7 || step === 8 || step === 9)) {
+      if (isCartOpen) {
+        setStep(6);
+      } else {
+        setStep(3);
+      }
+    }
+  }, [isCheckoutOpen, isCartOpen, isOpen, step]);
+
+  // 4. Auto-skip step 4 (sauces) if no items in the cart support sauces
+  useEffect(() => {
+    if (isOpen && step === 4 && cartCount > 0) {
+      const hasSauceItems = cartItems?.some(item => 
+        item.category === 'hamburguesas' || 
+        item.category === 'perros' || 
+        item.category === 'salchipapas'
+      );
+      if (!hasSauceItems) {
+        setStep(5);
+      }
+    }
+  }, [cartItems, isOpen, step, cartCount]);
+
+  // 5. If the cart becomes empty while on cart/checkout steps (3 to 9), go back to step 2
+  useEffect(() => {
+    if (isOpen && cartCount === 0 && step >= 3 && step <= 9) {
+      setStep(2);
+    }
+  }, [cartCount, isOpen, step]);
 
   // Scroll target element into view when step changes
   useEffect(() => {
@@ -187,7 +229,7 @@ export default function OnboardingTour({
 
   const completeTour = () => {
     try {
-      localStorage.setItem('rapido_deli_tour_completed', 'true');
+      localStorage.setItem('rapido_deli_tour_completed_v6', 'true');
     } catch (e) {
       console.warn('LocalStorage not supported:', e);
     }
@@ -303,7 +345,7 @@ export default function OnboardingTour({
       };
     }
 
-    if (!rect) {
+    if (!rect || (rect.width === 0 && rect.height === 0)) {
       return {
         pointerStyle: { display: 'none' },
         tooltipStyle: {

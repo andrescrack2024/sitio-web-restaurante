@@ -46,7 +46,7 @@ export default function App() {
     if (view === 'shop') {
       let tourCompleted = false;
       try {
-        tourCompleted = localStorage.getItem('rapido_deli_tour_completed') === 'true';
+        tourCompleted = localStorage.getItem('rapido_deli_tour_completed_v6') === 'true';
       } catch (e) {
         console.warn('LocalStorage not supported:', e);
       }
@@ -467,6 +467,7 @@ export default function App() {
       <OnboardingTour
         isOpen={isTourOpen}
         isCartOpen={isCartOpen}
+        isCheckoutOpen={isCheckoutOpen}
         onClose={() => {
           setIsTourOpen(false);
           setIsCartOpen(false);
@@ -483,6 +484,7 @@ export default function App() {
         }}
         closeCheckout={() => setIsCheckoutOpen(false)}
         cartCount={cartCount}
+        cartItems={cartItems}
       />
     </>
   );
