@@ -272,12 +272,6 @@ export default function App() {
       return [...prevItems, { ...item, cartKey, sauces, quantity: 1 }];
     });
     setHasAddedToCart(true);
-
-    // Auto-open guide at step 3 to guide the customer step-by-step
-    if (!tourDismissed && (!isTourOpen || tourStep < 3)) {
-      setTourStep(3);
-      setIsTourOpen(true);
-    }
   };
 
   const updateCartItemSauces = (cartKey, newSauces) => {
