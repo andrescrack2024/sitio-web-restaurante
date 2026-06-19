@@ -228,7 +228,7 @@ export default function OnboardingTour({
           transform: 'translate(-50%, -50%)',
           width: '90%',
           maxWidth: '400px',
-          zIndex: 100002
+          zIndex: 100030
         },
         emoji: '👇'
       };
@@ -242,7 +242,7 @@ export default function OnboardingTour({
           left: '50%',
           transform: 'translateX(-50%)',
           fontSize: '3.5rem',
-          zIndex: 100002,
+          zIndex: 100020,
           animation: 'bounce-hand-down 1.2s infinite'
         },
         tooltipStyle: {
@@ -252,7 +252,7 @@ export default function OnboardingTour({
           transform: 'translateX(-50%)',
           width: '90%',
           maxWidth: '340px',
-          zIndex: 100002
+          zIndex: 100030
         },
         emoji: '👇'
       };
@@ -268,7 +268,7 @@ export default function OnboardingTour({
           transform: 'translate(-50%, -50%)',
           width: '90%',
           maxWidth: '320px',
-          zIndex: 100002
+          zIndex: 100030
         },
         emoji: '👇'
       };
@@ -284,7 +284,7 @@ export default function OnboardingTour({
       transform: 'translateX(-50%)',
       width: '90%',
       maxWidth: '320px',
-      zIndex: 100002
+      zIndex: 100030
     };
 
     if (isUpperHalf) {
@@ -298,7 +298,7 @@ export default function OnboardingTour({
       left: `${rect.left + rect.width / 2}px`,
       transform: 'translateX(-50%)',
       fontSize: '3.5rem',
-      zIndex: 100002
+      zIndex: 100020
     };
 
     let emoji = '👇';

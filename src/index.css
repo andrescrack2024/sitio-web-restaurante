@@ -961,7 +961,7 @@ button {
   height: 100%;
   background-color: var(--overlay-bg);
   backdrop-filter: blur(4px);
-  z-index: 200;
+  z-index: 100010;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -1747,7 +1747,7 @@ button {
   pointer-events: none;
   user-select: none;
   filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.4));
-  z-index: 100000;
+  z-index: 100020;
 }
 
 @keyframes bounce-hand-down {
