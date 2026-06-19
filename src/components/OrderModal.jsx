@@ -292,8 +292,8 @@ Quedo atento a su confirmación. ¡Muchas gracias!`;
           {/* Delivery Method Selector */}
           <div className="form-group" style={{ marginBottom: '14px', position: 'relative' }}>
             {activeModalHint === 'delivery' && (
-              <div className="flow-hint-bubble tooltip-top" style={{ bottom: 'calc(100% + 8px)' }}>
-                <span className="flow-hint-hand">👇</span>
+              <div className="flow-hint-bubble tooltip-bottom">
+                <span className="flow-hint-hand">👆</span>
                 <span>Selecciona cómo recibir tu pedido</span>
               </div>
             )}
@@ -396,8 +396,8 @@ Quedo atento a su confirmación. ¡Muchas gracias!`;
           {/* Payment Method Selector */}
           <div className="form-group" style={{ marginBottom: '14px', position: 'relative' }}>
             {activeModalHint === 'payment' && (
-              <div className="flow-hint-bubble tooltip-top" style={{ bottom: 'calc(100% + 8px)' }}>
-                <span className="flow-hint-hand">👇</span>
+              <div className="flow-hint-bubble tooltip-bottom">
+                <span className="flow-hint-hand">👆</span>
                 <span>Elige tu método de pago</span>
               </div>
             )}
