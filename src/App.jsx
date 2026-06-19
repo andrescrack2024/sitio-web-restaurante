@@ -454,6 +454,7 @@ export default function App() {
 
       <OnboardingTour
         isOpen={isTourOpen}
+        isCartOpen={isCartOpen}
         onClose={() => {
           setIsTourOpen(false);
           setIsCartOpen(false);

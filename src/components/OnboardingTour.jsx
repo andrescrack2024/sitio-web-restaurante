@@ -3,6 +3,7 @@ import { X, ArrowRight } from 'lucide-react';
 
 export default function OnboardingTour({ 
   isOpen, 
+  isCartOpen,
   onClose, 
   addToCart, 
   clearCart, 
@@ -16,6 +17,42 @@ export default function OnboardingTour({
   const [step, setStep] = useState(0);
   const [rect, setRect] = useState(null);
   const [didAutoAdd, setDidAutoAdd] = useState(false);
+
+  // Auto-advance step if item is added to cart manually
+  useEffect(() => {
+    if (isOpen && cartCount > 0 && step === 2) {
+      setStep(3);
+    }
+  }, [cartCount, isOpen, step]);
+
+  // Auto-advance step if cart is opened manually
+  useEffect(() => {
+    if (isOpen && isCartOpen && step === 3) {
+      setStep(4);
+    }
+  }, [isCartOpen, isOpen, step]);
+
+  // Scroll target element into view when step changes
+  useEffect(() => {
+    if (!isOpen || step === -1) return;
+
+    let selector = '';
+    if (step === 1) selector = '#menu';
+    if (step === 2) selector = '#tour-first-add-btn';
+    if (step === 3) selector = '#tour-cart-btn';
+    if (step === 4) selector = '#nombre';
+    if (step === 5) selector = '#tour-payment-selector';
+    if (step === 6) selector = '#tour-submit-order-btn';
+
+    if (selector) {
+      setTimeout(() => {
+        const el = document.querySelector(selector);
+        if (el) {
+          el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+      }, step === 4 ? 350 : 100);
+    }
+  }, [step, isOpen]);
 
   useEffect(() => {
     if (!isOpen || step === -1) return;
@@ -83,11 +120,6 @@ export default function OnboardingTour({
       // Open the cart drawer
       if (openCart) openCart();
       setTimeout(() => {
-        // Scroll the cart body to reveal the form
-        const cartBody = document.querySelector('.cart-body');
-        if (cartBody) {
-          cartBody.scrollTo({ top: cartBody.scrollHeight, behavior: 'smooth' });
-        }
         setStep(4);
       }, 300);
     } else if (step === 4) {
