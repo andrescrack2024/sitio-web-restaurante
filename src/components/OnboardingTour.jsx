@@ -24,10 +24,9 @@ export default function OnboardingTour({
       let selector = '';
       if (step === 2) selector = '#tour-first-add-btn';
       if (step === 3) selector = '#tour-cart-btn';
-      if (step === 4) selector = '#tour-checkout-btn';
-      if (step === 5) selector = '#nombre';
-      if (step === 6) selector = '#tour-payment-selector';
-      if (step === 7) selector = '#tour-submit-order-btn';
+      if (step === 4) selector = '#nombre';
+      if (step === 5) selector = '#tour-payment-selector';
+      if (step === 6) selector = '#tour-submit-order-btn';
 
       if (step === 1) {
         setRect({ isScrollStep: true });
@@ -84,21 +83,18 @@ export default function OnboardingTour({
       // Open the cart drawer
       if (openCart) openCart();
       setTimeout(() => {
+        // Scroll the cart body to reveal the form
+        const cartBody = document.querySelector('.cart-body');
+        if (cartBody) {
+          cartBody.scrollTo({ top: cartBody.scrollHeight, behavior: 'smooth' });
+        }
         setStep(4);
       }, 300);
     } else if (step === 4) {
-      // Close cart and open checkout modal
-      if (closeCart) closeCart();
-      openCheckout();
-      setTimeout(() => {
-        setStep(5);
-      }, 300);
+      setStep(5);
     } else if (step === 5) {
       setStep(6);
     } else if (step === 6) {
-      setStep(7);
-    } else if (step === 7) {
-      closeCheckout();
       completeTour();
     } else {
       setStep((prev) => prev + 1);
@@ -108,10 +104,11 @@ export default function OnboardingTour({
   const handlePrev = () => {
     if (step > 0) {
       if (step === 4) {
-        if (closeCart) closeCart();
-      } else if (step === 5) {
-        closeCheckout();
-        if (openCart) openCart();
+        // Scroll back to top of the cart body
+        const cartBody = document.querySelector('.cart-body');
+        if (cartBody) {
+          cartBody.scrollTo({ top: 0, behavior: 'smooth' });
+        }
       }
       setStep((prev) => prev - 1);
     }
@@ -155,26 +152,20 @@ export default function OnboardingTour({
       showProgress: true
     },
     {
-      title: "📋 Paso 4: Confirmar Datos",
-      desc: "Haz clic en el botón de confirmar datos para abrir el formulario de envío a domicilio o recogida local.",
-      btnText: "Confirmar Datos",
-      showProgress: true
-    },
-    {
-      title: "👤 Paso 5: Ingresa tus Datos",
-      desc: "Escribe tu Nombre, Teléfono y Dirección de entrega para que podamos enviar el pedido.",
+      title: "👤 Paso 4: Ingresa tus Datos",
+      desc: "Escribe tu Nombre, Teléfono y Dirección de entrega en el formulario que aparece abajo de tus artículos.",
       btnText: "Siguiente Paso",
       showProgress: true
     },
     {
-      title: "💳 Paso 6: Elige el Pago",
-      desc: "Selecciona Pago en Efectivo o Pago por Llave (Transfiya) para realizar una transferencia electrónica segura.",
+      title: "💳 Paso 5: Elige el Pago",
+      desc: "Selecciona Pago en Efectivo o Pago por Llave (Transfiya) para realizar una transferencia segura.",
       btnText: "Siguiente Paso",
       showProgress: true
     },
     {
-      title: "📞 Paso 7: Envía por WhatsApp",
-      desc: "Haz clic aquí para finalizar. Se abrirá tu WhatsApp con un mensaje ya escrito que describe tu pedido para que lo envíes con un solo toque.",
+      title: "📞 Paso 6: Envía por WhatsApp",
+      desc: "Haz clic en el botón verde final para enviar el pedido. Se abrirá tu WhatsApp con el mensaje ya escrito para que lo envíes con un solo toque.",
       btnText: "¡Listo, a pedir! 🎉",
       showProgress: true
     }
@@ -307,11 +298,11 @@ export default function OnboardingTour({
         {currentContent.showProgress && (
           <div className="onboarding-progress">
             <div className="onboarding-progress-dots">
-              {[1, 2, 3, 4, 5, 6, 7].map((s) => (
+              {[1, 2, 3, 4, 5, 6].map((s) => (
                 <span key={s} className={`progress-dot ${step === s ? 'active' : ''}`} />
               ))}
             </div>
-            <span className="onboarding-step-num">Paso {step} de 7</span>
+            <span className="onboarding-step-num">Paso {step} de 6</span>
           </div>
         )}
 
@@ -327,7 +318,7 @@ export default function OnboardingTour({
           )}
           <button className="btn btn-primary btn-sm onboarding-next-btn" onClick={handleNext}>
             {currentContent.btnText}
-            {step < 7 && <ArrowRight size={14} style={{ marginLeft: '4px' }} />}
+            {step < 6 && <ArrowRight size={14} style={{ marginLeft: '4px' }} />}
           </button>
         </div>
       </div>
