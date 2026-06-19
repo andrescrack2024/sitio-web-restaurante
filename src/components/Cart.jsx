@@ -10,14 +10,19 @@ export default function Cart({
   updateCartItemSauces,
   onProceedToCheckout
 }) {
-  const [activeHint, setActiveHint] = React.useState(() => {
-    const hasCustomizable = cartItems.some(item => 
-      item.category === 'hamburguesas' || 
-      item.category === 'perros' || 
-      item.category === 'salchipapas'
-    );
-    return hasCustomizable ? 'sauces' : 'confirm';
-  });
+  const [activeHint, setActiveHint] = React.useState('confirm');
+
+  // Reset activeHint when cart is opened
+  React.useEffect(() => {
+    if (isOpen) {
+      const hasCustomizable = cartItems.some(item => 
+        item.category === 'hamburguesas' || 
+        item.category === 'perros' || 
+        item.category === 'salchipapas'
+      );
+      setActiveHint(hasCustomizable ? 'sauces' : 'qty');
+    }
+  }, [isOpen]);
 
   React.useEffect(() => {
     const hasCustomizable = cartItems.some(item => 
@@ -26,7 +31,7 @@ export default function Cart({
       item.category === 'salchipapas'
     );
     if (!hasCustomizable && activeHint === 'sauces') {
-      setActiveHint('confirm');
+      setActiveHint('qty');
     }
   }, [cartItems, activeHint]);
 
@@ -111,7 +116,7 @@ export default function Cart({
                                       }
                                       updateCartItemSauces(item.cartKey, newSauces);
                                       if (activeHint === 'sauces') {
-                                        setActiveHint('confirm');
+                                        setActiveHint('qty');
                                       }
                                     }}
                                   />
