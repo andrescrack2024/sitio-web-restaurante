@@ -19,9 +19,6 @@ const NEIGHBORHOODS = [
 
 export default function OrderModal({ isOpen, onClose, cartItems, clearCart, onPlaceOrder }) {
   const [activeModalHint, setActiveModalHint] = useState('details');
-
-  if (!isOpen) return null;
-
   const [formData, setFormData] = useState({
     nombre: '',
     telefono: '',
@@ -42,6 +39,8 @@ export default function OrderModal({ isOpen, onClose, cartItems, clearCart, onPl
       setFormData(prev => ({ ...prev, direccion: '' }));
     }
   }, [deliveryMethod]);
+
+  if (!isOpen) return null;
 
   const handleCopy = (textToCopy, field) => {
     navigator.clipboard.writeText(textToCopy);
