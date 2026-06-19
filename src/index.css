@@ -1940,6 +1940,74 @@ button {
   }
 }
 
+/* Dynamic Flow Hint Bubbles */
+.flow-hint-bubble {
+  position: absolute;
+  background: var(--bg-primary);
+  border: 2px solid var(--accent-gold);
+  border-radius: 12px;
+  padding: 6px 12px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
+  font-family: 'Outfit', sans-serif;
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  white-space: nowrap;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  pointer-events: none; /* Let clicks pass through if they click the bubble */
+  animation: bounce-hint 2s infinite ease-in-out;
+}
+
+[data-theme='light'] .flow-hint-bubble {
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.12);
+  background: var(--bg-primary);
+}
+
+.flow-hint-hand {
+  font-size: 1rem;
+}
+
+/* Tooltip position variants */
+.flow-hint-bubble.tooltip-top {
+  bottom: calc(100% + 10px);
+  left: 50%;
+  transform: translateX(-50%);
+}
+.flow-hint-bubble.tooltip-top::before {
+  content: '';
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  border-width: 6px;
+  border-style: solid;
+  border-color: var(--accent-gold) transparent transparent transparent;
+}
+
+.flow-hint-bubble.tooltip-top::after {
+  content: '';
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  border-width: 4px;
+  border-style: solid;
+  border-color: var(--bg-primary) transparent transparent transparent;
+}
+
+@keyframes bounce-hint {
+  0%, 100% {
+    transform: translate(-50%, 0);
+  }
+  50% {
+    transform: translate(-50%, -6px);
+  }
+}
+
+
 /* Sauce Customizer - Grid & Pills (Touch Friendly) */
 .sauce-grid {
   display: grid;

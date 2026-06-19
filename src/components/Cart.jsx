@@ -10,6 +10,26 @@ export default function Cart({
   updateCartItemSauces,
   onProceedToCheckout
 }) {
+  const [activeHint, setActiveHint] = React.useState(() => {
+    const hasCustomizable = cartItems.some(item => 
+      item.category === 'hamburguesas' || 
+      item.category === 'perros' || 
+      item.category === 'salchipapas'
+    );
+    return hasCustomizable ? 'sauces' : 'confirm';
+  });
+
+  React.useEffect(() => {
+    const hasCustomizable = cartItems.some(item => 
+      item.category === 'hamburguesas' || 
+      item.category === 'perros' || 
+      item.category === 'salchipapas'
+    );
+    if (!hasCustomizable && activeHint === 'sauces') {
+      setActiveHint('confirm');
+    }
+  }, [cartItems, activeHint]);
+
   if (!isOpen) return null;
 
   const formatPrice = (price) => {
@@ -61,7 +81,13 @@ export default function Cart({
                     {(item.category === 'hamburguesas' || 
                       item.category === 'perros' || 
                       item.category === 'salchipapas') ? (
-                        <div id={index === 0 ? "tour-cart-sauces" : undefined} style={{ margin: '6px 0' }}>
+                        <div id={index === 0 ? "tour-cart-sauces" : undefined} style={{ margin: '6px 0', position: 'relative' }}>
+                          {activeHint === 'sauces' && index === 0 && (
+                            <div className="flow-hint-bubble tooltip-top" style={{ bottom: 'calc(100% + 8px)' }}>
+                              <span className="flow-hint-hand">👇</span>
+                              <span>Elige tus salsas</span>
+                            </div>
+                          )}
                           <span style={{ fontSize: '0.78rem', color: 'var(--text-secondary)', display: 'block', marginBottom: '4px', fontWeight: '600' }}>
                             Salsas:
                           </span>
@@ -84,6 +110,9 @@ export default function Cart({
                                         newSauces = newSauces.filter(s => s !== sauce);
                                       }
                                       updateCartItemSauces(item.cartKey, newSauces);
+                                      if (activeHint === 'sauces') {
+                                        setActiveHint('confirm');
+                                      }
                                     }}
                                   />
                                   <span>{sauce}</span>
@@ -97,9 +126,20 @@ export default function Cart({
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '6px' }}>
                       <span className="cart-item-price" style={{ fontSize: '0.9rem', color: 'var(--accent-gold)', fontWeight: '600' }}>{formatPrice(item.price)}</span>
                       
-                      <div id={index === 0 ? "tour-cart-qty" : undefined} className="cart-item-actions">
+                      <div id={index === 0 ? "tour-cart-qty" : undefined} className="cart-item-actions" style={{ position: 'relative' }}>
+                        {activeHint === 'qty' && index === 0 && (
+                          <div className="flow-hint-bubble tooltip-top" style={{ bottom: 'calc(100% + 8px)' }}>
+                            <span className="flow-hint-hand">👇</span>
+                            <span>Ajusta la cantidad</span>
+                          </div>
+                        )}
                         <button
-                          onClick={() => updateQuantity(item.cartKey, -1)}
+                          onClick={() => {
+                            updateQuantity(item.cartKey, -1);
+                            if (activeHint === 'qty' || activeHint === 'sauces') {
+                              setActiveHint('confirm');
+                            }
+                          }}
                           className="quantity-btn"
                           aria-label="Disminuir cantidad"
                         >
@@ -107,7 +147,12 @@ export default function Cart({
                         </button>
                         <span className="cart-item-quantity">{item.quantity}</span>
                         <button
-                          onClick={() => updateQuantity(item.cartKey, 1)}
+                          onClick={() => {
+                            updateQuantity(item.cartKey, 1);
+                            if (activeHint === 'qty' || activeHint === 'sauces') {
+                              setActiveHint('confirm');
+                            }
+                          }}
                           className="quantity-btn"
                           aria-label="Aumentar cantidad"
                         >
@@ -141,14 +186,22 @@ export default function Cart({
               </div>
             </div>
             
-            <button
-              onClick={onProceedToCheckout}
-              id="tour-checkout-btn"
-              className="btn btn-primary btn-checkout"
-              style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', width: '100%', minHeight: '48px', fontSize: '0.95rem' }}
-            >
-              Confirmar Pedido
-            </button>
+            <div style={{ position: 'relative', width: '100%' }}>
+              {activeHint === 'confirm' && (
+                <div className="flow-hint-bubble tooltip-top" style={{ bottom: 'calc(100% + 10px)' }}>
+                  <span className="flow-hint-hand">👇</span>
+                  <span>Confirma tu pedido aquí</span>
+                </div>
+              )}
+              <button
+                onClick={onProceedToCheckout}
+                id="tour-checkout-btn"
+                className="btn btn-primary btn-checkout"
+                style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', width: '100%', minHeight: '48px', fontSize: '0.95rem' }}
+              >
+                Confirmar Pedido
+              </button>
+            </div>
           </div>
         )}
       </div>

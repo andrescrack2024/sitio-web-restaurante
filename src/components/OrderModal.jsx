@@ -18,6 +18,8 @@ const NEIGHBORHOODS = [
 ];
 
 export default function OrderModal({ isOpen, onClose, cartItems, clearCart, onPlaceOrder }) {
+  const [activeModalHint, setActiveModalHint] = useState('details');
+
   if (!isOpen) return null;
 
   const [formData, setFormData] = useState({
@@ -90,6 +92,10 @@ export default function OrderModal({ isOpen, onClose, cartItems, clearCart, onPl
     setFormData((prev) => ({ ...prev, [name]: value }));
     if (errors[name]) {
       setErrors((prev) => ({ ...prev, [name]: '' }));
+    }
+    // Transition to payment hint once they've entered some details
+    if (activeModalHint === 'details' && value.trim().length > 2) {
+      setActiveModalHint('payment');
     }
   };
 
@@ -247,7 +253,13 @@ Quedo atento a su confirmación. ¡Muchas gracias!`;
 
         <form id="tour-client-form" onSubmit={handleSubmit}>
           {/* Name Input */}
-          <div className="form-group" style={{ marginBottom: '14px' }}>
+          <div className="form-group" style={{ marginBottom: '14px', position: 'relative' }}>
+            {activeModalHint === 'details' && (
+              <div className="flow-hint-bubble tooltip-top" style={{ bottom: 'calc(100% + 8px)' }}>
+                <span className="flow-hint-hand">👇</span>
+                <span>Completa tus datos de envío</span>
+              </div>
+            )}
             <label className="form-label" htmlFor="nombre" style={{ fontSize: '0.85rem', fontWeight: '600' }}>Nombre Completo</label>
             <input
               type="text"
@@ -367,13 +379,24 @@ Quedo atento a su confirmación. ¡Muchas gracias!`;
           )}
 
           {/* Payment Method Selector */}
-          <div className="form-group" style={{ marginBottom: '14px' }}>
+          <div className="form-group" style={{ marginBottom: '14px', position: 'relative' }}>
+            {activeModalHint === 'payment' && (
+              <div className="flow-hint-bubble tooltip-top" style={{ bottom: 'calc(100% + 8px)' }}>
+                <span className="flow-hint-hand">👇</span>
+                <span>Elige tu método de pago</span>
+              </div>
+            )}
             <label className="form-label" style={{ fontSize: '0.85rem', fontWeight: '600' }}>Método de Pago</label>
             <div id="tour-payment-selector" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px', marginTop: '4px' }}>
               <button
                 type="button"
                 className={`payment-method-btn ${paymentMethod === 'efectivo' ? 'active' : ''}`}
-                onClick={() => setPaymentMethod('efectivo')}
+                onClick={() => {
+                  setPaymentMethod('efectivo');
+                  if (activeModalHint === 'payment' || activeModalHint === 'details') {
+                    setActiveModalHint('submit');
+                  }
+                }}
                 style={{
                   display: 'flex',
                   flexDirection: 'column',
@@ -394,7 +417,12 @@ Quedo atento a su confirmación. ¡Muchas gracias!`;
               <button
                 type="button"
                 className={`payment-method-btn ${paymentMethod === 'transfiya' ? 'active' : ''}`}
-                onClick={() => setPaymentMethod('transfiya')}
+                onClick={() => {
+                  setPaymentMethod('transfiya');
+                  if (activeModalHint === 'payment' || activeModalHint === 'details') {
+                    setActiveModalHint('submit');
+                  }
+                }}
                 style={{
                   display: 'flex',
                   flexDirection: 'column',
@@ -464,15 +492,23 @@ Quedo atento a su confirmación. ¡Muchas gracias!`;
               </div>
             </div>
 
-            <button
-              type="submit"
-              id="tour-submit-order-btn"
-              className="btn btn-primary"
-              style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', width: '100%', minHeight: '48px', fontSize: '0.95rem' }}
-            >
-              <Send size={18} />
-              Confirmar y Pedir por WhatsApp
-            </button>
+            <div style={{ position: 'relative', width: '100%' }}>
+              {activeModalHint === 'submit' && (
+                <div className="flow-hint-bubble tooltip-top" style={{ bottom: 'calc(100% + 10px)' }}>
+                  <span className="flow-hint-hand">👇</span>
+                  <span>Envía tu pedido por WhatsApp</span>
+                </div>
+              )}
+              <button
+                type="submit"
+                id="tour-submit-order-btn"
+                className="btn btn-primary"
+                style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', width: '100%', minHeight: '48px', fontSize: '0.95rem' }}
+              >
+                <Send size={18} />
+                Confirmar y Pedir por WhatsApp
+              </button>
+            </div>
           </div>
         </form>
       </div>
