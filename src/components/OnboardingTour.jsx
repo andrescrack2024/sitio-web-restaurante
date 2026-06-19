@@ -40,9 +40,10 @@ export default function OnboardingTour({
     if (step === 1) selector = '#menu';
     if (step === 2) selector = '#tour-first-add-btn';
     if (step === 3) selector = '#tour-cart-btn';
-    if (step === 4) selector = '#nombre';
-    if (step === 5) selector = '#tour-payment-selector';
-    if (step === 6) selector = '#tour-submit-order-btn';
+    if (step === 4) selector = '#tour-checkout-btn';
+    if (step === 5) selector = '#nombre';
+    if (step === 6) selector = '#tour-payment-selector';
+    if (step === 7) selector = '#tour-submit-order-btn';
 
     if (selector) {
       setTimeout(() => {
@@ -50,7 +51,7 @@ export default function OnboardingTour({
         if (el) {
           el.scrollIntoView({ behavior: 'smooth', block: 'center' });
         }
-      }, step === 4 ? 350 : 100);
+      }, (step === 4 || step === 5) ? 350 : 100);
     }
   }, [step, isOpen]);
 
@@ -61,9 +62,10 @@ export default function OnboardingTour({
       let selector = '';
       if (step === 2) selector = '#tour-first-add-btn';
       if (step === 3) selector = '#tour-cart-btn';
-      if (step === 4) selector = '#nombre';
-      if (step === 5) selector = '#tour-payment-selector';
-      if (step === 6) selector = '#tour-submit-order-btn';
+      if (step === 4) selector = '#tour-checkout-btn';
+      if (step === 5) selector = '#nombre';
+      if (step === 6) selector = '#tour-payment-selector';
+      if (step === 7) selector = '#tour-submit-order-btn';
 
       if (step === 1) {
         setRect({ isScrollStep: true });
@@ -123,10 +125,16 @@ export default function OnboardingTour({
         setStep(4);
       }, 300);
     } else if (step === 4) {
-      setStep(5);
+      // Open the checkout modal
+      if (openCheckout) openCheckout();
+      setTimeout(() => {
+        setStep(5);
+      }, 300);
     } else if (step === 5) {
       setStep(6);
     } else if (step === 6) {
+      setStep(7);
+    } else if (step === 7) {
       completeTour();
     } else {
       setStep((prev) => prev + 1);
@@ -135,12 +143,10 @@ export default function OnboardingTour({
 
   const handlePrev = () => {
     if (step > 0) {
-      if (step === 4) {
-        // Scroll back to top of the cart body
-        const cartBody = document.querySelector('.cart-body');
-        if (cartBody) {
-          cartBody.scrollTo({ top: 0, behavior: 'smooth' });
-        }
+      if (step === 5) {
+        // Going back from modal to cart drawer: close checkout and open cart
+        if (closeCheckout) closeCheckout();
+        if (openCart) openCart();
       }
       setStep((prev) => prev - 1);
     }
@@ -184,19 +190,25 @@ export default function OnboardingTour({
       showProgress: true
     },
     {
-      title: "👤 Paso 4: Ingresa tus Datos",
-      desc: "Escribe tu Nombre, Teléfono y Dirección de entrega en el formulario que aparece abajo de tus artículos.",
+      title: "📋 Paso 4: Confirma tu Pedido",
+      desc: "Presiona el botón de 'Confirmar Pedido' al final del carrito para abrir la pantalla de entrega.",
+      btnText: "Confirmar Pedido",
+      showProgress: true
+    },
+    {
+      title: "👤 Paso 5: Ingresa tus Datos",
+      desc: "Escribe tu Nombre, Teléfono y Dirección de entrega en el formulario que aparece en pantalla.",
       btnText: "Siguiente Paso",
       showProgress: true
     },
     {
-      title: "💳 Paso 5: Elige el Pago",
+      title: "💳 Paso 6: Elige el Pago",
       desc: "Selecciona Pago en Efectivo o Pago por Llave (Transfiya) para realizar una transferencia segura.",
       btnText: "Siguiente Paso",
       showProgress: true
     },
     {
-      title: "📞 Paso 6: Envía por WhatsApp",
+      title: "📞 Paso 7: Envía por WhatsApp",
       desc: "Haz clic en el botón verde final para enviar el pedido. Se abrirá tu WhatsApp con el mensaje ya escrito para que lo envíes con un solo toque.",
       btnText: "¡Listo, a pedir! 🎉",
       showProgress: true
@@ -330,11 +342,11 @@ export default function OnboardingTour({
         {currentContent.showProgress && (
           <div className="onboarding-progress">
             <div className="onboarding-progress-dots">
-              {[1, 2, 3, 4, 5, 6].map((s) => (
+              {[1, 2, 3, 4, 5, 6, 7].map((s) => (
                 <span key={s} className={`progress-dot ${step === s ? 'active' : ''}`} />
               ))}
             </div>
-            <span className="onboarding-step-num">Paso {step} de 6</span>
+            <span className="onboarding-step-num">Paso {step} de 7</span>
           </div>
         )}
 

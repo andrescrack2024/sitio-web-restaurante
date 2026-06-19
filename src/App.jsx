@@ -8,6 +8,7 @@ import Testimonials from './components/Testimonials';
 import Footer from './components/Footer';
 import Admin from './components/Admin';
 import OnboardingTour from './components/OnboardingTour';
+import OrderModal from './components/OrderModal';
 import { db, isFirebaseSupported } from './firebase';
 import { collection, onSnapshot, doc, setDoc, deleteDoc } from 'firebase/firestore';
 import { ShoppingBag } from 'lucide-react';
@@ -26,6 +27,7 @@ export default function App() {
   const [loading, setLoading] = useState(isFirebaseSupported);
   const [cartItems, setCartItems] = useState([]);
   const [isCartOpen, setIsCartOpen] = useState(false);
+  const [isCheckoutOpen, setIsCheckoutOpen] = useState(false);
   const [view, setView] = useState(() => window.location.hash === '#admin' ? 'admin' : 'shop');
   const [isTourOpen, setIsTourOpen] = useState(false);
   const [hasAddedToCart, setHasAddedToCart] = useState(false);
@@ -448,6 +450,16 @@ export default function App() {
         updateQuantity={updateQuantity}
         removeFromCart={removeFromCart}
         updateCartItemSauces={updateCartItemSauces}
+        onProceedToCheckout={() => {
+          setIsCartOpen(false);
+          setIsCheckoutOpen(true);
+        }}
+      />
+
+      <OrderModal
+        isOpen={isCheckoutOpen}
+        onClose={() => setIsCheckoutOpen(false)}
+        cartItems={cartItems}
         clearCart={clearCart}
         onPlaceOrder={handlePlaceOrder}
       />
@@ -458,6 +470,7 @@ export default function App() {
         onClose={() => {
           setIsTourOpen(false);
           setIsCartOpen(false);
+          setIsCheckoutOpen(false);
         }}
         addToCart={addToCart}
         clearCart={clearCart}
@@ -465,15 +478,10 @@ export default function App() {
         openCart={() => setIsCartOpen(true)}
         closeCart={() => setIsCartOpen(false)}
         openCheckout={() => {
-          setIsCartOpen(true);
-          setTimeout(() => {
-            const cartBody = document.querySelector('.cart-body');
-            if (cartBody) {
-              cartBody.scrollTo({ top: cartBody.scrollHeight, behavior: 'smooth' });
-            }
-          }, 100);
+          setIsCartOpen(false);
+          setIsCheckoutOpen(true);
         }}
-        closeCheckout={() => setIsCartOpen(false)}
+        closeCheckout={() => setIsCheckoutOpen(false)}
         cartCount={cartCount}
       />
     </>
