@@ -474,29 +474,29 @@ export default function Menu({ menuItems = [], addToCart, cartItems, loading }) 
                   <h4 style={{ fontSize: '0.95rem', fontWeight: '600', marginBottom: '12px', display: 'flex', alignItems: 'center', gap: '6px', color: 'var(--text-primary)' }}>
                     <Sparkles size={16} className="text-gold" /> Personaliza tus Salsas (Gratis)
                   </h4>
-                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '10px' }}>
-                    {['Rosada', 'Roja', 'Tártara', 'Ajo', 'Piña', 'Mostaza'].map(sauce => (
-                      <label key={sauce} style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', fontSize: '0.9rem', color: 'var(--text-secondary)' }}>
-                        <input
-                          type="checkbox"
-                          checked={selectedSauces.includes(sauce)}
-                          onChange={(e) => {
-                            if (e.target.checked) {
-                              setSelectedSauces(prev => [...prev, sauce]);
-                            } else {
-                              setSelectedSauces(prev => prev.filter(s => s !== sauce));
-                            }
-                          }}
-                          style={{
-                            accentColor: 'var(--accent-gold)',
-                            width: '18px',
-                            height: '18px',
-                            cursor: 'pointer'
-                          }}
-                        />
-                        <span>{sauce}</span>
-                      </label>
-                    ))}
+                  <div className="sauce-grid">
+                    {['Rosada', 'Roja', 'Tártara', 'Ajo', 'Piña', 'Mostaza'].map(sauce => {
+                      const isChecked = selectedSauces.includes(sauce);
+                      return (
+                        <label 
+                          key={sauce} 
+                          className={`sauce-pill ${isChecked ? 'active' : ''}`}
+                        >
+                          <input
+                            type="checkbox"
+                            checked={isChecked}
+                            onChange={(e) => {
+                              if (e.target.checked) {
+                                setSelectedSauces(prev => [...prev, sauce]);
+                              } else {
+                                setSelectedSauces(prev => prev.filter(s => s !== sauce));
+                              }
+                            }}
+                          />
+                          <span>{sauce}</span>
+                        </label>
+                      );
+                    })}
                   </div>
                 </div>
               )}

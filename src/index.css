@@ -1939,3 +1939,177 @@ button {
     transform: translateY(8px);
   }
 }
+
+/* Sauce Customizer - Grid & Pills (Touch Friendly) */
+.sauce-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+}
+
+@media (max-width: 480px) {
+  .sauce-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 8px;
+  }
+}
+
+.sauce-pill {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  padding: 12px 18px;
+  border-radius: 30px;
+  border: 2px solid var(--border-color);
+  background-color: var(--bg-secondary);
+  color: var(--text-secondary);
+  font-weight: 600;
+  font-size: 0.95rem;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  min-height: 52px; /* Large touch target for finger tap */
+  user-select: none;
+  position: relative;
+}
+
+.sauce-pill.active {
+  border-color: var(--accent-gold);
+  background-color: var(--accent-gold-light);
+  color: var(--text-primary);
+  box-shadow: 0 4px 12px rgba(197, 157, 95, 0.2);
+}
+
+.sauce-pill:hover {
+  border-color: var(--accent-gold);
+  color: var(--text-primary);
+  transform: translateY(-2px);
+}
+
+.sauce-pill:active {
+  transform: translateY(1px);
+}
+
+.sauce-pill input[type="checkbox"] {
+  accent-color: var(--accent-gold);
+  width: 22px;
+  height: 22px;
+  cursor: pointer;
+  margin: 0;
+  margin-right: 12px;
+}
+
+/* Sauce options inside Cart items */
+.sauce-grid-cart {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 6px;
+  margin-top: 6px;
+}
+
+.sauce-pill-cart {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  padding: 8px 10px;
+  border-radius: 20px;
+  border: 1.5px solid var(--border-color);
+  background-color: var(--bg-secondary);
+  color: var(--text-secondary);
+  font-size: 0.78rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  min-height: 40px; /* Touch target inside drawer */
+  user-select: none;
+}
+
+.sauce-pill-cart.active {
+  border-color: var(--accent-gold);
+  background-color: var(--accent-gold-light);
+  color: var(--text-primary);
+  box-shadow: 0 2px 6px rgba(197, 157, 95, 0.15);
+}
+
+.sauce-pill-cart:hover {
+  border-color: var(--accent-gold);
+  color: var(--text-primary);
+}
+
+.sauce-pill-cart input[type="checkbox"] {
+  accent-color: var(--accent-gold);
+  width: 14px;
+  height: 14px;
+  cursor: pointer;
+  margin: 0;
+  margin-right: 6px;
+}
+
+/* General interactive highlights for elements to guide the user */
+button,
+a,
+input,
+select,
+textarea,
+.sauce-pill,
+.sauce-pill-cart,
+.delivery-method-btn,
+.payment-method-btn {
+  transition: all var(--transition-fast);
+}
+
+/* Focus outline when tab/click */
+button:focus-visible,
+a:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible,
+.sauce-pill:focus-within,
+.sauce-pill-cart:focus-within {
+  outline: 3px solid var(--accent-gold) !important;
+  outline-offset: 2px !important;
+}
+
+/* Interactive scaling/highlighting for anything clickable */
+.btn-primary:hover,
+.btn-secondary:hover,
+.btn-checkout:hover,
+.btn-icon-round:hover,
+.quantity-btn:hover,
+.delivery-method-btn:hover,
+.payment-method-btn:hover,
+.btn-whatsapp-fixed:hover {
+  transform: translateY(-3px) scale(1.02);
+  filter: brightness(1.05);
+  box-shadow: 0 8px 20px rgba(197, 157, 95, 0.25) !important;
+}
+
+.btn-primary:active,
+.btn-secondary:active,
+.btn-checkout:active,
+.btn-icon-round:active,
+.quantity-btn:active,
+.delivery-method-btn:active,
+.payment-method-btn:active,
+.btn-whatsapp-fixed:active {
+  transform: translateY(1px) scale(0.98);
+}
+
+/* Make product cards visually respond to hovering/touching */
+.product-card {
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.3s ease, border-color 0.3s ease;
+}
+.product-card:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.15);
+  border-color: var(--accent-gold);
+}
+
+.category-tab {
+  transition: all var(--transition-fast);
+}
+.category-tab:hover {
+  border-color: var(--accent-gold);
+  color: var(--accent-gold);
+  background-color: var(--accent-gold-light);
+  transform: translateY(-2px);
+}

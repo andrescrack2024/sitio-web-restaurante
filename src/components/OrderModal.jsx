@@ -198,6 +198,7 @@ Quedo atento a su confirmación. ¡Muchas gracias!`;
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', marginTop: '6px' }}>
                   <button
                     type="button"
+                    className="delivery-method-btn"
                     onClick={() => setDeliveryMethod('domicilio')}
                     style={{
                       display: 'flex',
@@ -219,6 +220,7 @@ Quedo atento a su confirmación. ¡Muchas gracias!`;
                   </button>
                   <button
                     type="button"
+                    className="delivery-method-btn"
                     onClick={() => setDeliveryMethod('local')}
                     style={{
                       display: 'flex',
@@ -283,6 +285,7 @@ Quedo atento a su confirmación. ¡Muchas gracias!`;
                 <div id="tour-payment-selector" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', marginTop: '6px' }}>
                   <button
                     type="button"
+                    className="payment-method-btn"
                     onClick={() => setPaymentMethod('efectivo')}
                     style={{
                       display: 'flex',
@@ -304,6 +307,7 @@ Quedo atento a su confirmación. ¡Muchas gracias!`;
                   </button>
                   <button
                     type="button"
+                    className="payment-method-btn"
                     onClick={() => setPaymentMethod('transfiya')}
                     style={{
                       display: 'flex',

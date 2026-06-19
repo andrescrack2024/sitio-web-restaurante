@@ -60,37 +60,37 @@ export default function Cart({
                   {(item.category === 'hamburguesas' || 
                     item.category === 'perros' || 
                     item.category === 'salchipapas') ? (
-                    <div style={{ margin: '4px 0 8px 0' }}>
-                      <span style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', display: 'block', marginBottom: '2px', fontWeight: '500' }}>
-                        Salsas:
-                      </span>
-                      <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4px 8px' }}>
-                        {['Rosada', 'Roja', 'Tártara', 'Ajo', 'Piña', 'Mostaza'].map(sauce => (
-                          <label key={sauce} style={{ display: 'flex', alignItems: 'center', gap: '3px', fontSize: '0.75rem', cursor: 'pointer', color: 'var(--text-secondary)' }}>
-                            <input
-                              type="checkbox"
-                              checked={item.sauces && item.sauces.includes(sauce)}
-                              onChange={(e) => {
-                                let newSauces = item.sauces ? [...item.sauces] : [];
-                                if (e.target.checked) {
-                                  newSauces.push(sauce);
-                                } else {
-                                  newSauces = newSauces.filter(s => s !== sauce);
-                                }
-                                updateCartItemSauces(item.cartKey, newSauces);
-                              }}
-                              style={{
-                                accentColor: 'var(--accent-gold)',
-                                width: '12px',
-                                height: '12px',
-                                cursor: 'pointer'
-                              }}
-                            />
-                            <span>{sauce}</span>
-                          </label>
-                        ))}
+                      <div style={{ margin: '8px 0 8px 0' }}>
+                        <span style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', display: 'block', marginBottom: '6px', fontWeight: '600' }}>
+                          Personalizar Salsas:
+                        </span>
+                        <div className="sauce-grid-cart">
+                          {['Rosada', 'Roja', 'Tártara', 'Ajo', 'Piña', 'Mostaza'].map(sauce => {
+                            const isChecked = item.sauces && item.sauces.includes(sauce);
+                            return (
+                              <label 
+                                key={sauce} 
+                                className={`sauce-pill-cart ${isChecked ? 'active' : ''}`}
+                              >
+                                <input
+                                  type="checkbox"
+                                  checked={isChecked}
+                                  onChange={(e) => {
+                                    let newSauces = item.sauces ? [...item.sauces] : [];
+                                    if (e.target.checked) {
+                                      newSauces.push(sauce);
+                                    } else {
+                                      newSauces = newSauces.filter(s => s !== sauce);
+                                    }
+                                    updateCartItemSauces(item.cartKey, newSauces);
+                                  }}
+                                />
+                                <span>{sauce}</span>
+                              </label>
+                            );
+                          })}
+                        </div>
                       </div>
-                    </div>
                   ) : null}
                   
                   <span className="cart-item-price">{formatPrice(item.price)}</span>
