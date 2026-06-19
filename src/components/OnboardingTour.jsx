@@ -40,18 +40,45 @@ export default function OnboardingTour({
     if (step === 1) selector = '#menu';
     if (step === 2) selector = '#tour-first-add-btn';
     if (step === 3) selector = '#tour-cart-btn';
-    if (step === 4) selector = '#tour-checkout-btn';
-    if (step === 5) selector = '#nombre';
-    if (step === 6) selector = '#tour-payment-selector';
-    if (step === 7) selector = '#tour-submit-order-btn';
+    if (step === 4) selector = '#tour-cart-sauces';
+    if (step === 5) selector = '#tour-cart-qty';
+    if (step === 6) selector = '#tour-checkout-btn';
+    if (step === 7) selector = '#nombre';
+    if (step === 8) selector = '#tour-payment-selector';
+    if (step === 9) selector = '#tour-submit-order-btn';
 
     if (selector) {
       setTimeout(() => {
         const el = document.querySelector(selector);
         if (el) {
+          // 1. Scroll window for main layout elements
           el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+
+          // 2. Explicitly scroll modal-content if target is inside it
+          const modalContent = document.querySelector('.modal-content');
+          if (modalContent && modalContent.contains(el)) {
+            const containerRect = modalContent.getBoundingClientRect();
+            const elRect = el.getBoundingClientRect();
+            const relativeTop = elRect.top - containerRect.top + modalContent.scrollTop;
+            modalContent.scrollTo({
+              top: relativeTop - containerRect.height / 2 + elRect.height / 2,
+              behavior: 'smooth'
+            });
+          }
+
+          // 3. Explicitly scroll cart-body if target is inside it
+          const cartBody = document.querySelector('.cart-body');
+          if (cartBody && cartBody.contains(el)) {
+            const containerRect = cartBody.getBoundingClientRect();
+            const elRect = el.getBoundingClientRect();
+            const relativeTop = elRect.top - containerRect.top + cartBody.scrollTop;
+            cartBody.scrollTo({
+              top: relativeTop - containerRect.height / 2 + elRect.height / 2,
+              behavior: 'smooth'
+            });
+          }
         }
-      }, (step === 4 || step === 5) ? 350 : 100);
+      }, (step === 4 || step === 5 || step === 7 || step === 8 || step === 9) ? 350 : 100);
     }
   }, [step, isOpen]);
 
@@ -62,10 +89,12 @@ export default function OnboardingTour({
       let selector = '';
       if (step === 2) selector = '#tour-first-add-btn';
       if (step === 3) selector = '#tour-cart-btn';
-      if (step === 4) selector = '#tour-checkout-btn';
-      if (step === 5) selector = '#nombre';
-      if (step === 6) selector = '#tour-payment-selector';
-      if (step === 7) selector = '#tour-submit-order-btn';
+      if (step === 4) selector = '#tour-cart-sauces';
+      if (step === 5) selector = '#tour-cart-qty';
+      if (step === 6) selector = '#tour-checkout-btn';
+      if (step === 7) selector = '#nombre';
+      if (step === 8) selector = '#tour-payment-selector';
+      if (step === 9) selector = '#tour-submit-order-btn';
 
       if (step === 1) {
         setRect({ isScrollStep: true });
@@ -125,16 +154,20 @@ export default function OnboardingTour({
         setStep(4);
       }, 300);
     } else if (step === 4) {
-      // Open the checkout modal
-      if (openCheckout) openCheckout();
-      setTimeout(() => {
-        setStep(5);
-      }, 300);
+      setStep(5);
     } else if (step === 5) {
       setStep(6);
     } else if (step === 6) {
-      setStep(7);
+      // Open the checkout modal
+      if (openCheckout) openCheckout();
+      setTimeout(() => {
+        setStep(7);
+      }, 350);
     } else if (step === 7) {
+      setStep(8);
+    } else if (step === 8) {
+      setStep(9);
+    } else if (step === 9) {
       completeTour();
     } else {
       setStep((prev) => prev + 1);
@@ -143,7 +176,7 @@ export default function OnboardingTour({
 
   const handlePrev = () => {
     if (step > 0) {
-      if (step === 5) {
+      if (step === 7) {
         // Going back from modal to cart drawer: close checkout and open cart
         if (closeCheckout) closeCheckout();
         if (openCart) openCart();
@@ -190,25 +223,37 @@ export default function OnboardingTour({
       showProgress: true
     },
     {
-      title: "📋 Paso 4: Confirma tu Pedido",
-      desc: "Presiona el botón de 'Confirmar Pedido' al final del carrito para abrir la pantalla de entrega.",
+      title: "🥫 Paso 4: Elige tus Salsas",
+      desc: "Puedes marcar o desmarcar tus salsas preferidas directamente en el carrito para cada hamburguesa o perro.",
+      btnText: "Siguiente Paso",
+      showProgress: true
+    },
+    {
+      title: "➕ Paso 5: Ajusta la Cantidad",
+      desc: "Usa los botones de más (+) y menos (-) para cambiar las porciones de tus alimentos de manera sencilla.",
+      btnText: "Siguiente Paso",
+      showProgress: true
+    },
+    {
+      title: "📋 Paso 6: Confirma tu Pedido",
+      desc: "Presiona el botón de 'Confirmar Pedido' al final del carrito para abrir la pantalla de datos de entrega.",
       btnText: "Confirmar Pedido",
       showProgress: true
     },
     {
-      title: "👤 Paso 5: Ingresa tus Datos",
-      desc: "Escribe tu Nombre, Teléfono y Dirección de entrega en el formulario que aparece en pantalla.",
+      title: "👤 Paso 7: Ingresa tus Datos",
+      desc: "Escribe tu Nombre, Teléfono, Barrio y Dirección. Puedes deslizar o bajar en el recuadro para ver todos los campos.",
       btnText: "Siguiente Paso",
       showProgress: true
     },
     {
-      title: "💳 Paso 6: Elige el Pago",
-      desc: "Selecciona Pago en Efectivo o Pago por Llave (Transfiya) para realizar una transferencia segura.",
+      title: "💳 Paso 8: Elige el Pago",
+      desc: "Selecciona Pago en Efectivo o por Llave (Transfiya). Si eliges Transfiya, copia el número y transfiere desde tu app.",
       btnText: "Siguiente Paso",
       showProgress: true
     },
     {
-      title: "📞 Paso 7: Envía por WhatsApp",
+      title: "📞 Paso 9: Envía por WhatsApp",
       desc: "Haz clic en el botón verde final para enviar el pedido. Se abrirá tu WhatsApp con el mensaje ya escrito para que lo envíes con un solo toque.",
       btnText: "¡Listo, a pedir! 🎉",
       showProgress: true
@@ -342,11 +387,11 @@ export default function OnboardingTour({
         {currentContent.showProgress && (
           <div className="onboarding-progress">
             <div className="onboarding-progress-dots">
-              {[1, 2, 3, 4, 5, 6, 7].map((s) => (
+              {[1, 2, 3, 4, 5, 6, 7, 8, 9].map((s) => (
                 <span key={s} className={`progress-dot ${step === s ? 'active' : ''}`} />
               ))}
             </div>
-            <span className="onboarding-step-num">Paso {step} de 7</span>
+            <span className="onboarding-step-num">Paso {step} de 9</span>
           </div>
         )}
 
@@ -362,7 +407,7 @@ export default function OnboardingTour({
           )}
           <button className="btn btn-primary btn-sm onboarding-next-btn" onClick={handleNext}>
             {currentContent.btnText}
-            {step < 6 && <ArrowRight size={14} style={{ marginLeft: '4px' }} />}
+            {step < 9 && <ArrowRight size={14} style={{ marginLeft: '4px' }} />}
           </button>
         </div>
       </div>

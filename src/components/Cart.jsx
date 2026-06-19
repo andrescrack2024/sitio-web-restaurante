@@ -50,7 +50,7 @@ export default function Cart({
             </div>
           ) : (
             <div className="cart-items-list" style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-              {cartItems.map((item) => (
+              {cartItems.map((item, index) => (
                 <div key={item.cartKey} className="cart-item animate-slide-up" style={{ display: 'flex', gap: '12px', borderBottom: '1px solid var(--border-color)', paddingBottom: '12px', alignItems: 'flex-start' }}>
                   <img src={item.image} alt={item.name} className="cart-item-img" style={{ width: '60px', height: '60px', borderRadius: '8px', objectFit: 'cover' }} />
                   
@@ -61,7 +61,7 @@ export default function Cart({
                     {(item.category === 'hamburguesas' || 
                       item.category === 'perros' || 
                       item.category === 'salchipapas') ? (
-                        <div style={{ margin: '6px 0' }}>
+                        <div id={index === 0 ? "tour-cart-sauces" : undefined} style={{ margin: '6px 0' }}>
                           <span style={{ fontSize: '0.78rem', color: 'var(--text-secondary)', display: 'block', marginBottom: '4px', fontWeight: '600' }}>
                             Salsas:
                           </span>
@@ -97,7 +97,7 @@ export default function Cart({
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '6px' }}>
                       <span className="cart-item-price" style={{ fontSize: '0.9rem', color: 'var(--accent-gold)', fontWeight: '600' }}>{formatPrice(item.price)}</span>
                       
-                      <div className="cart-item-actions">
+                      <div id={index === 0 ? "tour-cart-qty" : undefined} className="cart-item-actions">
                         <button
                           onClick={() => updateQuantity(item.cartKey, -1)}
                           className="quantity-btn"
