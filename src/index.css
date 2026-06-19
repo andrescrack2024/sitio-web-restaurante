@@ -1882,3 +1882,60 @@ button {
   position: relative;
   z-index: 100001 !important; /* Above the backdrop */
 }
+
+/* Floating Cart Hint Styles */
+.cart-hint-container {
+  position: absolute;
+  top: calc(100% + 12px);
+  right: 0;
+  background: var(--bg-primary);
+  border: 2px solid var(--accent-gold);
+  border-radius: 12px;
+  padding: 8px 14px;
+  box-shadow: var(--shadow-lg);
+  white-space: nowrap;
+  z-index: 1100;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-family: 'Outfit', sans-serif;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  pointer-events: auto;
+  animation: bounce-cart-hint 2s infinite ease-in-out;
+}
+
+.cart-hint-container::before {
+  content: '';
+  position: absolute;
+  bottom: 100%;
+  right: 14px;
+  border-width: 6px;
+  border-style: solid;
+  border-color: transparent transparent var(--accent-gold) transparent;
+}
+
+.cart-hint-container::after {
+  content: '';
+  position: absolute;
+  bottom: 100%;
+  right: 14px;
+  border-width: 4px;
+  border-style: solid;
+  border-color: transparent transparent var(--bg-primary) transparent;
+  margin-right: 2px;
+}
+
+.cart-hint-hand {
+  font-size: 1.1rem;
+}
+
+@keyframes bounce-cart-hint {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(8px);
+  }
+}

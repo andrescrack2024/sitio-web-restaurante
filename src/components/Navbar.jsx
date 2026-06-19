@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { ShoppingBag, Sun, Moon, Menu as MenuIcon, X, HelpCircle } from 'lucide-react';
 
-export default function Navbar({ theme, toggleTheme, cartCount, openCart, startTour }) {
+export default function Navbar({ theme, toggleTheme, cartCount, openCart, startTour, hasAddedToCart, dismissCartHint }) {
   const [scrolled, setScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
@@ -71,7 +71,10 @@ export default function Navbar({ theme, toggleTheme, cartCount, openCart, startT
 
           {/* Cart Trigger */}
           <button
-            onClick={openCart}
+            onClick={() => {
+              openCart();
+              dismissCartHint();
+            }}
             id="tour-cart-btn"
             className="btn-icon-round"
             style={{ position: 'relative' }}
@@ -82,6 +85,19 @@ export default function Navbar({ theme, toggleTheme, cartCount, openCart, startT
               <span className="cart-badge-count animate-fade-in">
                 {cartCount}
               </span>
+            )}
+            {hasAddedToCart && (
+              <div 
+                className="cart-hint-container animate-fade-in"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  openCart();
+                  dismissCartHint();
+                }}
+              >
+                <span className="cart-hint-hand">👆</span>
+                <span>Ver pedido y confirmar</span>
+              </div>
             )}
           </button>
 

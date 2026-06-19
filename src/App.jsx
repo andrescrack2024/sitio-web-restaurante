@@ -30,6 +30,7 @@ export default function App() {
   const [isCheckoutOpen, setIsCheckoutOpen] = useState(false);
   const [view, setView] = useState(() => window.location.hash === '#admin' ? 'admin' : 'shop');
   const [isTourOpen, setIsTourOpen] = useState(false);
+  const [hasAddedToCart, setHasAddedToCart] = useState(false);
   const [orders, setOrders] = useState(() => {
     try {
       const saved = localStorage.getItem('rapidoydeli_orders');
@@ -79,6 +80,13 @@ export default function App() {
   useEffect(() => {
     document.documentElement.setAttribute('data-theme', theme);
   }, [theme]);
+
+  // Auto-dismiss cart hint when cart is opened
+  useEffect(() => {
+    if (isCartOpen) {
+      setHasAddedToCart(false);
+    }
+  }, [isCartOpen]);
 
   // Sync state to LocalStorage ONLY in local fallback mode
   useEffect(() => {
@@ -260,6 +268,33 @@ export default function App() {
       }
       return [...prevItems, { ...item, cartKey, sauces, quantity: 1 }];
     });
+    setHasAddedToCart(true);
+  };
+
+  const updateCartItemSauces = (cartKey, newSauces) => {
+    const sortedSauces = [...newSauces].sort();
+    setCartItems((prevItems) => {
+      const targetItem = prevItems.find((item) => item.cartKey === cartKey);
+      if (!targetItem) return prevItems;
+
+      const newCartKey = `${targetItem.id}-${sortedSauces.join(',')}`;
+      const duplicateItem = prevItems.find((item) => item.cartKey === newCartKey && item.cartKey !== cartKey);
+
+      if (duplicateItem) {
+        return prevItems
+          .map((item) => {
+            if (item.cartKey === newCartKey) {
+              return { ...item, quantity: item.quantity + targetItem.quantity };
+            }
+            return item;
+          })
+          .filter((item) => item.cartKey !== cartKey);
+      } else {
+        return prevItems.map((item) =>
+          item.cartKey === cartKey ? { ...item, cartKey: newCartKey, sauces: sortedSauces } : item
+        );
+      }
+    });
   };
 
   const removeFromCart = (cartKey) => {
@@ -376,6 +411,8 @@ export default function App() {
         cartCount={cartCount}
         openCart={() => setIsCartOpen(true)}
         startTour={() => setIsTourOpen(true)}
+        hasAddedToCart={hasAddedToCart}
+        dismissCartHint={() => setHasAddedToCart(false)}
       />
 
       <main style={{ marginTop: '80px' }}>
@@ -416,6 +453,7 @@ export default function App() {
         updateQuantity={updateQuantity}
         removeFromCart={removeFromCart}
         onProceedToCheckout={handleProceedToCheckout}
+        updateCartItemSauces={updateCartItemSauces}
       />
 
       <OrderModal
