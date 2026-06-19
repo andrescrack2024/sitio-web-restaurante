@@ -72,6 +72,7 @@ export default function Navbar({ theme, toggleTheme, cartCount, openCart, startT
           {/* Cart Trigger */}
           <button
             onClick={openCart}
+            id="tour-cart-btn"
             className="btn-icon-round"
             style={{ position: 'relative' }}
             aria-label="Ver carrito"

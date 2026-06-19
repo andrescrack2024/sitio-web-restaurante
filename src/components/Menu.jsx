@@ -4,147 +4,243 @@ import { Plus, Check, X, Clock, Heart, Sparkles } from 'lucide-react';
 export const MENU_ITEMS = [
   {
     id: 1,
-    name: 'Hamburguesa Clásica con Queso',
-    category: 'rapida',
-    price: 18000,
-    description: 'Carne de res premium de 150g, queso cheddar fundido, lechuga fresca, tomate, cebolla caramelizada y salsa especial de la casa en pan brioche artesanal.',
+    name: 'Hamburguesa Mixta',
+    category: 'hamburguesas',
+    price: 24000,
+    description: 'Exquisita combinación de carne de res, milanesa de pollo crujiente, queso fundido, tocino ahumado y guiso especial en pan brioche artesanal.',
     image: 'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?auto=format&fit=crop&q=80&w=500&q=60',
-    badge: 'Popular'
+    badge: 'La Más Vendida',
+    ingredients: ['Carne de res 150g', 'Milanesa de pollo', 'Queso mozzarella', 'Tocineta crujiente', 'Guiso especial', 'Pan brioche']
   },
   {
     id: 2,
-    name: 'Hamburguesa Suprema Doble Carne',
-    category: 'rapida',
-    price: 26000,
-    description: 'Dos carnes de res de 150g, tocineta ahumada crujiente, queso cheddar doble, aros de cebolla crujientes y salsa BBQ artesanal en pan brioche.',
+    name: 'Hamburguesa Doble Carne',
+    category: 'hamburguesas',
+    price: 23000,
+    description: 'Doble porción de jugosa carne de res premium, queso cheddar fundido y tocino crujiente en pan brioche artesanal.',
     image: 'https://images.unsplash.com/photo-1586190848861-99aa4a171e90?auto=format&fit=crop&q=80&w=500&q=60',
-    badge: 'Recomendada'
+    badge: 'Especial',
+    ingredients: ['Doble carne de res 150g', 'Queso cheddar doble', 'Tocineta crujiente', 'Pan brioche']
   },
   {
     id: 3,
-    name: 'Perro Caliente Especial Americano',
-    category: 'rapida',
-    price: 15000,
-    description: 'Salchicha tipo americana gigante, queso fundido, ripio de papa crujiente, tocineta picada, cebolla caramelizada y salsas tradicionales de la casa.',
-    image: 'https://images.unsplash.com/photo-1619740455993-9e612b1af08a?auto=format&fit=crop&q=80&w=500&q=60',
-    badge: 'El Favorito'
+    name: 'Hamburguesa de la Casa',
+    category: 'hamburguesas',
+    price: 25000,
+    description: 'Nuestra hamburguesa insignia con carne artesanal de res de 150g, tocino crujiente, queso gratinado, cebolla caramelizada y salsa especial.',
+    image: 'https://images.unsplash.com/photo-1550547660-d9450f859349?auto=format&fit=crop&q=80&w=500&q=60',
+    badge: 'Recomendada',
+    ingredients: ['Carne artesanal de res 150g', 'Tocineta crujiente', 'Queso gratinado', 'Cebolla caramelizada', 'Salsa de la casa', 'Pan brioche']
   },
   {
     id: 4,
-    name: 'Salchipapa Suprema de la Casa',
-    category: 'rapida',
-    price: 19000,
-    description: 'Cama de papas a la francesa doradas, salchicha premium seleccionada, queso gratinado, tocineta picada, maíz dulce y salsa tártara artesanal.',
-    image: 'https://images.unsplash.com/photo-1585109649139-366815a0d713?auto=format&fit=crop&q=80&w=500&q=60',
-    badge: 'Gran Tamaño'
+    name: 'Hamburguesa Sencilla',
+    category: 'hamburguesas',
+    price: 20000,
+    description: 'Carne de res seleccionada, queso derretido, lechuga fresca, tomate y salsas tradicionales de la casa.',
+    image: 'https://images.unsplash.com/photo-1571091718767-18b5b1457add?auto=format&fit=crop&q=80&w=500&q=60',
+    badge: 'Clásica',
+    ingredients: ['Carne de res 150g', 'Queso mozzarella', 'Lechuga', 'Tomate', 'Salsas tradicionales']
   },
   {
     id: 5,
-    name: 'Papas Fritas Rústicas al Romero',
-    category: 'acompanamientos',
-    price: 8000,
-    description: 'Porción generosa de papas fritas rústicas con piel, sazonadas con sal marina, romero fresco y un toque de paprika, servidas con salsa de ajo.',
-    image: 'https://images.unsplash.com/photo-1573080496219-bb080dd4f877?auto=format&fit=crop&q=80&w=500&q=60',
-    badge: 'Crujiente'
+    name: 'Hamburguesa de Pollo',
+    category: 'hamburguesas',
+    price: 22000,
+    description: 'Pechuga de pollo a la plancha tierna y sazonada, tocino crujiente, queso derretido, lechuga y tomate en pan artesanal.',
+    image: 'https://images.unsplash.com/photo-1625813506062-0aeb1d7a094b?auto=format&fit=crop&q=80&w=500&q=60',
+    badge: 'Ligera',
+    ingredients: ['Pechuga de pollo 150g', 'Tocineta crujiente', 'Queso derretido', 'Lechuga', 'Tomate', 'Pan brioche']
   },
   {
     id: 6,
-    name: 'Aros de Cebolla Crujientes',
-    category: 'acompanamientos',
-    price: 9000,
-    description: 'Anillos de cebolla tiernos rebozados en panko crujiente y fritos a la perfección, acompañados de salsa BBQ de la casa.',
-    image: 'https://images.unsplash.com/photo-1639024471283-2bc7b3c6a267?auto=format&fit=crop&q=80&w=500&q=60',
-    badge: 'Adicional'
+    name: 'Hamburguesa Milanesa',
+    category: 'hamburguesas',
+    price: 21000,
+    description: 'Filete de pollo apanado estilo milanesa crujiente, tocino ahumado, queso derretido, lechuga y tomate.',
+    image: 'https://images.unsplash.com/photo-1525059696034-4967a8e1dca2?auto=format&fit=crop&q=80&w=500&q=60',
+    badge: 'Crujiente',
+    ingredients: ['Filete de pollo apanado', 'Tocineta crujiente', 'Queso derretido', 'Lechuga', 'Tomate', 'Pan artesanal']
   },
   {
     id: 7,
-    name: 'Copa Helada con Galleta Oreo',
-    category: 'helados',
-    price: 12000,
-    description: 'Deliciosa copa con dos bolas de helado artesanal de vainilla Bourbon y chocolate, galletas Oreo trituradas, salsa de chocolate fudge y crema batida.',
-    image: 'https://images.unsplash.com/photo-1563805042-7684c019e1cb?auto=format&fit=crop&q=80&w=500&q=60',
-    badge: 'Especial'
+    name: 'Perro con Tocino',
+    category: 'perros',
+    price: 16000,
+    description: 'Salchicha americana premium, abundante queso fundido, tocineta crujiente picada y ripio de papa crujiente en pan extra tierno.',
+    image: 'https://images.unsplash.com/photo-1619740455993-9e612b1af08a?auto=format&fit=crop&q=80&w=500&q=60',
+    badge: 'Favorito',
+    ingredients: ['Salchicha americana', 'Queso fundido', 'Tocineta crujiente picada', 'Ripio de papa', 'Pan de perro']
   },
   {
     id: 8,
-    name: 'Banana Split Tres Sabores',
-    category: 'helados',
-    price: 16000,
-    description: 'Banano maduro entero acompañado de tres bolas de helado (fresa natural, chocolate suizo y vainilla), bañado en salsa de caramelo, chispas de colores y cereza.',
-    image: 'https://images.unsplash.com/photo-1579954115545-a95591f28bfc?auto=format&fit=crop&q=80&w=500&q=60',
-    badge: 'Clásico'
+    name: 'Perro Sencillo',
+    category: 'perros',
+    price: 11500,
+    description: 'Salchicha clásica seleccionada, queso mozzarella fundido, ripio de papa crujiente y salsas tradicionales.',
+    image: 'https://images.unsplash.com/photo-1627059313833-0a29507f4b22?auto=format&fit=crop&q=80&w=500&q=60',
+    badge: 'Económico',
+    ingredients: ['Salchicha clásica', 'Queso mozzarella', 'Ripio de papa', 'Pan de perro']
   },
   {
     id: 9,
-    name: 'Malteada Cremosa de Fresa',
-    category: 'helados',
-    price: 11000,
-    description: 'Batido ultra-cremoso elaborado con helado de fresa natural, leche entera y decorado con crema chantilly, fresa fresca y chispas de chocolate.',
-    image: 'https://images.unsplash.com/photo-1572490122747-3968b75cc699?auto=format&fit=crop&q=80&w=500&q=60',
-    badge: 'Deliciosa'
+    name: 'Perro Suizo',
+    category: 'perros',
+    price: 20000,
+    description: 'Delicioso perro caliente con salchicha suiza gigante, queso gratinado doble, tocineta picada y abundante ripio de papa.',
+    image: 'https://images.unsplash.com/photo-1541232264-8066f8e0b4c1?auto=format&fit=crop&q=80&w=500&q=60',
+    badge: 'Premium',
+    ingredients: ['Salchicha suiza gigante', 'Queso gratinado doble', 'Tocineta picada', 'Ripio de papa', 'Pan de perro']
   },
   {
     id: 10,
-    name: 'Limonada Frappé Cerezada',
-    category: 'bebidas',
-    price: 9000,
-    description: 'Refrescante limonada granizada licuada con limones recién exprimidos y un delicioso sirope artesanal de cereza silvestre.',
-    image: 'https://images.unsplash.com/photo-1513558161293-cdaf765ed2fd?auto=format&fit=crop&q=80&w=500&q=60',
-    badge: 'Refrescante'
+    name: 'Perro Americano',
+    category: 'perros',
+    price: 19000,
+    description: 'Salchicha americana gigante, tocineta crujiente, cebolla caramelizada suave, queso derretido y ripio de papa.',
+    image: 'https://images.unsplash.com/photo-1619740455993-9e612b1af08a?auto=format&fit=crop&q=80&w=500&q=60',
+    badge: 'Sabor Único',
+    ingredients: ['Salchicha americana gigante', 'Tocineta crujiente', 'Cebolla caramelizada', 'Queso derretido', 'Ripio de papa']
   },
   {
     id: 11,
-    name: 'Gaseosa Helada 350ml',
-    category: 'bebidas',
-    price: 4500,
-    description: 'Bebida gaseosa helada en presentación personal a su elección (Coca-Cola, Sprite, Fanta o Colombiana).',
-    image: 'https://images.unsplash.com/photo-1622483767028-3f66f32aef97?auto=format&fit=crop&q=80&w=500&q=60',
-    badge: 'Bebida'
+    name: 'Perro con Chorizo',
+    category: 'perros',
+    price: 16000,
+    description: 'Chorizo parrillero picado de excelente calidad, queso gratinado, tocineta crujiente, ripio de papa y salsas de la casa.',
+    image: 'https://images.unsplash.com/photo-1541232264-8066f8e0b4c1?auto=format&fit=crop&q=80&w=500&q=60',
+    badge: 'Parrillero',
+    ingredients: ['Chorizo parrillero seleccionado', 'Queso gratinado', 'Tocineta crujiente', 'Ripio de papa', 'Pan de perro']
   },
   {
     id: 12,
-    name: 'Perro Caliente Mediano',
-    category: 'rapida',
-    price: 11000,
-    description: 'Salchicha clásica de 15cm, queso mozzarella fundido, abundante ripio de papa crujiente y salsa rosada tradicional en pan tierno.',
+    name: 'Perra',
+    category: 'perros',
+    price: 16000,
+    description: 'Abundante queso mozzarella gratinado, tocineta crujiente picada y ripio de papa crujiente en pan tierno (sin salchicha).',
     image: 'https://images.unsplash.com/photo-1627059313833-0a29507f4b22?auto=format&fit=crop&q=80&w=500&q=60',
-    badge: 'Mediano'
+    badge: 'Especial Queso',
+    ingredients: ['Abundante queso mozzarella', 'Tocineta crujiente', 'Ripio de papa', 'Pan de perro']
   },
   {
     id: 13,
-    name: 'Perro Caliente Pequeño (Junior)',
-    category: 'rapida',
-    price: 8000,
-    description: 'Salchicha junior de 10cm, ripio de papa crujiente y salsas tradicionales (ketchup y mostaza). El tamaño ideal para los más pequeños.',
-    image: 'https://images.unsplash.com/photo-1541232264-8066f8e0b4c1?auto=format&fit=crop&q=80&w=500&q=60',
-    badge: 'Infantil'
+    name: 'Salchipapa Grande',
+    category: 'salchipapas',
+    price: 45000,
+    description: 'Super porción familiar de papas fritas doradas, salchicha manguera premium, tocineta, abundante queso gratinado y salsas.',
+    image: 'https://images.unsplash.com/photo-1585109649139-366815a0d713?auto=format&fit=crop&q=80&w=500&q=60',
+    badge: 'Familiar',
+    ingredients: ['Papas fritas familiares', 'Salchicha manguera premium', 'Tocineta picada', 'Abundante queso gratinado']
   },
   {
     id: 14,
-    name: 'Salchipapa Mediana Clásica',
-    category: 'rapida',
-    price: 13000,
-    description: 'Papas fritas a la francesa doradas, salchicha clásica picada, salsas de la casa y coronada con un toque de queso costeño rallado.',
-    image: 'https://images.unsplash.com/photo-1585109649139-366815a0d713?auto=format&fit=crop&q=80&w=500&q=60',
-    badge: 'Clásica'
+    name: 'Salchipapa Mediana',
+    category: 'salchipapas',
+    price: 29000,
+    description: 'Porción mediana de papas fritas doradas con salchicha premium seleccionada, queso mozzarella gratinado y salsas de la casa.',
+    image: 'https://images.unsplash.com/photo-1576107232684-1279f390859f?auto=format&fit=crop&q=80&w=500&q=60',
+    badge: 'Para Compartir',
+    ingredients: ['Papas fritas medianas', 'Salchicha premium', 'Queso mozzarella gratinado', 'Salsas de la casa']
   },
   {
     id: 15,
-    name: 'Salchipapa Pequeña Sencilla',
-    category: 'rapida',
-    price: 9000,
-    description: 'Porción individual para calmar el antojo: papas fritas doradas acompañadas de salchicha picada y salsas básicas.',
-    image: 'https://images.unsplash.com/photo-1576107232684-1279f390859f?auto=format&fit=crop&q=80&w=500&q=60',
-    badge: 'Individual'
+    name: 'Salchipapa Pequeña',
+    category: 'salchipapas',
+    price: 20000,
+    description: 'Porción individual con papas fritas crujientes, salchicha clásica picada, queso mozzarella fundido y salsas del restaurante.',
+    image: 'https://images.unsplash.com/photo-1585109649139-366815a0d713?auto=format&fit=crop&q=80&w=500&q=60',
+    badge: 'Individual',
+    ingredients: ['Papas fritas personales', 'Salchicha clásica picada', 'Queso mozzarella fundido', 'Salsas']
   },
   {
     id: 16,
-    name: 'Mazorcada Especial Gratinada',
-    category: 'rapida',
-    price: 18000,
-    description: 'Cama de papas fritas coronada con maíz tierno salteado con tocineta crujiente, abundante queso mozzarella gratinado, ripio de papa y salsa tártara.',
-    image: 'https://images.unsplash.com/photo-1551504734-5ee1c4a1479b?auto=format&fit=crop&q=80&w=500&q=60',
-    badge: 'Recomendado'
+    name: 'Gaseosa Helada 350ml',
+    category: 'bebidas',
+    price: 4500,
+    description: 'Bebida gaseosa helada en presentación personal a su elección (Coca-Cola, Sprite, Colombiana).',
+    image: 'https://images.unsplash.com/photo-1622483767028-3f66f32aef97?auto=format&fit=crop&q=80&w=500&q=60',
+    badge: 'Bebida',
+    ingredients: ['Gaseosa personal 350ml']
+  },
+  {
+    id: 17,
+    name: 'Gaseosa Familiar 1.5 Litros',
+    category: 'bebidas',
+    price: 7000,
+    description: 'Gaseosa tamaño familiar ideal para compartir con tus combos o platos favoritos.',
+    image: 'https://images.unsplash.com/photo-1513558161293-cdaf765ed2fd?auto=format&fit=crop&q=80&w=500&q=60',
+    badge: 'Familiar',
+    ingredients: ['Gaseosa familiar 1.5L']
+  },
+  {
+    id: 18,
+    name: 'Limonada Frappé Cerezada',
+    category: 'bebidas',
+    price: 9000,
+    description: 'Refrescante limonada granizada licuada con limones frescos y un delicioso sirope artesanal de cereza.',
+    image: 'https://images.unsplash.com/photo-1513558161293-cdaf765ed2fd?auto=format&fit=crop&q=80&w=500&q=60',
+    badge: 'Refrescante',
+    ingredients: ['Limones frescos exprimidos', 'Sirope de cereza artesanal', 'Hielo frappé']
+  },
+  {
+    id: 19,
+    name: 'Picada Familiar',
+    category: 'especiales',
+    price: 90000,
+    description: 'Abundante bandeja con trozos de carne de res, pechuga de pollo, chorizo, chicharrón crujiente, papas fritas y arepitas.',
+    image: 'https://images.unsplash.com/photo-1555939594-58d7cb561ad1?auto=format&fit=crop&q=80&w=500&q=60',
+    badge: 'Super Especial',
+    ingredients: ['Carne de res picada', 'Pechuga de pollo picada', 'Chorizo picado', 'Chicharrón crujiente', 'Papas fritas', 'Arepitas']
+  },
+  {
+    id: 20,
+    name: 'Combo 1 (2 Perros + Gaseosa 1.5L)',
+    category: 'especiales',
+    price: 38000,
+    description: '2 perros sencillos acompañados de una gaseosa familiar de 1.5 litros helada.',
+    image: 'https://images.unsplash.com/photo-1606787366850-de6330128bfc?auto=format&fit=crop&q=80&w=500&q=60',
+    badge: 'Combo Perros',
+    ingredients: ['2 Perros sencillos con salsas', '1 Gaseosa familiar 1.5L']
+  },
+  {
+    id: 21,
+    name: 'Combo 2 (2 Burguers + 2 Perros + Gaseosa 1.5L)',
+    category: 'especiales',
+    price: 58000,
+    description: '2 hamburguesas sencillas + 2 perros sencillos + una gaseosa familiar de 1.5 litros.',
+    image: 'https://images.unsplash.com/photo-1606787366850-de6330128bfc?auto=format&fit=crop&q=80&w=500&q=60',
+    badge: 'Combo Grande',
+    ingredients: ['2 Hamburguesas sencillas', '2 Perros sencillos', '1 Gaseosa familiar 1.5L']
+  },
+  {
+    id: 22,
+    name: 'Combo 3 (2 Salchipapas + Gaseosa 1.5L)',
+    category: 'especiales',
+    price: 58000,
+    description: '2 salchipapas pequeñas abundantes acompañadas de una gaseosa familiar de 1.5 litros.',
+    image: 'https://images.unsplash.com/photo-1606787366850-de6330128bfc?auto=format&fit=crop&q=80&w=500&q=60',
+    badge: 'Combo Salchipapa',
+    ingredients: ['2 Salchipapas pequeñas individuales', '1 Gaseosa familiar 1.5L']
+  },
+  {
+    id: 23,
+    name: 'Combo 4 (2 Burguers + 2 Papas)',
+    category: 'especiales',
+    price: 23000,
+    description: '2 hamburguesas sencillas acompañadas de 2 porciones de papas fritas individuales crujientes.',
+    image: 'https://images.unsplash.com/photo-1606787366850-de6330128bfc?auto=format&fit=crop&q=80&w=500&q=60',
+    badge: 'Combo Duo',
+    ingredients: ['2 Hamburguesas sencillas', '2 Porciones de papas fritas']
+  },
+  {
+    id: 24,
+    name: 'Combo 5 (1 Burguer + Papas + Gaseosa)',
+    category: 'especiales',
+    price: 19000,
+    description: '1 hamburguesa sencilla + porción de papas fritas individuales + gaseosa personal de 350ml.',
+    image: 'https://images.unsplash.com/photo-1606787366850-de6330128bfc?auto=format&fit=crop&q=80&w=500&q=60',
+    badge: 'Combo Individual',
+    ingredients: ['1 Hamburguesa sencilla', '1 Porción de papas fritas', '1 Gaseosa personal 350ml']
   }
 ];
 
@@ -152,21 +248,24 @@ export default function Menu({ menuItems = [], addToCart, cartItems, loading }) 
   const [activeCategory, setActiveCategory] = useState('todos');
   const [addedAnimationIds, setAddedAnimationIds] = useState({});
   const [selectedProduct, setSelectedProduct] = useState(null);
+  const [selectedSauces, setSelectedSauces] = useState(['Rosada', 'Roja']);
 
   const categories = [
     { id: 'todos', label: 'Todos' },
-    { id: 'rapida', label: 'Comida Rápida' },
-    { id: 'acompanamientos', label: 'Acompañamientos' },
-    { id: 'helados', label: 'Helados' },
-    { id: 'bebidas', label: 'Bebidas' }
+    { id: 'hamburguesas', label: 'Hamburguesas' },
+    { id: 'perros', label: 'Perros' },
+    { id: 'salchipapas', label: 'Salchipapas' },
+    { id: 'bebidas', label: 'Bebidas' },
+    { id: 'especiales', label: 'Especiales / Combos' }
   ];
 
   const getCategoryLabel = (cat) => {
     switch (cat) {
-      case 'rapida': return 'Comida Rápida';
-      case 'acompanamientos': return 'Acompañamiento';
-      case 'helados': return 'Helado';
+      case 'hamburguesas': return 'Hamburguesa';
+      case 'perros': return 'Perro Caliente';
+      case 'salchipapas': return 'Salchipapa';
       case 'bebidas': return 'Bebida';
+      case 'especiales': return 'Especial / Combo';
       default: return cat;
     }
   };
@@ -181,6 +280,13 @@ export default function Menu({ menuItems = [], addToCart, cartItems, loading }) 
       currency: 'COP',
       minimumFractionDigits: 0
     }).format(price);
+  };
+
+  const handleSelectProduct = (product) => {
+    setSelectedProduct(product);
+    if (product) {
+      setSelectedSauces(['Rosada', 'Roja']);
+    }
   };
 
   if (loading) {
@@ -213,9 +319,12 @@ export default function Menu({ menuItems = [], addToCart, cartItems, loading }) 
     );
   }
 
-  const handleAddClick = (item) => {
-    addToCart(item);
-    // Show success animation temporarily on the button
+  const handleAddClick = (item, sauces) => {
+    const isCustomizable = item.category === 'hamburguesas' || item.category === 'perros' || item.category === 'salchipapas';
+    const finalSauces = isCustomizable ? (sauces || ['Rosada', 'Roja']) : [];
+    
+    addToCart(item, finalSauces);
+    
     setAddedAnimationIds(prev => ({ ...prev, [item.id]: true }));
     setTimeout(() => {
       setAddedAnimationIds(prev => ({ ...prev, [item.id]: false }));
@@ -223,7 +332,7 @@ export default function Menu({ menuItems = [], addToCart, cartItems, loading }) 
   };
 
   const isItemInCart = (id) => {
-    return cartItems.some(cartItem => cartItem.id === id);
+    return cartItems.some(cartItem => String(cartItem.id) === String(id));
   };
 
   return (
@@ -260,7 +369,7 @@ export default function Menu({ menuItems = [], addToCart, cartItems, loading }) 
               <article key={item.id} className="menu-card animate-slide-up">
                 <div 
                   className="menu-img-wrapper" 
-                  onClick={() => setSelectedProduct(item)} 
+                  onClick={() => handleSelectProduct(item)} 
                   style={{ cursor: 'pointer' }}
                   title="Ver detalles del plato"
                 >
@@ -270,7 +379,7 @@ export default function Menu({ menuItems = [], addToCart, cartItems, loading }) 
                 
                 <div className="menu-card-body">
                   <div 
-                    onClick={() => setSelectedProduct(item)} 
+                    onClick={() => handleSelectProduct(item)} 
                     style={{ cursor: 'pointer', flexGrow: 1 }}
                     title="Ver detalles del plato"
                   >
@@ -334,6 +443,64 @@ export default function Menu({ menuItems = [], addToCart, cartItems, loading }) 
 
               <p className="detail-modal-desc">{selectedProduct.description}</p>
 
+              {/* Ingredients section */}
+              {selectedProduct.ingredients && selectedProduct.ingredients.length > 0 && (
+                <div style={{ margin: '16px 0', textAlign: 'left' }}>
+                  <h4 style={{ fontSize: '0.95rem', fontWeight: '600', marginBottom: '8px', color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                    🥣 Ingredientes principales:
+                  </h4>
+                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
+                    {selectedProduct.ingredients.map((ing, idx) => (
+                      <span key={idx} style={{ 
+                        fontSize: '0.8rem', 
+                        padding: '4px 10px', 
+                        backgroundColor: 'var(--bg-tertiary)', 
+                        borderRadius: '20px', 
+                        border: '1px solid var(--border-color)', 
+                        color: 'var(--text-secondary)' 
+                      }}>
+                        {ing}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Sauces checklist */}
+              {(selectedProduct.category === 'hamburguesas' || 
+                selectedProduct.category === 'perros' || 
+                selectedProduct.category === 'salchipapas') && (
+                <div className="sauce-selector-container" style={{ margin: '20px 0', padding: '16px', backgroundColor: 'var(--bg-tertiary)', borderRadius: '8px', border: '1px solid var(--border-color)' }}>
+                  <h4 style={{ fontSize: '0.95rem', fontWeight: '600', marginBottom: '12px', display: 'flex', alignItems: 'center', gap: '6px', color: 'var(--text-primary)' }}>
+                    <Sparkles size={16} className="text-gold" /> Personaliza tus Salsas (Gratis)
+                  </h4>
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '10px' }}>
+                    {['Rosada', 'Roja', 'Tártara', 'Ajo', 'Piña', 'Mostaza'].map(sauce => (
+                      <label key={sauce} style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', fontSize: '0.9rem', color: 'var(--text-secondary)' }}>
+                        <input
+                          type="checkbox"
+                          checked={selectedSauces.includes(sauce)}
+                          onChange={(e) => {
+                            if (e.target.checked) {
+                              setSelectedSauces(prev => [...prev, sauce]);
+                            } else {
+                              setSelectedSauces(prev => prev.filter(s => s !== sauce));
+                            }
+                          }}
+                          style={{
+                            accentColor: 'var(--accent-gold)',
+                            width: '18px',
+                            height: '18px',
+                            cursor: 'pointer'
+                          }}
+                        />
+                        <span>{sauce}</span>
+                      </label>
+                    ))}
+                  </div>
+                </div>
+              )}
+
               <div className="detail-specs-grid">
                 <div>
                   <h4 className="spec-group-title">Detalles de Preparación</h4>
@@ -345,10 +512,6 @@ export default function Menu({ menuItems = [], addToCart, cartItems, loading }) 
                     <li>
                       <Heart size={16} className="text-gold" />
                       <span>Ingredientes frescos y seleccionados del día</span>
-                    </li>
-                    <li>
-                      <Sparkles size={16} className="text-gold" />
-                      <span>Receta exclusiva del Chef Marc Laurent</span>
                     </li>
                   </ul>
                 </div>
@@ -362,9 +525,6 @@ export default function Menu({ menuItems = [], addToCart, cartItems, loading }) 
                       </span>
                     </li>
                     <li>
-                      <span>• Apto para vegetarianos si se solicita</span>
-                    </li>
-                    <li>
                       <span>• Puede contener trazas de lácteos y gluten</span>
                     </li>
                   </ul>
@@ -374,7 +534,7 @@ export default function Menu({ menuItems = [], addToCart, cartItems, loading }) 
               <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginTop: '16px' }}>
                 <button
                   onClick={() => {
-                    handleAddClick(selectedProduct);
+                    handleAddClick(selectedProduct, selectedSauces);
                     setSelectedProduct(null);
                   }}
                   className="btn btn-primary"
@@ -386,7 +546,8 @@ export default function Menu({ menuItems = [], addToCart, cartItems, loading }) 
                   onClick={() => {
                     const number = "573126602583";
                     const priceFormatted = formatPrice(selectedProduct.price);
-                    const text = `Hola! Quisiera ordenar a domicilio: *${selectedProduct.name}* (${priceFormatted}). ¿Me confirman disponibilidad y tiempo de entrega?`;
+                    const saucesStr = selectedSauces.length > 0 ? ` con salsas (${selectedSauces.join(', ')})` : '';
+                    const text = `¡Hola! Quisiera ordenar a domicilio: *${selectedProduct.name}*${saucesStr} (${priceFormatted}). ¿Me confirman disponibilidad y tiempo de entrega?`;
                     window.open(`https://wa.me/${number}?text=${encodeURIComponent(text)}`, '_blank');
                     setSelectedProduct(null);
                   }}

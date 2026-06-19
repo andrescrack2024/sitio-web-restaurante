@@ -13,7 +13,9 @@ export default function OrderModal({ isOpen, onClose, cartItems, clearCart, onPl
   });
   const [errors, setErrors] = useState({});
   const [isSuccess, setIsSuccess] = useState(false);
-  const [paymentMethod, setPaymentMethod] = useState('efectivo');
+  const [paymentMethod, setPaymentMethod] = useState('efectivo'); // efectivo, transfiya
+  const [deliveryMethod, setDeliveryMethod] = useState('domicilio'); // domicilio, local
+  const [deliveryZone, setDeliveryZone] = useState('cercano'); // cercano, medio, lejano
   const [copiedText, setCopiedText] = useState('');
 
   const handleCopy = (textToCopy, field) => {
@@ -37,6 +39,12 @@ export default function OrderModal({ isOpen, onClose, cartItems, clearCart, onPl
     0
   );
 
+  const deliveryFee = deliveryMethod === 'domicilio'
+    ? (deliveryZone === 'cercano' ? 4000 : deliveryZone === 'medio' ? 6000 : 8000)
+    : 0;
+
+  const finalTotal = total + deliveryFee;
+
   const validate = () => {
     const newErrors = {};
     if (!formData.nombre.trim()) newErrors.nombre = 'El nombre es obligatorio';
@@ -45,7 +53,9 @@ export default function OrderModal({ isOpen, onClose, cartItems, clearCart, onPl
     } else if (!/^\+?[\d\s-]{7,15}$/.test(formData.telefono)) {
       newErrors.telefono = 'Formato de teléfono inválido';
     }
-    if (!formData.direccion.trim()) newErrors.direccion = 'La dirección de entrega es obligatoria';
+    if (deliveryMethod === 'domicilio' && !formData.direccion.trim()) {
+      newErrors.direccion = 'La dirección de entrega es obligatoria';
+    }
     
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -65,42 +75,61 @@ export default function OrderModal({ isOpen, onClose, cartItems, clearCart, onPl
 
     // Build the WhatsApp message template
     const itemsText = cartItems
-      .map((item) => `• *${item.name}* x${item.quantity} - _${formatPrice(item.price * item.quantity)}_`)
+      .map((item) => {
+        const saucesStr = item.sauces && item.sauces.length > 0 ? ` (Salsas: ${item.sauces.join(', ')})` : '';
+        return `• *${item.name}*${saucesStr} x${item.quantity} - _${formatPrice(item.price * item.quantity)}_`;
+      })
       .join('\n');
 
     // Format client's phone number
     const cleanPhone = formData.telefono.replace(/\D/g, '');
 
+    const deliveryDetail = deliveryMethod === 'domicilio'
+      ? `🏍️ *Entrega a Domicilio* (Zona: ${deliveryZone === 'cercano' ? 'Cercana ($4.000)' : deliveryZone === 'medio' ? 'Media ($6.000)' : 'Lejana ($8.000)'})`
+      : `🏬 *Recoger en Local* (Sin costo de envío)`;
+
     const message = `¡Hola, Rápido & Deli! 🍔🍟🥤
-Quisiera realizar el siguiente pedido a domicilio:
+Quisiera realizar el siguiente pedido:
 
 *Detalles del Pedido:*
 ${itemsText}
 
-*Total a Pagar:* ${formatPrice(total)}
-*Método de Pago:* ${paymentMethod === 'nequi' ? 'Nequi / Bancolombia (Comprobante adjunto)' : 'Efectivo (Contra entrega)'}
+*Desglose de Pago:*
+• Subtotal: ${formatPrice(total)}
+• Envío: ${formatPrice(deliveryFee)}
+• *Total a Pagar:* ${formatPrice(finalTotal)}
 
-*Datos de Entrega:*
+*Método de Pago:* ${paymentMethod === 'transfiya' ? 'Pago por Llave / Transfiya (Comprobante adjunto)' : 'Efectivo (Contra entrega)'}
+
+*Método de Entrega:*
+${deliveryDetail}
+
+*Datos del Cliente:*
 👤 *Nombre:* ${formData.nombre}
 📞 *Teléfono:* ${cleanPhone}
-📍 *Dirección:* ${formData.direccion}
+${deliveryMethod === 'domicilio' ? `📍 *Dirección:* ${formData.direccion}` : ''}
 
 Quedo atento a su confirmación. ¡Muchas gracias!`;
 
-    // Save order details to Firestore/database
+    // Save order details to database
     if (onPlaceOrder) {
       const orderData = {
         items: cartItems.map((item) => ({
           id: item.id || '',
           name: item.name,
           quantity: item.quantity,
-          price: item.price
+          price: item.price,
+          sauces: item.sauces || []
         })),
-        total: total,
+        subtotal: total,
+        deliveryFee: deliveryFee,
+        total: finalTotal,
         paymentMethod: paymentMethod,
+        deliveryMethod: deliveryMethod,
+        deliveryZone: deliveryMethod === 'domicilio' ? deliveryZone : '',
         clientName: formData.nombre,
         clientPhone: cleanPhone,
-        clientAddress: formData.direccion,
+        clientAddress: deliveryMethod === 'domicilio' ? formData.direccion : 'Recoge en Local',
         status: 'pendiente'
       };
       onPlaceOrder(orderData);
@@ -163,20 +192,92 @@ Quedo atento a su confirmación. ¡Muchas gracias!`;
                 {errors.telefono && <p className="form-error">{errors.telefono}</p>}
               </div>
 
-              <div className="form-group">
-                <label className="form-label" htmlFor="direccion">Dirección de Entrega</label>
-                <textarea
-                  id="direccion"
-                  name="direccion"
-                  value={formData.direccion}
-                  onChange={handleChange}
-                  className="form-control"
-                  rows="3"
-                  placeholder="Calle, carrera, apartamento, conjunto, barrio..."
-                ></textarea>
-                {errors.direccion && <p className="form-error">{errors.direccion}</p>}
+              {/* Delivery Method Selector */}
+              <div className="form-group" style={{ marginBottom: '16px' }}>
+                <label className="form-label">Método de Entrega</label>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', marginTop: '6px' }}>
+                  <button
+                    type="button"
+                    onClick={() => setDeliveryMethod('domicilio')}
+                    style={{
+                      display: 'flex',
+                      flexDirection: 'column',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      padding: '12px 8px',
+                      borderRadius: '10px',
+                      border: deliveryMethod === 'domicilio' ? '2px solid var(--accent-gold)' : '1px solid var(--border-color)',
+                      backgroundColor: deliveryMethod === 'domicilio' ? 'var(--accent-gold-light)' : 'var(--bg-primary)',
+                      color: 'var(--text-primary)',
+                      cursor: 'pointer',
+                      transition: 'all 0.2s ease',
+                      gap: '4px'
+                    }}
+                  >
+                    <span style={{ fontSize: '1.4rem' }}>🏍️</span>
+                    <span style={{ fontSize: '0.85rem', fontWeight: '600' }}>Domicilio</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setDeliveryMethod('local')}
+                    style={{
+                      display: 'flex',
+                      flexDirection: 'column',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      padding: '12px 8px',
+                      borderRadius: '10px',
+                      border: deliveryMethod === 'local' ? '2px solid var(--accent-gold)' : '1px solid var(--border-color)',
+                      backgroundColor: deliveryMethod === 'local' ? 'var(--accent-gold-light)' : 'var(--bg-primary)',
+                      color: 'var(--text-primary)',
+                      cursor: 'pointer',
+                      transition: 'all 0.2s ease',
+                      gap: '4px'
+                    }}
+                  >
+                    <span style={{ fontSize: '1.4rem' }}>🏬</span>
+                    <span style={{ fontSize: '0.85rem', fontWeight: '600' }}>Recoger en Local</span>
+                  </button>
+                </div>
               </div>
 
+              {/* Delivery Zone Selector */}
+              {deliveryMethod === 'domicilio' && (
+                <div className="form-group" style={{ marginBottom: '16px' }}>
+                  <label className="form-label" htmlFor="deliveryZone">Zona de Envío</label>
+                  <select
+                    id="deliveryZone"
+                    name="deliveryZone"
+                    value={deliveryZone}
+                    onChange={(e) => setDeliveryZone(e.target.value)}
+                    className="form-control"
+                    style={{ marginTop: '6px', cursor: 'pointer' }}
+                  >
+                    <option value="cercano">Casco Urbano / Cercano (+$4.000)</option>
+                    <option value="medio">Barrios Alejados / Medio (+$6.000)</option>
+                    <option value="lejano">Afueras / Lejano (+$8.000)</option>
+                  </select>
+                </div>
+              )}
+
+              {/* Address input */}
+              {deliveryMethod === 'domicilio' && (
+                <div className="form-group">
+                  <label className="form-label" htmlFor="direccion">Dirección de Entrega</label>
+                  <textarea
+                    id="direccion"
+                    name="direccion"
+                    value={formData.direccion}
+                    onChange={handleChange}
+                    className="form-control"
+                    rows="3"
+                    placeholder="Calle, carrera, apartamento, conjunto, barrio..."
+                  ></textarea>
+                  {errors.direccion && <p className="form-error">{errors.direccion}</p>}
+                </div>
+              )}
+
+              {/* Payment Method Selector */}
               <div className="form-group" style={{ marginBottom: '16px' }}>
                 <label className="form-label">Método de Pago</label>
                 <div id="tour-payment-selector" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', marginTop: '6px' }}>
@@ -203,7 +304,7 @@ Quedo atento a su confirmación. ¡Muchas gracias!`;
                   </button>
                   <button
                     type="button"
-                    onClick={() => setPaymentMethod('nequi')}
+                    onClick={() => setPaymentMethod('transfiya')}
                     style={{
                       display: 'flex',
                       flexDirection: 'column',
@@ -211,8 +312,8 @@ Quedo atento a su confirmación. ¡Muchas gracias!`;
                       justifyContent: 'center',
                       padding: '12px 8px',
                       borderRadius: '10px',
-                      border: paymentMethod === 'nequi' ? '2px solid #e6007e' : '1px solid var(--border-color)',
-                      backgroundColor: paymentMethod === 'nequi' ? 'rgba(230, 0, 126, 0.08)' : 'var(--bg-primary)',
+                      border: paymentMethod === 'transfiya' ? '2px solid #25D366' : '1px solid var(--border-color)',
+                      backgroundColor: paymentMethod === 'transfiya' ? 'rgba(37, 211, 102, 0.08)' : 'var(--bg-primary)',
                       color: 'var(--text-primary)',
                       cursor: 'pointer',
                       transition: 'all 0.2s ease',
@@ -220,12 +321,13 @@ Quedo atento a su confirmación. ¡Muchas gracias!`;
                     }}
                   >
                     <span style={{ fontSize: '1.4rem' }}>💳</span>
-                    <span style={{ fontSize: '0.85rem', fontWeight: '600' }}>Nequi / Bancolombia</span>
+                    <span style={{ fontSize: '0.85rem', fontWeight: '600' }}>Pago por Llave (Transfiya)</span>
                   </button>
                 </div>
               </div>
 
-              {paymentMethod === 'nequi' && (
+              {/* Transfiya Instructions */}
+              {paymentMethod === 'transfiya' && (
                 <div style={{
                   padding: '16px',
                   backgroundColor: 'var(--bg-secondary)',
@@ -236,7 +338,7 @@ Quedo atento a su confirmación. ¡Muchas gracias!`;
                 }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '12px' }}>
                     <div style={{
-                      backgroundColor: '#e6007e',
+                      backgroundColor: '#25D366',
                       color: 'white',
                       padding: '4px 8px',
                       borderRadius: '6px',
@@ -244,27 +346,22 @@ Quedo atento a su confirmación. ¡Muchas gracias!`;
                       fontWeight: 'bold',
                       letterSpacing: '0.5px'
                     }}>
-                      TRANSFERENCIA
+                      LLAVE / TRANSFIYA
                     </div>
                     <span style={{ fontSize: '0.85rem', fontWeight: '600', color: 'var(--text-primary)' }}>
-                      Cuentas Disponibles
+                      Enviar a Celular
                     </span>
                   </div>
 
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                    {/* Celular Nequi / Transfiya */}
                     <div style={{ padding: '12px', backgroundColor: 'var(--bg-primary)', borderRadius: '8px', border: '1px solid var(--border-color)' }}>
-                      <span style={{ fontSize: '0.7rem', color: '#e6007e', fontWeight: 'bold', textTransform: 'uppercase', display: 'block', marginBottom: '4px' }}>
-                        Opción 1: Nequi / Daviplata / Transfiya
+                      <span style={{ fontSize: '0.7rem', color: '#25D366', fontWeight: 'bold', textTransform: 'uppercase', display: 'block', marginBottom: '4px' }}>
+                        Número de Celular Destino
                       </span>
                       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                         <div>
-                          <span style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', display: 'block' }}>Celular destino (Cualquier Banco)</span>
-                          <strong style={{ fontSize: '0.95rem' }}>
-                            <a href="tel:3126602583" style={{ color: 'var(--text-primary)', textDecoration: 'underline' }} title="Presiona para llamar o agregar a contactos">
-                              312 660 2583
-                            </a>
-                          </strong>
+                          <span style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', display: 'block' }}>Transfiya (Cualquier Banco / Nequi / Daviplata)</span>
+                          <strong style={{ fontSize: '0.95rem', color: 'var(--text-primary)' }}>312 660 2583</strong>
                         </div>
                         <button 
                           type="button"
@@ -277,36 +374,15 @@ Quedo atento a su confirmación. ¡Muchas gracias!`;
                       </div>
                     </div>
 
-                    {/* Bancolombia Ahorros */}
-                    <div style={{ padding: '12px', backgroundColor: 'var(--bg-primary)', borderRadius: '8px', border: '1px solid var(--border-color)', borderLeft: '3px solid var(--accent-gold)' }}>
-                      <span style={{ fontSize: '0.7rem', color: 'var(--accent-gold)', fontWeight: 'bold', textTransform: 'uppercase', display: 'block', marginBottom: '4px' }}>
-                        Opción 2: Bancolombia (Ejemplo)
-                      </span>
-                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                        <div>
-                          <span style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', display: 'block' }}>Bancolombia • Ahorros</span>
-                          <strong style={{ fontSize: '0.95rem' }}>507-123456-78</strong>
-                        </div>
-                        <button 
-                          type="button"
-                          onClick={() => handleCopy('507-123456-78', 'cuenta')}
-                          className="btn btn-secondary" 
-                          style={{ padding: '6px 12px', fontSize: '0.75rem', textTransform: 'none', borderRadius: '6px' }}
-                        >
-                          {copiedText === 'cuenta' ? '¡Copiado!' : 'Copiar'}
-                        </button>
-                      </div>
-                    </div>
-
                     {/* Valor a pagar */}
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '10px 12px', backgroundColor: 'var(--bg-primary)', borderRadius: '8px', border: '1px solid var(--border-color)' }}>
                       <div>
                         <span style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', display: 'block' }}>Valor exacto a transferir</span>
-                        <strong style={{ fontSize: '1rem', color: 'var(--accent-gold)' }}>{formatPrice(total)}</strong>
+                        <strong style={{ fontSize: '1rem', color: 'var(--accent-gold)' }}>{formatPrice(finalTotal)}</strong>
                       </div>
                       <button 
                         type="button"
-                        onClick={() => handleCopy(total.toString(), 'valor')}
+                        onClick={() => handleCopy(finalTotal.toString(), 'valor')}
                         className="btn btn-secondary" 
                         style={{ padding: '6px 12px', fontSize: '0.75rem', textTransform: 'none', borderRadius: '6px' }}
                       >
@@ -317,11 +393,36 @@ Quedo atento a su confirmación. ¡Muchas gracias!`;
 
                   <div style={{ marginTop: '14px' }}>
                     <span style={{ display: 'block', fontSize: '0.75rem', color: 'var(--text-secondary)', marginTop: '8px', textAlign: 'center', lineHeight: '1.4' }}>
-                      Realiza la transferencia desde tu banco o app Nequi. Toma una captura de pantalla del comprobante y <strong>recuerda mandar el comprobante de pago al número de WhatsApp</strong> al finalizar tu pedido.
+                      Realiza la transferencia desde tu banco preferido usando Transfiya o envía directo al celular. Toma captura del comprobante y <strong>adjúntala en el chat de WhatsApp</strong> que se abrirá a continuación.
                     </span>
                   </div>
                 </div>
               )}
+
+              {/* Desglose de totales */}
+              <div style={{
+                padding: '16px',
+                backgroundColor: 'var(--bg-secondary)',
+                border: '1px solid var(--border-color)',
+                borderRadius: '12px',
+                marginBottom: '16px',
+                marginTop: '16px'
+              }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
+                  <span style={{ color: 'var(--text-secondary)' }}>Subtotal:</span>
+                  <span style={{ fontWeight: '600', color: 'var(--text-primary)' }}>{formatPrice(total)}</span>
+                </div>
+                {deliveryMethod === 'domicilio' && (
+                  <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
+                    <span style={{ color: 'var(--text-secondary)' }}>Costo Domicilio:</span>
+                    <span style={{ fontWeight: '600', color: 'var(--text-primary)' }}>{formatPrice(deliveryFee)}</span>
+                  </div>
+                )}
+                <div style={{ display: 'flex', justifyContent: 'space-between', borderTop: '1px solid var(--border-color)', paddingTop: '8px' }}>
+                  <span style={{ fontWeight: 'bold', color: 'var(--text-primary)' }}>Total Final:</span>
+                  <span style={{ fontWeight: 'bold', color: 'var(--accent-gold)' }}>{formatPrice(finalTotal)}</span>
+                </div>
+              </div>
 
               <button id="tour-submit-order-btn" type="submit" className="btn btn-primary" style={{ width: '100%', marginTop: '12px' }}>
                 Hacer Pedido por WhatsApp <Send size={18} style={{ marginLeft: '6px' }} />
@@ -336,13 +437,33 @@ Quedo atento a su confirmación. ¡Muchas gracias!`;
             <h3 className="modal-title" style={{ textAlign: 'center', marginBottom: '16px' }}>
               ¡Pedido Enviado!
             </h3>
-            <p style={{ color: 'var(--text-secondary)', marginBottom: '24px', fontSize: '0.95rem' }}>
+            <p style={{ color: 'var(--text-secondary)', marginBottom: '24px', fontSize: '0.95rem', textAlign: 'center' }}>
               Hemos abierto WhatsApp para enviar tu pedido al restaurante. 
               <br /><br />
-              El dueño confirmará tu pedido en breve y te solicitará tu **ubicación en tiempo real** por el chat para realizar la entrega a domicilio.
+              El restaurante confirmará tu pedido en breve. Si seleccionaste domicilio, te solicitaremos tu **ubicación en tiempo real** para la entrega.
             </p>
+            
+            {/* Cross-selling box */}
+            <div style={{ marginTop: '20px', padding: '16px', backgroundColor: 'var(--bg-secondary)', borderRadius: '8px', border: '1px solid var(--border-color)', textAlign: 'center', marginBottom: '16px' }}>
+              <p style={{ fontSize: '0.9rem', marginBottom: '10px', color: 'var(--text-primary)', fontWeight: '600' }}>
+                ¿Se te olvidó algo o quieres pedir algo más?
+              </p>
+              <button 
+                onClick={() => {
+                  clearCart();
+                  onClose();
+                  const menuSection = document.getElementById('menu');
+                  if (menuSection) menuSection.scrollIntoView({ behavior: 'smooth' });
+                }}
+                className="btn btn-secondary" 
+                style={{ width: '100%', textTransform: 'none', letterSpacing: '0.5px' }}
+              >
+                🍔 Sí, pedir algo más
+              </button>
+            </div>
+
             <button onClick={handleCloseSuccess} className="btn btn-primary" style={{ width: '100%' }}>
-              Volver al Inicio
+              Entendido / Volver al Inicio
             </button>
           </div>
         )}

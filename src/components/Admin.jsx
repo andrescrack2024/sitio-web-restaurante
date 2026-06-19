@@ -22,10 +22,11 @@ export default function Admin({
   const [formData, setFormData] = useState({
     name: '',
     price: '',
-    category: 'rapida',
+    category: 'hamburguesas',
     description: '',
     badge: '',
-    image: ''
+    image: '',
+    ingredients: ''
   });
   const [errors, setErrors] = useState({});
   const [isUploading, setIsUploading] = useState(false);
@@ -109,10 +110,11 @@ export default function Admin({
 
   const getCategoryLabel = (cat) => {
     switch (cat) {
-      case 'rapida': return 'Comida Rápida';
-      case 'acompanamientos': return 'Acompañamientos';
-      case 'helados': return 'Helados';
+      case 'hamburguesas': return 'Hamburguesas';
+      case 'perros': return 'Perros';
+      case 'salchipapas': return 'Salchipapas';
       case 'bebidas': return 'Bebidas';
+      case 'especiales': return 'Especiales / Combos';
       default: return cat;
     }
   };
@@ -124,13 +126,21 @@ export default function Admin({
       return;
     }
     
-    const itemsHtml = order.items.map(item => `
-      <tr>
-        <td style="padding: 15px 0; font-size: 24px; vertical-align: top;">${item.quantity}x</td>
-        <td style="padding: 15px 0; font-size: 24px; vertical-align: top;"><b>${item.name}</b></td>
-        <td style="text-align: right; padding: 15px 0; font-size: 24px; vertical-align: top;">$${(item.price * item.quantity).toLocaleString('es-CO')}</td>
-      </tr>
-    `).join('');
+    const itemsHtml = order.items.map(item => {
+      const saucesHtml = item.sauces && item.sauces.length > 0
+        ? `<div style="font-size: 18px; font-style: italic; margin-top: 4px; color: #333;">Salsas: ${item.sauces.join(', ')}</div>`
+        : '';
+      return `
+        <tr>
+          <td style="padding: 15px 0; font-size: 24px; vertical-align: top;">${item.quantity}x</td>
+          <td style="padding: 15px 0; font-size: 24px; vertical-align: top;">
+            <b>${item.name}</b>
+            ${saucesHtml}
+          </td>
+          <td style="text-align: right; padding: 15px 0; font-size: 24px; vertical-align: top;">$${(item.price * item.quantity).toLocaleString('es-CO')}</td>
+        </tr>
+      `;
+    }).join('');
 
     const dateFormatted = new Date(order.createdAt).toLocaleString('es-CO', {
       dateStyle: 'short',
@@ -233,11 +243,10 @@ export default function Admin({
             </div>
             
             <div class="solid-divider"></div>
-            
-            <div style="font-size: 24px; margin-bottom: 15px;"><b>PAGO:</b> ${order.paymentMethod === 'nequi' ? '💳 TRANSFERENCIA' : '💵 EFECTIVO CONTRA ENTREGA'}</div>
+                       <div style="font-size: 24px; margin-bottom: 15px;"><b>PAGO:</b> ${(order.paymentMethod === 'transfiya' || order.paymentMethod === 'nequi') ? '💳 TRANSFERENCIA (TRANSFIYA)' : '💵 EFECTIVO CONTRA ENTREGA'}</div>
             
             <div class="badge">
-              ${order.status === 'pendiente' && order.paymentMethod === 'nequi' 
+              ${order.status === 'pendiente' && (order.paymentMethod === 'transfiya' || order.paymentMethod === 'nequi') 
                 ? '⚠️ PAGO POR VERIFICAR (WhatsApp)' 
                 : '⚠️ PEDIDO AUTORIZADO - COCINA'}
             </div>
@@ -258,6 +267,26 @@ export default function Admin({
       </html>
     `);
     printWindow.document.close();
+  };
+
+  const handleAcceptOrder = (order) => {
+    // 1. Change status to 'en cocina'
+    onUpdateOrderStatus(order.id, 'en cocina');
+    
+    // 2. Open print dialog
+    printComanda(order);
+    
+    // 3. Open WhatsApp chat with confirmation
+    const orderNum = order.id ? order.id.slice(-4).toUpperCase() : 'N/A';
+    const message = `¡Hola, ${order.clientName}! 🍔 Tu pedido #${orderNum} de Rápido & Deli ya fue recibido y entró en preparación en la cocina. En breve te enviaremos el comprobante. ¡Muchas gracias!`;
+    
+    let phone = order.clientPhone.replace(/\D/g, '');
+    if (phone.length === 10 && !phone.startsWith('57')) {
+      phone = '57' + phone;
+    }
+    
+    const url = `https://wa.me/${phone}?text=${encodeURIComponent(message)}`;
+    window.open(url, '_blank');
   };
 
   const sendStatusWhatsApp = (order) => {
@@ -291,10 +320,11 @@ export default function Admin({
     setFormData({
       name: '',
       price: '',
-      category: 'rapida',
+      category: 'hamburguesas',
       description: '',
       badge: '',
-      image: ''
+      image: '',
+      ingredients: ''
     });
     setErrors({});
     setIsFormOpen(true);
@@ -308,7 +338,10 @@ export default function Admin({
       category: product.category,
       description: product.description || '',
       badge: product.badge || '',
-      image: product.image || ''
+      image: product.image || '',
+      ingredients: Array.isArray(product.ingredients) 
+        ? product.ingredients.join(', ') 
+        : product.ingredients || ''
     });
     setErrors({});
     setIsFormOpen(true);
@@ -348,7 +381,10 @@ export default function Admin({
       category: formData.category,
       description: formData.description.trim(),
       badge: formData.badge.trim() || undefined,
-      image: formData.image.trim() || defaultImage
+      image: formData.image.trim() || defaultImage,
+      ingredients: formData.ingredients.trim()
+        ? formData.ingredients.split(',').map(i => i.trim()).filter(i => i !== '')
+        : []
     };
 
     if (editingProduct) {
@@ -582,11 +618,11 @@ export default function Admin({
                                 fontWeight: '600',
                                 padding: '2px 8px',
                                 borderRadius: '4px',
-                                backgroundColor: order.paymentMethod === 'nequi' ? 'rgba(0,112,243,0.1)' : 'rgba(37,211,102,0.1)',
-                                color: order.paymentMethod === 'nequi' ? '#3291ff' : '#25d366'
+                                backgroundColor: (order.paymentMethod === 'transfiya' || order.paymentMethod === 'nequi') ? 'rgba(37,211,102,0.1)' : 'rgba(222,142,0,0.1)',
+                                color: (order.paymentMethod === 'transfiya' || order.paymentMethod === 'nequi') ? '#25d366' : 'var(--accent-gold)'
                               }}
                             >
-                              {order.paymentMethod === 'nequi' ? '💳 Transferencia' : '💵 Domicilio Contra Entrega'}
+                              {(order.paymentMethod === 'transfiya' || order.paymentMethod === 'nequi') ? '💳 Transferencia' : '💵 Contra Entrega'}
                             </span>
                           </p>
                         </div>
@@ -597,9 +633,16 @@ export default function Admin({
                         <h4 style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', textTransform: 'uppercase', marginBottom: '10px', letterSpacing: '0.5px', fontWeight: '700' }}>Detalles del Pedido</h4>
                         <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
                           {order.items && order.items.map((item, idx) => (
-                            <div key={idx} style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.95rem' }}>
-                              <span>• {item.name} <b style={{ color: 'var(--accent-gold)' }}>x{item.quantity}</b></span>
-                              <span style={{ color: 'var(--text-secondary)' }}>{formatPrice(item.price * item.quantity)}</span>
+                            <div key={idx} style={{ display: 'flex', flexDirection: 'column', fontSize: '0.95rem', borderBottom: '1px solid var(--border-color)', paddingBottom: '4px', marginBottom: '4px' }}>
+                              <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                                <span>• {item.name} <b style={{ color: 'var(--accent-gold)' }}>x{item.quantity}</b></span>
+                                <span style={{ color: 'var(--text-secondary)' }}>{formatPrice(item.price * item.quantity)}</span>
+                              </div>
+                              {item.sauces && item.sauces.length > 0 && (
+                                <span style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', fontStyle: 'italic', paddingLeft: '12px' }}>
+                                  Salsas: {item.sauces.join(', ')}
+                                </span>
+                              )}
                             </div>
                           ))}
                         </div>
@@ -614,8 +657,31 @@ export default function Admin({
                     <div style={{ borderTop: '1px solid var(--border-color)', width: '100%' }}></div>
 
                     {/* Bottom Actions Row */}
-                    <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '12px', alignItems: 'center' }}>
-                      {order.paymentMethod === 'nequi' && order.status === 'pendiente' && (
+                    <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '12px', alignItems: 'center', flexWrap: 'wrap' }}>
+                      {order.status === 'pendiente' && (
+                        <button
+                          type="button"
+                          onClick={() => handleAcceptOrder(order)}
+                          className="btn btn-primary"
+                          style={{
+                            textTransform: 'none',
+                            fontSize: '0.85rem',
+                            padding: '8px 16px',
+                            backgroundColor: '#25d366',
+                            borderColor: '#25d366',
+                            color: '#ffffff',
+                            borderRadius: '30px',
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '6px',
+                            fontWeight: '600'
+                          }}
+                        >
+                          🟢 Tomar Pedido / Aceptar
+                        </button>
+                      )}
+                      
+                      {(order.paymentMethod === 'transfiya' || order.paymentMethod === 'nequi') && order.status === 'pendiente' && (
                         <button
                           type="button"
                           onClick={() => onUpdateOrderStatus(order.id, 'en cocina')}
@@ -833,10 +899,11 @@ export default function Admin({
                     className="form-control"
                     style={{ appearance: 'auto', WebkitAppearance: 'auto' }}
                   >
-                    <option value="rapida">Comida Rápida</option>
-                    <option value="acompanamientos">Acompañamientos</option>
-                    <option value="helados">Helados</option>
+                    <option value="hamburguesas">Hamburguesas</option>
+                    <option value="perros">Perros</option>
+                    <option value="salchipapas">Salchipapas</option>
                     <option value="bebidas">Bebidas</option>
+                    <option value="especiales">Especiales / Combos</option>
                   </select>
                 </div>
               </div>
@@ -900,6 +967,19 @@ export default function Admin({
                   />
                 </div>
               )}
+
+              <div className="form-group">
+                <label className="form-label" htmlFor="prod-ingredients">Ingredientes (Separados por coma)</label>
+                <input
+                  type="text"
+                  id="prod-ingredients"
+                  name="ingredients"
+                  value={formData.ingredients}
+                  onChange={handleChange}
+                  className="form-control"
+                  placeholder="Ej: Carne de res, Queso mozzarella, Tocineta"
+                />
+              </div>
 
               <div className="form-group">
                 <label className="form-label" htmlFor="prod-description">Descripción del Plato</label>

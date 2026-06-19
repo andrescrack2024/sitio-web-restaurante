@@ -49,16 +49,24 @@ export default function Cart({
             </div>
           ) : (
             cartItems.map((item) => (
-              <div key={item.id} className="cart-item animate-slide-up">
+              <div key={item.cartKey} className="cart-item animate-slide-up">
                 <img src={item.image} alt={item.name} className="cart-item-img" />
                 
                 <div className="cart-item-info">
                   <h4 className="cart-item-name">{item.name}</h4>
+                  
+                  {/* Selected sauces */}
+                  {item.sauces && item.sauces.length > 0 && (
+                    <p style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', fontStyle: 'italic', margin: '2px 0 6px 0' }}>
+                      Salsas: {item.sauces.join(', ')}
+                    </p>
+                  )}
+                  
                   <span className="cart-item-price">{formatPrice(item.price)}</span>
                   
                   <div className="cart-item-actions">
                     <button
-                      onClick={() => updateQuantity(item.id, -1)}
+                      onClick={() => updateQuantity(item.cartKey, -1)}
                       className="quantity-btn"
                       aria-label="Disminuir cantidad"
                     >
@@ -66,7 +74,7 @@ export default function Cart({
                     </button>
                     <span className="cart-item-quantity">{item.quantity}</span>
                     <button
-                      onClick={() => updateQuantity(item.id, 1)}
+                      onClick={() => updateQuantity(item.cartKey, 1)}
                       className="quantity-btn"
                       aria-label="Aumentar cantidad"
                     >
@@ -76,7 +84,7 @@ export default function Cart({
                 </div>
 
                 <button
-                  onClick={() => removeFromCart(item.id)}
+                  onClick={() => removeFromCart(item.cartKey)}
                   className="btn-remove-item"
                   title="Eliminar artículo"
                   aria-label="Eliminar artículo"
@@ -97,6 +105,7 @@ export default function Cart({
             
             <button
               onClick={onProceedToCheckout}
+              id="tour-checkout-btn"
               className="btn btn-primary btn-checkout"
             >
               Confirmar Datos de Entrega

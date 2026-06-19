@@ -103,18 +103,18 @@ export default function App() {
       if (!migrationCheckedRef.current) {
         migrationCheckedRef.current = true; // Mark as checked immediately to avoid any re-runs
 
-        const hasGourmet = items.some(item => 
-          item.name === 'Carpaccio de Lomo' || 
-          item.name === 'Crema de Tomates Rostizados' ||
-          item.category === 'entradas' ||
-          item.category === 'fuertes' ||
-          item.category === 'postres'
+        const hasOldCategories = items.some(item => 
+          item.category === 'rapida' || 
+          item.category === 'acompanamientos' || 
+          item.category === 'helados' ||
+          item.name === 'Hamburguesa Clásica con Queso'
         );
         const hasOutdatedImages = items.some(item => 
           item.image && item.image.includes('w=800')
         );
+        const missingIngredients = items.length > 0 && !items.some(item => item.ingredients && item.ingredients.length > 0);
 
-        if (hasGourmet || hasOutdatedImages || items.length === 0) {
+        if (hasOldCategories || hasOutdatedImages || missingIngredients || items.length === 0) {
           console.log("Migración o inicialización requerida. Limpiando colección...");
           setLoading(true);
 
@@ -246,27 +246,31 @@ export default function App() {
     setTheme((prev) => (prev === 'dark' ? 'light' : 'dark'));
   };
 
-  const addToCart = (item) => {
+  const addToCart = (item, selectedSauces = []) => {
+    const isCustomizable = item.category === 'hamburguesas' || item.category === 'perros' || item.category === 'salchipapas';
+    const sauces = isCustomizable ? [...selectedSauces].sort() : [];
+    const cartKey = `${item.id}-${sauces.join(',')}`;
+
     setCartItems((prevItems) => {
-      const existing = prevItems.find((i) => String(i.id) === String(item.id));
+      const existing = prevItems.find((i) => i.cartKey === cartKey);
       if (existing) {
         return prevItems.map((i) =>
-          String(i.id) === String(item.id) ? { ...i, quantity: i.quantity + 1 } : i
+          i.cartKey === cartKey ? { ...i, quantity: i.quantity + 1 } : i
         );
       }
-      return [...prevItems, { ...item, quantity: 1 }];
+      return [...prevItems, { ...item, cartKey, sauces, quantity: 1 }];
     });
   };
 
-  const removeFromCart = (id) => {
-    setCartItems((prevItems) => prevItems.filter((item) => String(item.id) !== String(id)));
+  const removeFromCart = (cartKey) => {
+    setCartItems((prevItems) => prevItems.filter((item) => item.cartKey !== cartKey));
   };
 
-  const updateQuantity = (id, amount) => {
+  const updateQuantity = (cartKey, amount) => {
     setCartItems((prevItems) =>
       prevItems
         .map((item) => {
-          if (String(item.id) === String(id)) {
+          if (item.cartKey === cartKey) {
             const newQuantity = item.quantity + amount;
             return { ...item, quantity: newQuantity };
           }
@@ -427,10 +431,13 @@ export default function App() {
         onClose={() => {
           setIsTourOpen(false);
           setIsCheckoutOpen(false);
+          setIsCartOpen(false);
         }}
         addToCart={addToCart}
         clearCart={clearCart}
         menuItems={menuItems}
+        openCart={() => setIsCartOpen(true)}
+        closeCart={() => setIsCartOpen(false)}
         openCheckout={() => {
           setIsCartOpen(false);
           setIsCheckoutOpen(true);
