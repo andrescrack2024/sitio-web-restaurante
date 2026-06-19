@@ -14,9 +14,10 @@ export default function OnboardingTour({
   openCheckout, 
   closeCheckout, 
   cartCount,
-  cartItems
+  cartItems,
+  step,
+  setStep
 }) {
-  const [step, setStep] = useState(0);
   const [rect, setRect] = useState(null);
   const [didAutoAdd, setDidAutoAdd] = useState(false);
 

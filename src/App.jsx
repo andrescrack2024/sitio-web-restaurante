@@ -30,6 +30,8 @@ export default function App() {
   const [isCheckoutOpen, setIsCheckoutOpen] = useState(false);
   const [view, setView] = useState(() => window.location.hash === '#admin' ? 'admin' : 'shop');
   const [isTourOpen, setIsTourOpen] = useState(false);
+  const [tourStep, setTourStep] = useState(0);
+  const [tourDismissed, setTourDismissed] = useState(false);
   const [hasAddedToCart, setHasAddedToCart] = useState(false);
   const [orders, setOrders] = useState(() => {
     try {
@@ -53,6 +55,7 @@ export default function App() {
       
       if (!tourCompleted) {
         const timer = setTimeout(() => {
+          setTourStep(0);
           setIsTourOpen(true);
         }, 1500);
         return () => clearTimeout(timer);
@@ -269,6 +272,12 @@ export default function App() {
       return [...prevItems, { ...item, cartKey, sauces, quantity: 1 }];
     });
     setHasAddedToCart(true);
+
+    // Auto-open guide at step 3 to guide the customer step-by-step
+    if (!tourDismissed && (!isTourOpen || tourStep < 3)) {
+      setTourStep(3);
+      setIsTourOpen(true);
+    }
   };
 
   const updateCartItemSauces = (cartKey, newSauces) => {
@@ -407,7 +416,11 @@ export default function App() {
         toggleTheme={toggleTheme}
         cartCount={cartCount}
         openCart={() => setIsCartOpen(true)}
-        startTour={() => setIsTourOpen(true)}
+        startTour={() => {
+          setTourDismissed(false);
+          setTourStep(0);
+          setIsTourOpen(true);
+        }}
         hasAddedToCart={hasAddedToCart}
         dismissCartHint={() => setHasAddedToCart(false)}
       />
@@ -472,6 +485,7 @@ export default function App() {
           setIsTourOpen(false);
           setIsCartOpen(false);
           setIsCheckoutOpen(false);
+          setTourDismissed(true);
         }}
         addToCart={addToCart}
         clearCart={clearCart}
@@ -485,6 +499,8 @@ export default function App() {
         closeCheckout={() => setIsCheckoutOpen(false)}
         cartCount={cartCount}
         cartItems={cartItems}
+        step={tourStep}
+        setStep={setTourStep}
       />
     </>
   );
