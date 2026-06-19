@@ -2113,3 +2113,25 @@ textarea:focus-visible,
   background-color: var(--accent-gold-light);
   transform: translateY(-2px);
 }
+
+/* Custom, permanently visible scrollbar for the cart body */
+.cart-body::-webkit-scrollbar {
+  width: 8px !important;
+  display: block !important;
+}
+
+.cart-body::-webkit-scrollbar-track {
+  background: var(--bg-secondary) !important;
+  border-radius: 4px;
+}
+
+.cart-body::-webkit-scrollbar-thumb {
+  background: var(--accent-gold) !important;
+  border-radius: 4px;
+  border: 2px solid var(--bg-secondary);
+}
+
+.cart-body {
+  scrollbar-width: thin;
+  scrollbar-color: var(--accent-gold) var(--bg-secondary);
+}

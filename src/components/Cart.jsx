@@ -375,15 +375,19 @@ Quedo atento a su confirmación. ¡Muchas gracias!`;
               {/* Delivery and Customer Form */}
               <div 
                 className="cart-checkout-form animate-slide-up" 
-                style={{ marginTop: '24px', borderTop: '2px solid var(--border-color)', paddingTop: '20px' }}
+                style={{ marginTop: '20px', borderTop: '2px solid var(--border-color)', paddingTop: '16px' }}
               >
-                <h3 style={{ fontSize: '1.1rem', fontWeight: '700', marginBottom: '16px', fontFamily: 'var(--font-serif)', color: 'var(--text-primary)' }}>
+                <h3 style={{ fontSize: '1.1rem', fontWeight: '700', marginBottom: '4px', fontFamily: 'var(--font-serif)', color: 'var(--text-primary)' }}>
                   📍 Confirmar Datos de Entrega
                 </h3>
+                <div style={{ fontSize: '0.78rem', color: 'var(--accent-gold)', marginBottom: '14px', display: 'flex', alignItems: 'center', gap: '6px', fontWeight: '600' }}>
+                  <span>Desliza para ver dirección y pago</span>
+                  <span style={{ animation: 'bounce-cart-hint 1.5s infinite', display: 'inline-block' }}>👇</span>
+                </div>
 
                 <form onSubmit={handleSubmit}>
                   {/* Name Input */}
-                  <div className="form-group" style={{ marginBottom: '14px' }}>
+                  <div className="form-group" style={{ marginBottom: '10px' }}>
                     <label className="form-label" htmlFor="nombre" style={{ fontSize: '0.85rem', fontWeight: '600' }}>Nombre Completo</label>
                     <input
                       type="text"
@@ -399,7 +403,7 @@ Quedo atento a su confirmación. ¡Muchas gracias!`;
                   </div>
 
                   {/* Phone Input */}
-                  <div className="form-group" style={{ marginBottom: '14px' }}>
+                  <div className="form-group" style={{ marginBottom: '10px' }}>
                     <label className="form-label" htmlFor="telefono" style={{ fontSize: '0.85rem', fontWeight: '600' }}>Número de Teléfono</label>
                     <input
                       type="tel"
@@ -415,7 +419,7 @@ Quedo atento a su confirmación. ¡Muchas gracias!`;
                   </div>
 
                   {/* Delivery Method Selector */}
-                  <div className="form-group" style={{ marginBottom: '14px' }}>
+                  <div className="form-group" style={{ marginBottom: '10px' }}>
                     <label className="form-label" style={{ fontSize: '0.85rem', fontWeight: '600' }}>Método de Entrega</label>
                     <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px', marginTop: '4px' }}>
                       <button
@@ -465,7 +469,7 @@ Quedo atento a su confirmación. ¡Muchas gracias!`;
 
                   {/* Neighborhood Selector */}
                   {deliveryMethod === 'domicilio' && (
-                    <div className="form-group" style={{ marginBottom: '14px' }}>
+                    <div className="form-group" style={{ marginBottom: '10px' }}>
                       <label className="form-label" htmlFor="barrio" style={{ fontSize: '0.85rem', fontWeight: '600' }}>Barrio en Quibdó (Domicilio)</label>
                       <select
                         id="barrio"
@@ -486,7 +490,7 @@ Quedo atento a su confirmación. ¡Muchas gracias!`;
 
                   {/* Delivery Address Input */}
                   {deliveryMethod === 'domicilio' && (
-                    <div className="form-group" style={{ marginBottom: '14px' }}>
+                    <div className="form-group" style={{ marginBottom: '10px' }}>
                       <label className="form-label" htmlFor="direccion" style={{ fontSize: '0.85rem', fontWeight: '600' }}>Dirección de Entrega</label>
                       <textarea
                         id="direccion"
@@ -503,7 +507,7 @@ Quedo atento a su confirmación. ¡Muchas gracias!`;
                   )}
 
                   {/* Payment Method Selector */}
-                  <div className="form-group" style={{ marginBottom: '14px' }}>
+                  <div className="form-group" style={{ marginBottom: '10px' }}>
                     <label className="form-label" style={{ fontSize: '0.85rem', fontWeight: '600' }}>Método de Pago</label>
                     <div id="tour-payment-selector" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px', marginTop: '4px' }}>
                       <button
