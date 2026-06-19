@@ -1998,6 +1998,34 @@ button {
   border-color: var(--bg-primary) transparent transparent transparent;
 }
 
+.flow-hint-bubble.tooltip-bottom {
+  top: calc(100% + 10px);
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.flow-hint-bubble.tooltip-bottom::before {
+  content: '';
+  position: absolute;
+  bottom: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  border-width: 6px;
+  border-style: solid;
+  border-color: transparent transparent var(--accent-gold) transparent;
+}
+
+.flow-hint-bubble.tooltip-bottom::after {
+  content: '';
+  position: absolute;
+  bottom: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  border-width: 4px;
+  border-style: solid;
+  border-color: transparent transparent var(--bg-primary) transparent;
+}
+
 @keyframes bounce-hint {
   0%, 100% {
     transform: translate(-50%, 0);

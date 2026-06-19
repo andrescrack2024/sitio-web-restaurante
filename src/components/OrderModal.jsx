@@ -92,9 +92,9 @@ export default function OrderModal({ isOpen, onClose, cartItems, clearCart, onPl
     if (errors[name]) {
       setErrors((prev) => ({ ...prev, [name]: '' }));
     }
-    // Transition to payment hint once they've entered some details
+    // Transition to delivery hint once they've entered some details
     if (activeModalHint === 'details' && value.trim().length > 2) {
-      setActiveModalHint('payment');
+      setActiveModalHint('delivery');
     }
   };
 
@@ -290,13 +290,24 @@ Quedo atento a su confirmación. ¡Muchas gracias!`;
           </div>
 
           {/* Delivery Method Selector */}
-          <div className="form-group" style={{ marginBottom: '14px' }}>
+          <div className="form-group" style={{ marginBottom: '14px', position: 'relative' }}>
+            {activeModalHint === 'delivery' && (
+              <div className="flow-hint-bubble tooltip-top" style={{ bottom: 'calc(100% + 8px)' }}>
+                <span className="flow-hint-hand">👇</span>
+                <span>Selecciona cómo recibir tu pedido</span>
+              </div>
+            )}
             <label className="form-label" style={{ fontSize: '0.85rem', fontWeight: '600' }}>Método de Entrega</label>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px', marginTop: '4px' }}>
               <button
                 type="button"
                 className={`delivery-method-btn ${deliveryMethod === 'domicilio' ? 'active' : ''}`}
-                onClick={() => setDeliveryMethod('domicilio')}
+                onClick={() => {
+                  setDeliveryMethod('domicilio');
+                  if (activeModalHint === 'delivery' || activeModalHint === 'details') {
+                    setActiveModalHint('payment');
+                  }
+                }}
                 style={{
                   display: 'flex',
                   flexDirection: 'column',
@@ -317,7 +328,12 @@ Quedo atento a su confirmación. ¡Muchas gracias!`;
               <button
                 type="button"
                 className={`delivery-method-btn ${deliveryMethod === 'local' ? 'active' : ''}`}
-                onClick={() => setDeliveryMethod('local')}
+                onClick={() => {
+                  setDeliveryMethod('local');
+                  if (activeModalHint === 'delivery' || activeModalHint === 'details') {
+                    setActiveModalHint('payment');
+                  }
+                }}
                 style={{
                   display: 'flex',
                   flexDirection: 'column',
@@ -392,7 +408,7 @@ Quedo atento a su confirmación. ¡Muchas gracias!`;
                 className={`payment-method-btn ${paymentMethod === 'efectivo' ? 'active' : ''}`}
                 onClick={() => {
                   setPaymentMethod('efectivo');
-                  if (activeModalHint === 'payment' || activeModalHint === 'details') {
+                  if (activeModalHint === 'payment' || activeModalHint === 'details' || activeModalHint === 'delivery') {
                     setActiveModalHint('submit');
                   }
                 }}
@@ -418,7 +434,7 @@ Quedo atento a su confirmación. ¡Muchas gracias!`;
                 className={`payment-method-btn ${paymentMethod === 'transfiya' ? 'active' : ''}`}
                 onClick={() => {
                   setPaymentMethod('transfiya');
-                  if (activeModalHint === 'payment' || activeModalHint === 'details') {
+                  if (activeModalHint === 'payment' || activeModalHint === 'details' || activeModalHint === 'delivery') {
                     setActiveModalHint('submit');
                   }
                 }}

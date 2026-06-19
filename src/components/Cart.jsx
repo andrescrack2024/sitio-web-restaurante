@@ -133,8 +133,8 @@ export default function Cart({
                       
                       <div id={index === 0 ? "tour-cart-qty" : undefined} className="cart-item-actions" style={{ position: 'relative' }}>
                         {activeHint === 'qty' && index === 0 && (
-                          <div className="flow-hint-bubble tooltip-top" style={{ bottom: 'calc(100% + 8px)' }}>
-                            <span className="flow-hint-hand">👇</span>
+                          <div className="flow-hint-bubble tooltip-bottom">
+                            <span className="flow-hint-hand">👆</span>
                             <span>Ajusta la cantidad</span>
                           </div>
                         )}
