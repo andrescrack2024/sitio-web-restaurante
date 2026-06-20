@@ -31,6 +31,22 @@ export default function OrderModal({ isOpen, onClose, cartItems, clearCart, onPl
   const [barrio, setBarrio] = useState('El Jardín / Alrededores');
   const [copiedText, setCopiedText] = useState('');
 
+  const [showTransferReminder, setShowTransferReminder] = useState(false);
+  const [countdown, setCountdown] = useState(10);
+
+  // Handle countdown for transfer payment reminder
+  useEffect(() => {
+    let timer;
+    if (showTransferReminder && countdown > 0) {
+      timer = setTimeout(() => {
+        setCountdown(prev => prev - 1);
+      }, 1000);
+    } else if (showTransferReminder && countdown === 0) {
+      handleFinalSubmit();
+    }
+    return () => clearTimeout(timer);
+  }, [showTransferReminder, countdown]);
+
   // Auto-fill delivery address if local pickup is selected
   useEffect(() => {
     if (deliveryMethod === 'local') {
@@ -92,15 +108,10 @@ export default function OrderModal({ isOpen, onClose, cartItems, clearCart, onPl
     if (errors[name]) {
       setErrors((prev) => ({ ...prev, [name]: '' }));
     }
-    // Transition to delivery hint once they've entered some details
-    if (activeModalHint === 'details' && value.trim().length > 2) {
-      setActiveModalHint('delivery');
-    }
   };
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    if (!validate()) return;
+  function handleFinalSubmit() {
+    setShowTransferReminder(false);
 
     const itemsText = cartItems
       .map((item) => {
@@ -163,8 +174,26 @@ Quedo atento a su confirmación. ¡Muchas gracias!`;
     }
 
     const whatsappUrl = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(message)}`;
-    window.open(whatsappUrl, '_blank');
+    
+    // Attempt window.open first, fallback to redirect if blocked
+    const newWindow = window.open(whatsappUrl, '_blank');
+    if (!newWindow || newWindow.closed || typeof newWindow.closed === 'undefined') {
+      window.location.href = whatsappUrl;
+    }
+    
     setIsSuccess(true);
+  }
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    if (!validate()) return;
+
+    if (paymentMethod === 'transfiya') {
+      setShowTransferReminder(true);
+      setCountdown(10); // Start 10 second countdown
+    } else {
+      handleFinalSubmit();
+    }
   };
 
   const handleCloseSuccess = () => {
@@ -172,6 +201,38 @@ Quedo atento a su confirmación. ¡Muchas gracias!`;
     clearCart();
     onClose();
   };
+
+  if (showTransferReminder) {
+    return (
+      <div className="modal-overlay">
+        <div className="modal-content animate-slide-up" style={{ textAlign: 'center', padding: '32px 24px', maxWidth: '440px' }}>
+          <div className="warning-icon-wrapper animate-bounce" style={{ display: 'flex', justifyContent: 'center', marginBottom: '20px', color: 'var(--accent-gold)' }}>
+            <span style={{ fontSize: '4rem' }}>⚠️</span>
+          </div>
+          
+          <h3 style={{ fontSize: '1.3rem', fontWeight: '700', marginBottom: '12px', color: 'var(--text-primary)' }}>
+            Recordatorio de Pago
+          </h3>
+          
+          <p style={{ fontSize: '0.92rem', color: 'var(--text-secondary)', lineHeight: '1.6', marginBottom: '24px' }}>
+            Recuerda hacer la transferencia y enviar o adjuntar al WhatsApp el recibo del pago.
+          </p>
+
+          <button
+            onClick={handleFinalSubmit}
+            className="btn btn-primary"
+            style={{ width: '100%', marginBottom: '14px', minHeight: '48px', fontWeight: '600' }}
+          >
+            Enviar al WhatsApp
+          </button>
+
+          <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
+            Redirigiendo automáticamente en <strong style={{ color: 'var(--accent-gold)' }}>{countdown}</strong> segundos...
+          </p>
+        </div>
+      </div>
+    );
+  }
 
   if (isSuccess) {
     return (
@@ -252,7 +313,11 @@ Quedo atento a su confirmación. ¡Muchas gracias!`;
 
         <form id="tour-client-form" onSubmit={handleSubmit}>
           {/* Name Input */}
-          <div className="form-group" style={{ marginBottom: '14px', position: 'relative' }}>
+          <div 
+            className="form-group" 
+            style={{ marginBottom: '14px', position: 'relative' }}
+            onClick={() => setActiveModalHint('details')}
+          >
             {activeModalHint === 'details' && (
               <div className="flow-hint-bubble tooltip-top" style={{ bottom: 'calc(100% + 8px)' }}>
                 <span className="flow-hint-hand">👇</span>
@@ -266,6 +331,12 @@ Quedo atento a su confirmación. ¡Muchas gracias!`;
               name="nombre"
               value={formData.nombre}
               onChange={handleChange}
+              onFocus={() => setActiveModalHint('details')}
+              onBlur={() => {
+                if (formData.nombre.trim() && formData.telefono.trim()) {
+                  setActiveModalHint('delivery');
+                }
+              }}
               className="form-control"
               placeholder="Ej: Sharli Gómez"
               style={{ marginTop: '4px' }}
@@ -274,7 +345,11 @@ Quedo atento a su confirmación. ¡Muchas gracias!`;
           </div>
 
           {/* Phone Input */}
-          <div className="form-group" style={{ marginBottom: '14px' }}>
+          <div 
+            className="form-group" 
+            style={{ marginBottom: '14px' }}
+            onClick={() => setActiveModalHint('details')}
+          >
             <label className="form-label" htmlFor="telefono" style={{ fontSize: '0.85rem', fontWeight: '600' }}>Número de Teléfono</label>
             <input
               type="tel"
@@ -282,6 +357,12 @@ Quedo atento a su confirmación. ¡Muchas gracias!`;
               name="telefono"
               value={formData.telefono}
               onChange={handleChange}
+              onFocus={() => setActiveModalHint('details')}
+              onBlur={() => {
+                if (formData.nombre.trim() && formData.telefono.trim()) {
+                  setActiveModalHint('delivery');
+                }
+              }}
               className="form-control"
               placeholder="Ej: 3126602583"
               style={{ marginTop: '4px' }}
@@ -290,7 +371,11 @@ Quedo atento a su confirmación. ¡Muchas gracias!`;
           </div>
 
           {/* Delivery Method Selector */}
-          <div className="form-group" style={{ marginBottom: '14px', position: 'relative' }}>
+          <div 
+            className="form-group" 
+            style={{ marginBottom: '14px', position: 'relative' }}
+            onClick={() => setActiveModalHint('delivery')}
+          >
             {activeModalHint === 'delivery' && (
               <div className="flow-hint-bubble tooltip-bottom">
                 <span className="flow-hint-hand">👆</span>
@@ -302,11 +387,10 @@ Quedo atento a su confirmación. ¡Muchas gracias!`;
               <button
                 type="button"
                 className={`delivery-method-btn ${deliveryMethod === 'domicilio' ? 'active' : ''}`}
-                onClick={() => {
+                onClick={(e) => {
+                  e.stopPropagation();
                   setDeliveryMethod('domicilio');
-                  if (activeModalHint === 'delivery' || activeModalHint === 'details') {
-                    setActiveModalHint('payment');
-                  }
+                  setActiveModalHint('neighborhood');
                 }}
                 style={{
                   display: 'flex',
@@ -328,11 +412,10 @@ Quedo atento a su confirmación. ¡Muchas gracias!`;
               <button
                 type="button"
                 className={`delivery-method-btn ${deliveryMethod === 'local' ? 'active' : ''}`}
-                onClick={() => {
+                onClick={(e) => {
+                  e.stopPropagation();
                   setDeliveryMethod('local');
-                  if (activeModalHint === 'delivery' || activeModalHint === 'details') {
-                    setActiveModalHint('payment');
-                  }
+                  setActiveModalHint('payment');
                 }}
                 style={{
                   display: 'flex',
@@ -356,13 +439,29 @@ Quedo atento a su confirmación. ¡Muchas gracias!`;
 
           {/* Neighborhood Selector */}
           {deliveryMethod === 'domicilio' && (
-            <div className="form-group" style={{ marginBottom: '14px' }}>
+            <div 
+              className="form-group" 
+              style={{ marginBottom: '14px', position: 'relative' }}
+              onClick={() => setActiveModalHint('neighborhood')}
+            >
+              {activeModalHint === 'neighborhood' && (
+                <div className="flow-hint-bubble tooltip-top" style={{ bottom: 'calc(100% + 8px)' }}>
+                  <span className="flow-hint-hand">👇</span>
+                  <span>Selecciona tu barrio</span>
+                </div>
+              )}
               <label className="form-label" htmlFor="barrio" style={{ fontSize: '0.85rem', fontWeight: '600' }}>Barrio en Quibdó (Domicilio)</label>
               <select
                 id="barrio"
                 name="barrio"
                 value={barrio}
-                onChange={(e) => setBarrio(e.target.value)}
+                onChange={(e) => {
+                  setBarrio(e.target.value);
+                  if (activeModalHint === 'neighborhood') {
+                    setActiveModalHint('address');
+                  }
+                }}
+                onFocus={() => setActiveModalHint('neighborhood')}
                 className="form-control"
                 style={{ marginTop: '4px', cursor: 'pointer' }}
               >
@@ -377,13 +476,29 @@ Quedo atento a su confirmación. ¡Muchas gracias!`;
 
           {/* Delivery Address Input */}
           {deliveryMethod === 'domicilio' && (
-            <div className="form-group" style={{ marginBottom: '14px' }}>
+            <div 
+              className="form-group" 
+              style={{ marginBottom: '14px', position: 'relative' }}
+              onClick={() => setActiveModalHint('address')}
+            >
+              {activeModalHint === 'address' && (
+                <div className="flow-hint-bubble tooltip-top" style={{ bottom: 'calc(100% + 8px)' }}>
+                  <span className="flow-hint-hand">👇</span>
+                  <span>Ingresa la dirección de entrega</span>
+                </div>
+              )}
               <label className="form-label" htmlFor="direccion" style={{ fontSize: '0.85rem', fontWeight: '600' }}>Dirección de Entrega</label>
               <textarea
                 id="direccion"
                 name="direccion"
                 value={formData.direccion}
                 onChange={handleChange}
+                onFocus={() => setActiveModalHint('address')}
+                onBlur={() => {
+                  if (formData.direccion.trim()) {
+                    setActiveModalHint('payment');
+                  }
+                }}
                 className="form-control"
                 rows="2"
                 placeholder="Ej: Calle 24 # 3-12, frente al parque"
@@ -394,7 +509,11 @@ Quedo atento a su confirmación. ¡Muchas gracias!`;
           )}
 
           {/* Payment Method Selector */}
-          <div className="form-group" style={{ marginBottom: '14px', position: 'relative' }}>
+          <div 
+            className="form-group" 
+            style={{ marginBottom: '14px', position: 'relative' }}
+            onClick={() => setActiveModalHint('payment')}
+          >
             {activeModalHint === 'payment' && (
               <div className="flow-hint-bubble tooltip-bottom">
                 <span className="flow-hint-hand">👆</span>
@@ -406,11 +525,10 @@ Quedo atento a su confirmación. ¡Muchas gracias!`;
               <button
                 type="button"
                 className={`payment-method-btn ${paymentMethod === 'efectivo' ? 'active' : ''}`}
-                onClick={() => {
+                onClick={(e) => {
+                  e.stopPropagation();
                   setPaymentMethod('efectivo');
-                  if (activeModalHint === 'payment' || activeModalHint === 'details' || activeModalHint === 'delivery') {
-                    setActiveModalHint('submit');
-                  }
+                  setActiveModalHint('submit');
                 }}
                 style={{
                   display: 'flex',
@@ -432,11 +550,10 @@ Quedo atento a su confirmación. ¡Muchas gracias!`;
               <button
                 type="button"
                 className={`payment-method-btn ${paymentMethod === 'transfiya' ? 'active' : ''}`}
-                onClick={() => {
+                onClick={(e) => {
+                  e.stopPropagation();
                   setPaymentMethod('transfiya');
-                  if (activeModalHint === 'payment' || activeModalHint === 'details' || activeModalHint === 'delivery') {
-                    setActiveModalHint('submit');
-                  }
+                  setActiveModalHint('copy_number');
                 }}
                 style={{
                   display: 'flex',
@@ -460,32 +577,47 @@ Quedo atento a su confirmación. ¡Muchas gracias!`;
 
           {/* Transfiya Instructions Box */}
           {paymentMethod === 'transfiya' && (
-            <div style={{ padding: '12px', backgroundColor: 'rgba(37, 211, 102, 0.04)', border: '1px solid rgba(37, 211, 102, 0.2)', borderRadius: '10px', marginBottom: '14px' }}>
+            <div 
+              onClick={() => setActiveModalHint('copy_number')}
+              style={{ padding: '12px', backgroundColor: 'rgba(37, 211, 102, 0.04)', border: '1px solid rgba(37, 211, 102, 0.2)', borderRadius: '10px', marginBottom: '14px' }}
+            >
               <p style={{ fontSize: '0.78rem', margin: '0 0 6px 0', color: 'var(--text-primary)', lineHeight: '1.4' }}>
                 Transfiere por <strong>Transfiya / Nequi / Daviplata</strong> al número del local. Recuerda enviar la captura de pantalla del comprobante.
               </p>
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '6px 10px', backgroundColor: 'var(--bg-primary)', border: '1px solid var(--border-color)', borderRadius: '8px' }}>
                 <span style={{ fontSize: '0.85rem', fontWeight: '700', color: 'var(--text-primary)' }}>312 660 2583</span>
-                <button
-                  type="button"
-                  onClick={() => handleCopy('3126602583', 'phone')}
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '4px',
-                    padding: '4px 8px',
-                    borderRadius: '6px',
-                    border: 'none',
-                    backgroundColor: copiedText === 'phone' ? 'var(--success)' : 'var(--accent-gold)',
-                    color: '#fff',
-                    fontSize: '0.75rem',
-                    cursor: 'pointer',
-                    fontWeight: '600'
-                  }}
-                >
-                  {copiedText === 'phone' ? <Check size={12} /> : <Copy size={12} />}
-                  <span>{copiedText === 'phone' ? 'Copiado!' : 'Copiar'}</span>
-                </button>
+                <div style={{ position: 'relative' }}>
+                  {activeModalHint === 'copy_number' && (
+                    <div className="flow-hint-bubble tooltip-bottom">
+                      <span className="flow-hint-hand">👆</span>
+                      <span>Copia el número</span>
+                    </div>
+                  )}
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleCopy('3126602583', 'phone');
+                      setActiveModalHint('submit');
+                    }}
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '4px',
+                      padding: '4px 8px',
+                      borderRadius: '6px',
+                      border: 'none',
+                      backgroundColor: copiedText === 'phone' ? 'var(--success)' : 'var(--accent-gold)',
+                      color: '#fff',
+                      fontSize: '0.75rem',
+                      cursor: 'pointer',
+                      fontWeight: '600'
+                    }}
+                  >
+                    {copiedText === 'phone' ? <Check size={12} /> : <Copy size={12} />}
+                    <span>{copiedText === 'phone' ? 'Copiado!' : 'Copiar'}</span>
+                  </button>
+                </div>
               </div>
             </div>
           )}
@@ -507,7 +639,14 @@ Quedo atento a su confirmación. ¡Muchas gracias!`;
               </div>
             </div>
 
-            <div style={{ position: 'relative', width: '100%' }}>
+            <div 
+              style={{ 
+                position: 'relative', 
+                width: '100%',
+                marginTop: activeModalHint === 'submit' ? '40px' : '0px',
+                transition: 'margin-top 0.3s ease'
+              }}
+            >
               {activeModalHint === 'submit' && (
                 <div className="flow-hint-bubble tooltip-top" style={{ bottom: 'calc(100% + 10px)' }}>
                   <span className="flow-hint-hand">👇</span>

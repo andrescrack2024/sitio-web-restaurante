@@ -86,7 +86,11 @@ export default function Cart({
                     {(item.category === 'hamburguesas' || 
                       item.category === 'perros' || 
                       item.category === 'salchipapas') ? (
-                        <div id={index === 0 ? "tour-cart-sauces" : undefined} style={{ margin: '6px 0', position: 'relative' }}>
+                        <div 
+                          id={index === 0 ? "tour-cart-sauces" : undefined} 
+                          onClick={() => setActiveHint('sauces')}
+                          style={{ margin: '6px 0', position: 'relative' }}
+                        >
                           {activeHint === 'sauces' && index === 0 && (
                             <div className="flow-hint-bubble tooltip-top" style={{ bottom: 'calc(100% + 8px)' }}>
                               <span className="flow-hint-hand">👇</span>
@@ -103,6 +107,12 @@ export default function Cart({
                                 <label 
                                   key={sauce} 
                                   className={`sauce-pill-cart ${isChecked ? 'active' : ''}`}
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    if (activeHint !== 'sauces') {
+                                      setActiveHint('sauces');
+                                    }
+                                  }}
                                 >
                                   <input
                                     type="checkbox"
@@ -131,7 +141,12 @@ export default function Cart({
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '6px' }}>
                       <span className="cart-item-price" style={{ fontSize: '0.9rem', color: 'var(--accent-gold)', fontWeight: '600' }}>{formatPrice(item.price)}</span>
                       
-                      <div id={index === 0 ? "tour-cart-qty" : undefined} className="cart-item-actions" style={{ position: 'relative' }}>
+                      <div 
+                        id={index === 0 ? "tour-cart-qty" : undefined} 
+                        className="cart-item-actions" 
+                        onClick={() => setActiveHint('qty')}
+                        style={{ position: 'relative' }}
+                      >
                         {activeHint === 'qty' && index === 0 && (
                           <div className="flow-hint-bubble tooltip-bottom">
                             <span className="flow-hint-hand">👆</span>
@@ -139,9 +154,12 @@ export default function Cart({
                           </div>
                         )}
                         <button
-                          onClick={() => {
+                          onClick={(e) => {
+                            e.stopPropagation();
                             updateQuantity(item.cartKey, -1);
-                            if (activeHint === 'qty' || activeHint === 'sauces') {
+                            if (activeHint !== 'qty') {
+                              setActiveHint('qty');
+                            } else {
                               setActiveHint('confirm');
                             }
                           }}
@@ -152,9 +170,12 @@ export default function Cart({
                         </button>
                         <span className="cart-item-quantity">{item.quantity}</span>
                         <button
-                          onClick={() => {
+                          onClick={(e) => {
+                            e.stopPropagation();
                             updateQuantity(item.cartKey, 1);
-                            if (activeHint === 'qty' || activeHint === 'sauces') {
+                            if (activeHint !== 'qty') {
+                              setActiveHint('qty');
+                            } else {
                               setActiveHint('confirm');
                             }
                           }}
@@ -183,7 +204,11 @@ export default function Cart({
         </div>
 
         {cartItems.length > 0 && (
-          <div className="cart-footer animate-slide-up" style={{ borderTop: '2px solid var(--border-color)', padding: '16px 24px', backgroundColor: 'var(--bg-primary)' }}>
+          <div 
+            onClick={() => setActiveHint('confirm')}
+            className="cart-footer animate-slide-up" 
+            style={{ borderTop: '2px solid var(--border-color)', padding: '16px 24px', backgroundColor: 'var(--bg-primary)' }}
+          >
             <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', marginBottom: '16px' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '1.05rem', fontWeight: '700', borderTop: '1px dashed var(--border-color)', paddingTop: '6px', marginTop: '2px' }}>
                 <span>Subtotal:</span>
