@@ -28,7 +28,41 @@ export default function App() {
   const [cartItems, setCartItems] = useState([]);
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [isCheckoutOpen, setIsCheckoutOpen] = useState(false);
-  const [view, setView] = useState(() => window.location.hash === '#admin' ? 'admin' : 'shop');
+
+  const [adminHash, setAdminHash] = useState(() => {
+    try {
+      const saved = localStorage.getItem('rapidoydeli_admin_hash');
+      return saved || 'admin_chocquin_9924';
+    } catch (e) {
+      return 'admin_chocquin_9924';
+    }
+  });
+
+  const [adminSettings, setAdminSettings] = useState(() => {
+    try {
+      const saved = localStorage.getItem('rapidoydeli_admin_settings');
+      if (saved) return JSON.parse(saved);
+    } catch (e) {
+      console.warn('LocalStorage read error for admin settings:', e);
+    }
+    return {
+      password: 'admin123',
+      securityQuestion: '¿Cuál es el nombre de tu cliente principal?',
+      securityAnswer: 'edwin',
+      secureHash: 'admin_chocquin_9924'
+    };
+  });
+
+  const [view, setView] = useState(() => {
+    const currentHash = window.location.hash.replace('#', '');
+    try {
+      const saved = localStorage.getItem('rapidoydeli_admin_hash') || 'admin_chocquin_9924';
+      return currentHash === saved ? 'admin' : 'shop';
+    } catch (e) {
+      return currentHash === 'admin_chocquin_9924' ? 'admin' : 'shop';
+    }
+  });
+
   const [isTourOpen, setIsTourOpen] = useState(false);
   const [tourStep, setTourStep] = useState(0);
   const [tourDismissed, setTourDismissed] = useState(false);
@@ -69,7 +103,8 @@ export default function App() {
   // Handle hash-based routing for admin panel
   useEffect(() => {
     const handleHashChange = () => {
-      if (window.location.hash === '#admin') {
+      const currentHash = window.location.hash.replace('#', '');
+      if (currentHash === adminHash) {
         setView('admin');
       } else {
         setView('shop');
@@ -77,6 +112,46 @@ export default function App() {
     };
     window.addEventListener('hashchange', handleHashChange);
     return () => window.removeEventListener('hashchange', handleHashChange);
+  }, [adminHash]);
+
+  // Subscribe to config/admin_settings in Firestore
+  useEffect(() => {
+    if (!isFirebaseSupported) return;
+
+    const docRef = doc(db, 'config', 'admin_settings');
+    const unsubscribe = onSnapshot(docRef, async (docSnap) => {
+      if (docSnap.exists()) {
+        const data = docSnap.data();
+        setAdminSettings(data);
+        if (data.secureHash) {
+          setAdminHash(data.secureHash);
+          try {
+            localStorage.setItem('rapidoydeli_admin_hash', data.secureHash);
+          } catch(e){}
+        }
+        try {
+          localStorage.setItem('rapidoydeli_admin_settings', JSON.stringify(data));
+        } catch(e){}
+      } else {
+        // Seed default admin configuration
+        const defaultSettings = {
+          password: 'admin123',
+          securityQuestion: '¿Cuál es el nombre de tu cliente principal?',
+          securityAnswer: 'edwin',
+          secureHash: 'admin_chocquin_9924'
+        };
+        try {
+          await setDoc(docRef, defaultSettings);
+          console.log("Configuración inicial de administrador sembrada en Firestore.");
+        } catch (e) {
+          console.error("Error al sembrar configuración en Firestore:", e);
+        }
+      }
+    }, (error) => {
+      console.error("Error al cargar configuración de Firestore:", error);
+    });
+
+    return () => unsubscribe();
   }, []);
 
   // Apply theme class to document element
@@ -388,6 +463,29 @@ export default function App() {
 
 
 
+  const handleUpdateAdminSettings = async (newSettings) => {
+    setAdminSettings(newSettings);
+    if (newSettings.secureHash) {
+      setAdminHash(newSettings.secureHash);
+      try {
+        localStorage.setItem('rapidoydeli_admin_hash', newSettings.secureHash);
+      } catch (e) {}
+    }
+    try {
+      localStorage.setItem('rapidoydeli_admin_settings', JSON.stringify(newSettings));
+    } catch (e) {}
+
+    if (isFirebaseSupported) {
+      try {
+        const docRef = doc(db, 'config', 'admin_settings');
+        await setDoc(docRef, newSettings);
+        console.log("Configuración de administración guardada en Firestore.");
+      } catch (error) {
+        console.error("Error al guardar configuración en Firestore:", error);
+      }
+    }
+  };
+
   if (view === 'admin') {
     return (
       <Admin
@@ -399,6 +497,8 @@ export default function App() {
         onUpdateOrderStatus={handleUpdateOrderStatus}
         onDeleteOrder={handleDeleteOrder}
         onGoBack={() => { window.location.hash = ''; }}
+        adminSettings={adminSettings}
+        onUpdateAdminSettings={handleUpdateAdminSettings}
       />
     );
   }

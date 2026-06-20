@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { Plus, Edit3, Trash2, ArrowLeft, Save, X, Info } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Plus, Edit3, Trash2, ArrowLeft, Save, X, Info, Lock, Unlock, Copy, Check, Key, HelpCircle } from 'lucide-react';
 import { storage, isFirebaseSupported } from '../firebase';
 import { ref, uploadBytesResumable, getDownloadURL } from 'firebase/storage';
 
@@ -11,12 +11,19 @@ export default function Admin({
   orders = [],
   onUpdateOrderStatus,
   onDeleteOrder,
-  onGoBack
+  onGoBack,
+  adminSettings,
+  onUpdateAdminSettings
 }) {
+  const adminPassword = adminSettings?.password || 'admin123';
+  const adminQuestion = adminSettings?.securityQuestion || '¿Cuál es el nombre de tu cliente principal?';
+  const adminAnswer = adminSettings?.securityAnswer || 'edwin';
+  const adminHash = adminSettings?.secureHash || 'admin_chocquin_9924';
+
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [password, setPassword] = useState('');
   const [loginError, setLoginError] = useState('');
-  const [activeTab, setActiveTab] = useState('pedidos'); // 'pedidos' or 'menu'
+  const [activeTab, setActiveTab] = useState('pedidos'); // 'pedidos', 'menu', or 'seguridad'
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState(null);
   const [formData, setFormData] = useState({
@@ -31,6 +38,32 @@ export default function Admin({
   const [errors, setErrors] = useState({});
   const [isUploading, setIsUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
+
+  // Recovery & PIN states
+  const [loginMode, setLoginMode] = useState('login'); // 'login', 'recovery', 'reset'
+  const [recoveryAnswer, setRecoveryAnswer] = useState('');
+  const [newPassword, setNewPassword] = useState('');
+  const [recoveryError, setRecoveryError] = useState('');
+
+  // Security Form State
+  const [securityForm, setSecurityForm] = useState({
+    password: adminPassword,
+    secureHash: adminHash,
+    securityQuestion: adminQuestion,
+    securityAnswer: adminAnswer
+  });
+
+  // Sync security form when adminSettings updates
+  useEffect(() => {
+    if (adminSettings) {
+      setSecurityForm({
+        password: adminSettings.password || 'admin123',
+        secureHash: adminSettings.secureHash || 'admin_chocquin_9924',
+        securityQuestion: adminSettings.securityQuestion || '¿Cuál es el nombre de tu cliente principal?',
+        securityAnswer: adminSettings.securityAnswer || 'edwin'
+      });
+    }
+  }, [adminSettings]);
 
   const compressAndReadImage = (file) => {
     const reader = new FileReader();
@@ -402,56 +435,334 @@ export default function Admin({
     }
   };
 
+  const handlePinClick = (num) => {
+    if (loginMode === 'login') {
+      setPassword(prev => prev + num);
+      if (loginError) setLoginError('');
+    } else if (loginMode === 'reset') {
+      setNewPassword(prev => prev + num);
+      if (recoveryError) setRecoveryError('');
+    }
+  };
+
+  const handlePinDelete = () => {
+    if (loginMode === 'login') {
+      setPassword(prev => prev.slice(0, -1));
+    } else if (loginMode === 'reset') {
+      setNewPassword(prev => prev.slice(0, -1));
+    }
+  };
+
+  const handlePinClear = () => {
+    if (loginMode === 'login') {
+      setPassword('');
+    } else if (loginMode === 'reset') {
+      setNewPassword('');
+    }
+  };
+
   const handleLoginSubmit = (e) => {
-    e.preventDefault();
-    if (password === 'admin123') {
+    if (e) e.preventDefault();
+    if (password === adminPassword) {
       setIsAuthenticated(true);
       setLoginError('');
     } else {
+      setPassword('');
       setLoginError('Contraseña incorrecta. Intente de nuevo.');
     }
+  };
+
+  const handleRecoverySubmit = (e) => {
+    if (e) e.preventDefault();
+    if (recoveryAnswer.trim().toLowerCase() === adminAnswer.trim().toLowerCase()) {
+      setLoginMode('reset');
+      setRecoveryError('');
+    } else {
+      setRecoveryError('Respuesta incorrecta. Intente de nuevo.');
+    }
+  };
+
+  const handleResetPasswordSubmit = (e) => {
+    if (e) e.preventDefault();
+    if (!newPassword.trim()) {
+      setRecoveryError('La contraseña no puede estar vacía.');
+      return;
+    }
+    const updated = {
+      ...adminSettings,
+      password: newPassword.trim()
+    };
+    onUpdateAdminSettings(updated);
+    
+    setPassword(newPassword.trim());
+    setNewPassword('');
+    setLoginMode('login');
+    alert('Contraseña restablecida con éxito. Ya puedes ingresar con tu nueva contraseña.');
+  };
+
+  const handleSecurityFormSubmit = (e) => {
+    e.preventDefault();
+    if (!securityForm.password.trim()) {
+      alert('La contraseña no puede estar vacía.');
+      return;
+    }
+    if (!securityForm.secureHash.trim()) {
+      alert('La ruta segura no puede estar vacía.');
+      return;
+    }
+    
+    const normalizedHash = securityForm.secureHash.trim().replace(/[^a-zA-Z0-9_-]/g, '');
+    if (!normalizedHash) {
+      alert('La ruta segura contiene caracteres no válidos.');
+      return;
+    }
+
+    const updated = {
+      password: securityForm.password.trim(),
+      secureHash: normalizedHash,
+      securityQuestion: securityForm.securityQuestion.trim(),
+      securityAnswer: securityForm.securityAnswer.trim()
+    };
+
+    onUpdateAdminSettings(updated);
+    alert('Configuración de seguridad guardada con éxito.');
+  };
+
+  const accessUrl = `${window.location.origin}/#${securityForm.secureHash}`;
+  const [copied, setCopied] = useState(false);
+  const handleCopyLink = () => {
+    navigator.clipboard.writeText(accessUrl)
+      .then(() => {
+        setCopied(true);
+        setTimeout(() => setCopied(false), 2000);
+      })
+      .catch((err) => {
+        console.error('Error al copiar:', err);
+        alert('No se pudo copiar automáticamente. Puedes copiarlo manualmente: ' + accessUrl);
+      });
+  };
+
+  const renderPinPad = () => {
+    const digits = ['1', '2', '3', '4', '5', '6', '7', '8', '9', 'C', '0', '⌫'];
+    return (
+      <div style={{
+        display: 'grid',
+        gridTemplateColumns: 'repeat(3, 1fr)',
+        gap: '10px',
+        marginTop: '15px',
+        maxWidth: '300px',
+        marginLeft: 'auto',
+        marginRight: 'auto'
+      }}>
+        {digits.map((digit) => {
+          let style = {
+            height: '56px',
+            fontSize: '1.25rem',
+            fontWeight: '700',
+            borderRadius: '10px',
+            border: '1px solid var(--border-color)',
+            backgroundColor: 'var(--bg-secondary)',
+            color: 'var(--text-primary)',
+            cursor: 'pointer',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            userSelect: 'none',
+            touchAction: 'manipulation',
+            transition: 'all 0.1s ease',
+            padding: 0
+          };
+          if (digit === 'C') {
+            style.backgroundColor = 'rgba(255, 69, 58, 0.1)';
+            style.color = '#ff453a';
+            style.borderColor = 'rgba(255, 69, 58, 0.2)';
+          } else if (digit === '⌫') {
+            style.backgroundColor = 'rgba(222, 142, 0, 0.1)';
+            style.color = 'var(--accent-gold)';
+            style.borderColor = 'rgba(222, 142, 0, 0.2)';
+          }
+          return (
+            <button
+              key={digit}
+              type="button"
+              onClick={() => {
+                if (digit === 'C') {
+                  handlePinClear();
+                } else if (digit === '⌫') {
+                  handlePinDelete();
+                } else {
+                  handlePinClick(digit);
+                }
+              }}
+              style={style}
+              className="pin-button"
+            >
+              {digit}
+            </button>
+          );
+        })}
+      </div>
+    );
   };
 
   if (!isAuthenticated) {
     return (
       <section className="admin-section" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '90vh' }}>
-        <div className="modal-content animate-slide-up" style={{ position: 'static', maxWidth: '400px', padding: '40px', textAlign: 'center', boxShadow: 'var(--shadow-lg)' }}>
-          <div className="success-icon-wrapper" style={{ backgroundColor: 'var(--accent-gold-light)', margin: '0 auto 20px' }}>
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-gold">
-              <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
-              <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
-            </svg>
-          </div>
-          <h3 className="modal-title" style={{ textAlign: 'center', marginBottom: '10px' }}>Acceso Restringido</h3>
-          <p style={{ color: 'var(--text-secondary)', fontSize: '0.9rem', marginBottom: '24px' }}>
-            Ingrese la contraseña del administrador para gestionar el catálogo.
-          </p>
+        <div className="modal-content animate-slide-up" style={{ position: 'static', maxWidth: '420px', padding: '40px', textAlign: 'center', boxShadow: 'var(--shadow-lg)' }}>
+          {loginMode === 'login' && (
+            <>
+              <div className="success-icon-wrapper" style={{ backgroundColor: 'var(--accent-gold-light)', margin: '0 auto 20px' }}>
+                <Lock size={24} className="text-gold" />
+              </div>
+              <h3 className="modal-title" style={{ textAlign: 'center', marginBottom: '10px' }}>Acceso Restringido</h3>
+              <p style={{ color: 'var(--text-secondary)', fontSize: '0.9rem', marginBottom: '20px' }}>
+                Ingrese la contraseña de administración.
+              </p>
 
-          <form onSubmit={handleLoginSubmit}>
-            <div className="form-group" style={{ marginBottom: '20px' }}>
-              <input
-                type="password"
-                value={password}
-                onChange={(e) => {
-                  setPassword(e.target.value);
-                  if (loginError) setLoginError('');
-                }}
-                className="form-control"
-                placeholder="Contraseña"
-                style={{ textAlign: 'center', fontSize: '1.1rem', letterSpacing: '2px' }}
-                required
-                autoFocus
-              />
-              {loginError && <p className="form-error" style={{ textAlign: 'center', marginTop: '8px' }}>{loginError}</p>}
-            </div>
+              <form onSubmit={handleLoginSubmit}>
+                <div className="form-group" style={{ marginBottom: '15px' }}>
+                  <input
+                    type="password"
+                    value={password}
+                    onChange={(e) => {
+                      setPassword(e.target.value);
+                      if (loginError) setLoginError('');
+                    }}
+                    className="form-control"
+                    placeholder="Contraseña"
+                    style={{ textAlign: 'center', fontSize: '1.25rem', letterSpacing: '4px', height: '52px' }}
+                    required
+                    autoFocus
+                  />
+                  {loginError && <p className="form-error" style={{ textAlign: 'center', marginTop: '8px' }}>{loginError}</p>}
+                </div>
 
-            <button type="submit" className="btn btn-primary" style={{ width: '100%', marginBottom: '16px' }}>
-              Ingresar al Panel
-            </button>
-          </form>
+                {renderPinPad()}
+
+                <button type="submit" className="btn btn-primary" style={{ width: '100%', height: '50px', fontSize: '1rem', marginTop: '24px', marginBottom: '16px' }}>
+                  Ingresar al Panel
+                </button>
+              </form>
+              
+              <button 
+                onClick={() => {
+                  setLoginMode('recovery');
+                  setRecoveryError('');
+                  setRecoveryAnswer('');
+                }} 
+                className="btn btn-secondary" 
+                style={{ width: '100%', textTransform: 'none', border: '1px solid var(--border-color)', marginBottom: '12px', height: '44px' }}
+              >
+                <HelpCircle size={16} style={{ marginRight: '6px' }} /> Olvidé mi contraseña
+              </button>
+            </>
+          )}
+
+          {loginMode === 'recovery' && (
+            <>
+              <div className="success-icon-wrapper" style={{ backgroundColor: 'var(--accent-gold-light)', margin: '0 auto 20px' }}>
+                <HelpCircle size={24} className="text-gold" />
+              </div>
+              <h3 className="modal-title" style={{ textAlign: 'center', marginBottom: '10px' }}>Recuperación de Contraseña</h3>
+              <p style={{ color: 'var(--text-secondary)', fontSize: '0.9rem', marginBottom: '24px' }}>
+                Responda la pregunta de seguridad configurada para restablecer su contraseña.
+              </p>
+
+              <div style={{ backgroundColor: 'var(--bg-secondary)', border: '1px solid var(--border-color)', padding: '16px', borderRadius: '8px', marginBottom: '20px', textAlign: 'left' }}>
+                <span style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', fontWeight: 'bold', textTransform: 'uppercase' }}>Pregunta de Seguridad:</span>
+                <p style={{ margin: '4px 0 0 0', fontSize: '1.05rem', fontWeight: '600', color: 'var(--text-primary)' }}>{adminQuestion}</p>
+              </div>
+
+              <form onSubmit={handleRecoverySubmit}>
+                <div className="form-group" style={{ marginBottom: '20px' }}>
+                  <input
+                    type="text"
+                    value={recoveryAnswer}
+                    onChange={(e) => {
+                      setRecoveryAnswer(e.target.value);
+                      if (recoveryError) setRecoveryError('');
+                    }}
+                    className="form-control"
+                    placeholder="Escriba su respuesta aquí"
+                    style={{ textAlign: 'center', fontSize: '1.1rem', height: '52px' }}
+                    required
+                    autoFocus
+                  />
+                  {recoveryError && <p className="form-error" style={{ textAlign: 'center', marginTop: '8px' }}>{recoveryError}</p>}
+                </div>
+
+                <button type="submit" className="btn btn-primary" style={{ width: '100%', height: '50px', fontSize: '1rem', marginBottom: '16px' }}>
+                  Verificar Respuesta
+                </button>
+              </form>
+              
+              <button 
+                onClick={() => {
+                  setLoginMode('login');
+                  setLoginError('');
+                  setPassword('');
+                }} 
+                className="btn btn-secondary" 
+                style={{ width: '100%', textTransform: 'none', border: '1px solid var(--border-color)', height: '44px' }}
+              >
+                <ArrowLeft size={16} style={{ marginRight: '6px' }} /> Volver al Login
+              </button>
+            </>
+          )}
+
+          {loginMode === 'reset' && (
+            <>
+              <div className="success-icon-wrapper" style={{ backgroundColor: 'var(--accent-gold-light)', margin: '0 auto 20px' }}>
+                <Key size={24} className="text-gold" />
+              </div>
+              <h3 className="modal-title" style={{ textAlign: 'center', marginBottom: '10px' }}>Restablecer Contraseña</h3>
+              <p style={{ color: 'var(--text-secondary)', fontSize: '0.9rem', marginBottom: '20px' }}>
+                Cree una nueva contraseña para su cuenta de administrador.
+              </p>
+
+              <form onSubmit={handleResetPasswordSubmit}>
+                <div className="form-group" style={{ marginBottom: '15px' }}>
+                  <input
+                    type="password"
+                    value={newPassword}
+                    onChange={(e) => {
+                      setNewPassword(e.target.value);
+                      if (recoveryError) setRecoveryError('');
+                    }}
+                    className="form-control"
+                    placeholder="Nueva Contraseña"
+                    style={{ textAlign: 'center', fontSize: '1.25rem', letterSpacing: '4px', height: '52px' }}
+                    required
+                    autoFocus
+                  />
+                  {recoveryError && <p className="form-error" style={{ textAlign: 'center', marginTop: '8px' }}>{recoveryError}</p>}
+                </div>
+
+                {renderPinPad()}
+
+                <button type="submit" className="btn btn-primary" style={{ width: '100%', height: '50px', fontSize: '1rem', marginTop: '24px', marginBottom: '16px' }}>
+                  Guardar Contraseña
+                </button>
+              </form>
+              
+              <button 
+                onClick={() => {
+                  setLoginMode('login');
+                  setLoginError('');
+                  setPassword('');
+                }} 
+                className="btn btn-secondary" 
+                style={{ width: '100%', textTransform: 'none', border: '1px solid var(--border-color)', height: '44px' }}
+              >
+                Cancelar
+              </button>
+            </>
+          )}
           
-          <button onClick={onGoBack} className="btn btn-secondary" style={{ width: '100%', textTransform: 'none' }}>
-            <ArrowLeft size={16} style={{ marginRight: '6px' }} /> Regresar al Sitio
+          <div style={{ margin: '20px 0 10px 0', borderTop: '1px solid var(--border-color)' }}></div>
+
+          <button onClick={onGoBack} className="btn btn-secondary" style={{ width: '100%', textTransform: 'none', height: '44px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px', backgroundColor: 'transparent' }}>
+            <ArrowLeft size={16} /> Regresar al Sitio
           </button>
         </div>
       </section>
@@ -481,7 +792,7 @@ export default function Admin({
         </div>
 
         {/* Tab Selector */}
-        <div className="admin-tabs animate-slide-up" style={{ display: 'flex', gap: '12px', marginBottom: '24px', borderBottom: '1px solid var(--border-color)', paddingBottom: '14px' }}>
+        <div className="admin-tabs animate-slide-up" style={{ display: 'flex', gap: '12px', marginBottom: '24px', borderBottom: '1px solid var(--border-color)', paddingBottom: '14px', flexWrap: 'wrap' }}>
           <button 
             type="button"
             onClick={() => setActiveTab('pedidos')} 
@@ -497,6 +808,14 @@ export default function Admin({
             style={{ textTransform: 'none', borderRadius: '8px', padding: '10px 20px', display: 'flex', alignItems: 'center', gap: '8px', border: activeTab !== 'menu' ? '1px solid var(--border-color)' : undefined }}
           >
             🍔 Gestionar Menú ({menuItems.length})
+          </button>
+          <button 
+            type="button"
+            onClick={() => setActiveTab('seguridad')} 
+            className={`btn ${activeTab === 'seguridad' ? 'btn-primary' : 'btn-secondary'}`}
+            style={{ textTransform: 'none', borderRadius: '8px', padding: '10px 20px', display: 'flex', alignItems: 'center', gap: '8px', border: activeTab !== 'seguridad' ? '1px solid var(--border-color)' : undefined }}
+          >
+            🔒 Seguridad
           </button>
         </div>
 
@@ -521,14 +840,18 @@ export default function Admin({
             <p>
               Aquí puedes ver los pedidos a domicilio entrantes en tiempo real. Utiliza el botón <b>Validar Transferencia</b> para confirmar pagos por Nequi/Bancolombia, o presiona <b>Imprimir Comanda</b> para generar el ticket físico para la cocina.
             </p>
-          ) : (
+          ) : activeTab === 'menu' ? (
             <p>
               Gestiona el catálogo de platos. Los cambios realizados aquí se sincronizan automáticamente con la base de datos de Firestore en la nube y se reflejan al instante en la carta digital del cliente.
+            </p>
+          ) : (
+            <p>
+              Configura los parámetros de seguridad del panel: cambia tu contraseña de acceso, la pregunta y respuesta secreta para recuperación, y personaliza el enlace cifrado para ocultar el panel a usuarios no deseados.
             </p>
           )}
         </div>
 
-        {activeTab === 'pedidos' ? (
+        {activeTab === 'pedidos' && (
           /* Pedidos en Vivo Grid list */
           <div className="orders-container animate-fade-in" style={{ display: 'flex', flexDirection: 'column', gap: '16px', textAlign: 'left' }}>
             {orders.length === 0 ? (
@@ -569,31 +892,24 @@ export default function Admin({
                       </div>
                       
                       <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                        <span style={{ fontSize: '0.9rem', color: 'var(--text-secondary)' }}>Estado:</span>
-                        <select
-                          value={order.status}
-                          onChange={(e) => onUpdateOrderStatus(order.id, e.target.value)}
-                          className="form-control"
-                          style={{
-                            width: 'auto',
-                            padding: '6px 12px',
+                        <span 
+                          style={{ 
+                            fontWeight: 'bold', 
                             fontSize: '0.85rem',
-                            borderRadius: '6px',
-                            height: 'auto',
-                            appearance: 'auto',
-                            WebkitAppearance: 'auto',
-                            backgroundColor: order.status === 'pendiente' ? 'rgba(222, 142, 0, 0.1)' : order.status === 'cancelado' ? 'rgba(255, 0, 0, 0.1)' : 'rgba(37, 211, 102, 0.1)',
-                            color: order.status === 'pendiente' ? 'var(--accent-gold)' : order.status === 'cancelado' ? '#ff453a' : '#25d366',
-                            border: '1px solid currentColor',
-                            fontWeight: '600'
+                            padding: '6px 12px',
+                            borderRadius: '20px',
+                            textTransform: 'uppercase',
+                            backgroundColor: order.status === 'pendiente' ? 'rgba(222, 142, 0, 0.15)' : order.status === 'cancelado' ? 'rgba(255, 69, 58, 0.15)' : 'rgba(37, 211, 102, 0.15)',
+                            color: order.status === 'pendiente' ? '#de8e00' : order.status === 'cancelado' ? '#ff453a' : '#25d366',
+                            border: '1px solid currentColor'
                           }}
                         >
-                          <option value="pendiente">Pendiente</option>
-                          <option value="en cocina">En Cocina</option>
-                          <option value="en camino">En Camino</option>
-                          <option value="entregado">Entregado</option>
-                          <option value="cancelado">Cancelado</option>
-                        </select>
+                          {order.status === 'pendiente' && '🕒 Pendiente'}
+                          {order.status === 'en cocina' && '🍳 En Cocina'}
+                          {order.status === 'en camino' && '🛵 En Camino'}
+                          {order.status === 'entregado' && '✅ Entregado'}
+                          {order.status === 'cancelado' && '❌ Cancelado'}
+                        </span>
                       </div>
                     </div>
 
@@ -651,6 +967,47 @@ export default function Admin({
                           <span>TOTAL:</span>
                           <span style={{ color: 'var(--accent-gold)' }}>{formatPrice(order.total)}</span>
                         </div>
+                      </div>
+                    </div>
+
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', width: '100%', marginTop: '8px' }}>
+                      <span style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', fontWeight: 'bold', textTransform: 'uppercase' }}>Actualizar Estado (POS Táctil)</span>
+                      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))', gap: '8px' }}>
+                        {[
+                          { value: 'pendiente', label: '🕒 Pendiente', color: '#de8e00' },
+                          { value: 'en cocina', label: '🍳 Cocina', color: '#d4ac0d' },
+                          { value: 'en camino', label: '🛵 Camino', color: '#3498db' },
+                          { value: 'entregado', label: '✅ Entregado', color: '#25d366' },
+                          { value: 'cancelado', label: '❌ Cancelar', color: '#ff453a' }
+                        ].map((btn) => {
+                          const isActive = order.status === btn.value;
+                          return (
+                            <button
+                              key={btn.value}
+                              type="button"
+                              onClick={() => onUpdateOrderStatus(order.id, btn.value)}
+                              style={{
+                                padding: '12px 8px',
+                                fontSize: '0.9rem',
+                                fontWeight: 'bold',
+                                borderRadius: '8px',
+                                border: isActive ? `2px solid ${btn.color}` : '1px solid var(--border-color)',
+                                backgroundColor: isActive ? btn.color : 'var(--bg-primary)',
+                                color: isActive ? '#fff' : btn.color,
+                                cursor: 'pointer',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                gap: '4px',
+                                minHeight: '48px',
+                                touchAction: 'manipulation',
+                                transition: 'all 0.15s ease'
+                              }}
+                            >
+                              {btn.label}
+                            </button>
+                          );
+                        })}
                       </div>
                     </div>
 
@@ -765,7 +1122,9 @@ export default function Admin({
               })
             )}
           </div>
-        ) : (
+        )}
+
+        {activeTab === 'menu' && (
           /* Products Table */
           <div className="admin-table-container animate-fade-in">
             {menuItems.length === 0 ? (
@@ -840,6 +1199,144 @@ export default function Admin({
             )}
           </div>
         )}
+
+        {activeTab === 'seguridad' && (
+          <div className="order-card animate-fade-in" style={{ backgroundColor: 'var(--bg-secondary)', border: '1px solid var(--border-color)', borderRadius: '12px', padding: '24px', textAlign: 'left' }}>
+            <h3 style={{ fontSize: '1.25rem', fontWeight: 'bold', marginBottom: '16px', color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <Lock size={20} className="text-gold" style={{ flexShrink: 0 }} /> Parámetros de Acceso y Seguridad
+            </h3>
+
+            <form onSubmit={handleSecurityFormSubmit}>
+              <div className="admin-form-grid" style={{ marginBottom: '20px' }}>
+                <div className="form-group">
+                  <label className="form-label" style={{ fontWeight: '600' }}>Contraseña de Administrador</label>
+                  <input
+                    type="text"
+                    value={securityForm.password}
+                    onChange={(e) => setSecurityForm(prev => ({ ...prev, password: e.target.value }))}
+                    className="form-control"
+                    placeholder="Contraseña"
+                    style={{ fontSize: '1.05rem', height: '48px' }}
+                    required
+                  />
+                </div>
+
+                <div className="form-group">
+                  <label className="form-label" style={{ fontWeight: '600' }}>Ruta de Enlace Seguro (Hash)</label>
+                  <input
+                    type="text"
+                    value={securityForm.secureHash}
+                    onChange={(e) => setSecurityForm(prev => ({ ...prev, secureHash: e.target.value.replace(/[^a-zA-Z0-9_-]/g, '') }))}
+                    className="form-control"
+                    placeholder="ej: admin_chocquin_9924"
+                    style={{ fontSize: '1.05rem', height: '48px' }}
+                    required
+                  />
+                  <small style={{ color: 'var(--text-secondary)', display: 'block', marginTop: '4px' }}>Solo letras, números, guiones y guiones bajos.</small>
+                </div>
+              </div>
+
+              <div className="admin-form-grid" style={{ marginBottom: '20px' }}>
+                <div className="form-group">
+                  <label className="form-label" style={{ fontWeight: '600' }}>Pregunta Secreta de Recuperación</label>
+                  <input
+                    type="text"
+                    value={securityForm.securityQuestion}
+                    onChange={(e) => setSecurityForm(prev => ({ ...prev, securityQuestion: e.target.value }))}
+                    className="form-control"
+                    placeholder="Pregunta de Seguridad"
+                    style={{ fontSize: '1.05rem', height: '48px' }}
+                    required
+                  />
+                </div>
+
+                <div className="form-group">
+                  <label className="form-label" style={{ fontWeight: '600' }}>Respuesta Secreta de Recuperación</label>
+                  <input
+                    type="text"
+                    value={securityForm.securityAnswer}
+                    onChange={(e) => setSecurityForm(prev => ({ ...prev, securityAnswer: e.target.value }))}
+                    className="form-control"
+                    placeholder="Respuesta de Seguridad"
+                    style={{ fontSize: '1.05rem', height: '48px' }}
+                    required
+                  />
+                </div>
+              </div>
+
+              {/* Secure Link Info Box & Copier */}
+              <div style={{
+                backgroundColor: 'var(--bg-primary)',
+                border: '1px solid var(--border-color)',
+                borderRadius: '8px',
+                padding: '20px',
+                marginBottom: '24px',
+                textAlign: 'left'
+              }}>
+                <span style={{ fontSize: '0.8rem', color: 'var(--accent-gold)', fontWeight: 'bold', textTransform: 'uppercase', display: 'block', marginBottom: '6px' }}>Enlace de Acceso Administrador (Guardar como Marcador)</span>
+                <p style={{ color: 'var(--text-secondary)', fontSize: '0.85rem', marginBottom: '12px' }}>
+                  Este es el enlace secreto para ingresar a este panel. Compártelo con cuidado. Cualquier otro enlace (como #admin) no permitirá el acceso.
+                </p>
+                <div style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '12px',
+                  backgroundColor: 'var(--bg-secondary)',
+                  border: '1px solid var(--border-color)',
+                  borderRadius: '6px',
+                  padding: '12px',
+                  overflowX: 'auto',
+                  fontFamily: 'monospace',
+                  fontSize: '0.95rem',
+                  color: 'var(--text-primary)',
+                  marginBottom: '15px'
+                }}>
+                  <span style={{ whiteSpace: 'nowrap', userSelect: 'all' }}>{accessUrl}</span>
+                </div>
+
+                <button
+                  type="button"
+                  onClick={handleCopyLink}
+                  className="btn"
+                  style={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '8px',
+                    backgroundColor: copied ? 'rgba(37, 211, 102, 0.15)' : 'var(--accent-gold-light)',
+                    border: copied ? '1px solid #25d366' : '1px solid var(--accent-gold)',
+                    color: copied ? '#25d366' : 'var(--accent-gold)',
+                    padding: '10px 16px',
+                    borderRadius: '6px',
+                    fontSize: '0.9rem',
+                    fontWeight: 'bold',
+                    cursor: 'pointer',
+                    minHeight: '44px'
+                  }}
+                >
+                  {copied ? <Check size={16} /> : <Copy size={16} />}
+                  {copied ? '¡Copiado con éxito!' : 'Copiar Enlace Secreto'}
+                </button>
+              </div>
+
+              <button
+                type="submit"
+                className="btn btn-primary"
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '8px',
+                  width: '100%',
+                  height: '50px',
+                  fontSize: '1rem',
+                  fontWeight: 'bold'
+                }}
+              >
+                <Save size={18} /> Guardar Configuración de Seguridad
+              </button>
+            </form>
+          </div>
+        )}
       </div>
 
       {/* Add / Edit Form Modal Popup */}
@@ -888,23 +1385,46 @@ export default function Admin({
                   />
                   {errors.price && <p className="form-error">{errors.price}</p>}
                 </div>
+              </div>
 
-                <div className="form-group">
-                  <label className="form-label" htmlFor="prod-category">Categoría</label>
-                  <select
-                    id="prod-category"
-                    name="category"
-                    value={formData.category}
-                    onChange={handleChange}
-                    className="form-control"
-                    style={{ appearance: 'auto', WebkitAppearance: 'auto' }}
-                  >
-                    <option value="hamburguesas">Hamburguesas</option>
-                    <option value="perros">Perros</option>
-                    <option value="salchipapas">Salchipapas</option>
-                    <option value="bebidas">Bebidas</option>
-                    <option value="especiales">Especiales / Combos</option>
-                  </select>
+              <div className="form-group" style={{ marginBottom: '20px' }}>
+                <label className="form-label" style={{ marginBottom: '8px', display: 'block' }}>Categoría (POS Táctil)</label>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(115px, 1fr))', gap: '8px' }}>
+                  {[
+                    { value: 'hamburguesas', label: '🍔 Hamburguesas' },
+                    { value: 'perros', label: '🌭 Perros' },
+                    { value: 'salchipapas', label: '🍟 Salchipapas' },
+                    { value: 'bebidas', label: '🥤 Bebidas' },
+                    { value: 'especiales', label: '⭐ Combos' }
+                  ].map((cat) => {
+                    const isSel = formData.category === cat.value;
+                    return (
+                      <button
+                        key={cat.value}
+                        type="button"
+                        onClick={() => setFormData(prev => ({ ...prev, category: cat.value }))}
+                        style={{
+                          padding: '12px 10px',
+                          fontSize: '0.9rem',
+                          fontWeight: '600',
+                          borderRadius: '8px',
+                          border: isSel ? '2px solid var(--accent-gold)' : '1px solid var(--border-color)',
+                          backgroundColor: isSel ? 'var(--accent-gold-light)' : 'var(--bg-primary)',
+                          color: isSel ? 'var(--accent-gold)' : 'var(--text-primary)',
+                          cursor: 'pointer',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          gap: '6px',
+                          minHeight: '48px',
+                          touchAction: 'manipulation',
+                          transition: 'all 0.15s ease'
+                        }}
+                      >
+                        {cat.label}
+                      </button>
+                    );
+                  })}
                 </div>
               </div>
 
