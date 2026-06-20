@@ -2231,3 +2231,114 @@ textarea:focus-visible,
   scrollbar-width: thin;
   scrollbar-color: var(--accent-gold) var(--bg-secondary);
 }
+
+/* Touch Screen POS Buttons Style */
+.pos-tactile-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  font-family: inherit;
+  font-weight: 700;
+  font-size: 0.95rem;
+  padding: 12px 18px;
+  border-radius: 8px;
+  border: 2px solid var(--border-color);
+  background-color: var(--bg-secondary);
+  color: var(--text-primary);
+  box-shadow: 0 4px 0 var(--border-color);
+  cursor: pointer;
+  user-select: none;
+  touch-action: manipulation;
+  transition: all 0.05s ease;
+  min-height: 48px;
+}
+
+.pos-tactile-btn:hover {
+  background-color: var(--bg-primary);
+}
+
+.pos-tactile-btn:active {
+  transform: translateY(3px);
+  box-shadow: 0 1px 0 var(--border-color);
+}
+
+.pos-tactile-btn.primary {
+  background-color: var(--accent-gold);
+  border-color: #b57a00;
+  color: #ffffff;
+  box-shadow: 0 4px 0 #b57a00;
+}
+
+.pos-tactile-btn.primary:hover {
+  background-color: #b57a00;
+}
+
+.pos-tactile-btn.primary:active {
+  transform: translateY(3px);
+  box-shadow: 0 1px 0 #b57a00;
+}
+
+.pos-tactile-btn.success {
+  background-color: #25d366;
+  border-color: #1ebd56;
+  color: #ffffff;
+  box-shadow: 0 4px 0 #1ebd56;
+}
+
+.pos-tactile-btn.success:hover {
+  background-color: #1ebd56;
+}
+
+.pos-tactile-btn.success:active {
+  transform: translateY(3px);
+  box-shadow: 0 1px 0 #1ebd56;
+}
+
+.pos-tactile-btn.danger {
+  background-color: #ff453a;
+  border-color: #d12e26;
+  color: #ffffff;
+  box-shadow: 0 4px 0 #d12e26;
+}
+
+.pos-tactile-btn.danger:hover {
+  background-color: #d12e26;
+}
+
+.pos-tactile-btn.danger:active {
+  transform: translateY(3px);
+  box-shadow: 0 1px 0 #d12e26;
+}
+
+.pos-tactile-btn.info {
+  background-color: #3498db;
+  border-color: #217dbb;
+  color: #ffffff;
+  box-shadow: 0 4px 0 #217dbb;
+}
+
+.pos-tactile-btn.info:hover {
+  background-color: #217dbb;
+}
+
+.pos-tactile-btn.info:active {
+  transform: translateY(3px);
+  box-shadow: 0 1px 0 #217dbb;
+}
+
+.pos-tactile-btn.warning {
+  background-color: #de8e00;
+  border-color: #b57400;
+  color: #ffffff;
+  box-shadow: 0 4px 0 #b57400;
+}
+
+.pos-tactile-btn.warning:hover {
+  background-color: #b57400;
+}
+
+.pos-tactile-btn.warning:active {
+  transform: translateY(3px);
+  box-shadow: 0 1px 0 #b57400;
+}

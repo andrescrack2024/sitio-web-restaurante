@@ -49,7 +49,13 @@ export default function App() {
       password: 'admin123',
       securityQuestion: '¿Cuál es el nombre de tu cliente principal?',
       securityAnswer: 'edwin',
-      secureHash: 'admin_chocquin_9924'
+      secureHash: 'admin_chocquin_9924',
+      adminEmail: 'sharlyandresmosquerarodriguez@gmail.com',
+      emailjsServiceId: '',
+      emailjsTemplateId: '',
+      emailjsPublicKey: '',
+      audioNotifications: true,
+      voiceNotifications: true
     };
   });
 
@@ -99,6 +105,54 @@ export default function App() {
   
   // Ref to ensure migration check runs exactly once when component mounts
   const migrationCheckedRef = useRef(false);
+  const processedOrderIdsRef = useRef(null);
+  const initialLoadTimeRef = useRef(Date.now());
+
+  const playAlertChime = () => {
+    try {
+      const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      const playTone = (freq, startTime, duration) => {
+        const osc = audioCtx.createOscillator();
+        const gainNode = audioCtx.createGain();
+        osc.connect(gainNode);
+        gainNode.connect(audioCtx.destination);
+        osc.frequency.setValueAtTime(freq, startTime);
+        gainNode.gain.setValueAtTime(0.2, startTime);
+        gainNode.gain.exponentialRampToValueAtTime(0.01, startTime + duration);
+        osc.start(startTime);
+        osc.stop(startTime + duration);
+      };
+      playTone(523.25, audioCtx.currentTime, 0.3); // C5 (Ping)
+      playTone(659.25, audioCtx.currentTime + 0.15, 0.4); // E5 (Pong)
+    } catch (e) {
+      console.warn("Failed to play audio alert:", e);
+    }
+  };
+
+  const speakNotification = (text) => {
+    try {
+      if ('speechSynthesis' in window) {
+        const utterance = new SpeechSynthesisUtterance(text);
+        utterance.lang = 'es-ES';
+        window.speechSynthesis.speak(utterance);
+      }
+    } catch (e) {
+      console.warn("Failed to announce with Text-To-Speech:", e);
+    }
+  };
+
+  const triggerOrderNotification = (order) => {
+    const audioEnabled = adminSettings?.audioNotifications !== false;
+    const voiceEnabled = adminSettings?.voiceNotifications !== false;
+
+    if (audioEnabled) {
+      playAlertChime();
+    }
+
+    if (voiceEnabled) {
+      speakNotification(`Nuevo pedido recibido de ${order.clientName || 'cliente'}`);
+    }
+  };
 
   // Handle hash-based routing for admin panel
   useEffect(() => {
@@ -138,7 +192,13 @@ export default function App() {
           password: 'admin123',
           securityQuestion: '¿Cuál es el nombre de tu cliente principal?',
           securityAnswer: 'edwin',
-          secureHash: 'admin_chocquin_9924'
+          secureHash: 'admin_chocquin_9924',
+          adminEmail: 'sharlyandresmosquerarodriguez@gmail.com',
+          emailjsServiceId: '',
+          emailjsTemplateId: '',
+          emailjsPublicKey: '',
+          audioNotifications: true,
+          voiceNotifications: true
         };
         try {
           await setDoc(docRef, defaultSettings);
@@ -259,6 +319,23 @@ export default function App() {
       snapshot.forEach((docSnap) => {
         items.push({ id: docSnap.id, ...docSnap.data() });
       });
+
+      // Trigger audio & voice notifications for new orders
+      if (processedOrderIdsRef.current !== null) {
+        const newOrders = items.filter(order => 
+          !processedOrderIdsRef.current.has(order.id) && 
+          order.status === 'pendiente' &&
+          new Date(order.createdAt).getTime() > initialLoadTimeRef.current - 10000
+        );
+
+        if (newOrders.length > 0) {
+          newOrders.forEach(order => {
+            triggerOrderNotification(order);
+          });
+        }
+      }
+      processedOrderIdsRef.current = new Set(items.map(o => o.id));
+
       // Sort by date descending (newest first)
       items.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
       setOrders(items);

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Plus, Edit3, Trash2, ArrowLeft, Save, X, Info, Lock, Unlock, Copy, Check, Key, HelpCircle } from 'lucide-react';
+import { Plus, Edit3, Trash2, ArrowLeft, Save, X, Info, Lock, Unlock, Copy, Check, Key, HelpCircle, Volume2, VolumeX, Mail } from 'lucide-react';
 import { storage, isFirebaseSupported } from '../firebase';
 import { ref, uploadBytesResumable, getDownloadURL } from 'firebase/storage';
 
@@ -19,6 +19,12 @@ export default function Admin({
   const adminQuestion = adminSettings?.securityQuestion || '¿Cuál es el nombre de tu cliente principal?';
   const adminAnswer = adminSettings?.securityAnswer || 'edwin';
   const adminHash = adminSettings?.secureHash || 'admin_chocquin_9924';
+  const adminEmail = adminSettings?.adminEmail || 'sharlyandresmosquerarodriguez@gmail.com';
+  const emailjsServiceId = adminSettings?.emailjsServiceId || '';
+  const emailjsTemplateId = adminSettings?.emailjsTemplateId || '';
+  const emailjsPublicKey = adminSettings?.emailjsPublicKey || '';
+  const audioNotifications = adminSettings?.audioNotifications !== false;
+  const voiceNotifications = adminSettings?.voiceNotifications !== false;
 
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [password, setPassword] = useState('');
@@ -40,8 +46,9 @@ export default function Admin({
   const [uploadProgress, setUploadProgress] = useState(0);
 
   // Recovery & PIN states
-  const [loginMode, setLoginMode] = useState('login'); // 'login', 'recovery', 'reset'
-  const [recoveryAnswer, setRecoveryAnswer] = useState('');
+  const [loginMode, setLoginMode] = useState('login'); // 'login', 'recovery', 'enter_pin', 'reset'
+  const [recoveryEmail, setRecoveryEmail] = useState('');
+  const [enteredPin, setEnteredPin] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [recoveryError, setRecoveryError] = useState('');
 
@@ -50,7 +57,13 @@ export default function Admin({
     password: adminPassword,
     secureHash: adminHash,
     securityQuestion: adminQuestion,
-    securityAnswer: adminAnswer
+    securityAnswer: adminAnswer,
+    adminEmail: adminEmail,
+    emailjsServiceId: emailjsServiceId,
+    emailjsTemplateId: emailjsTemplateId,
+    emailjsPublicKey: emailjsPublicKey,
+    audioNotifications: audioNotifications,
+    voiceNotifications: voiceNotifications
   });
 
   // Sync security form when adminSettings updates
@@ -60,7 +73,13 @@ export default function Admin({
         password: adminSettings.password || 'admin123',
         secureHash: adminSettings.secureHash || 'admin_chocquin_9924',
         securityQuestion: adminSettings.securityQuestion || '¿Cuál es el nombre de tu cliente principal?',
-        securityAnswer: adminSettings.securityAnswer || 'edwin'
+        securityAnswer: adminSettings.securityAnswer || 'edwin',
+        adminEmail: adminSettings.adminEmail || 'sharlyandresmosquerarodriguez@gmail.com',
+        emailjsServiceId: adminSettings.emailjsServiceId || '',
+        emailjsTemplateId: adminSettings.emailjsTemplateId || '',
+        emailjsPublicKey: adminSettings.emailjsPublicKey || '',
+        audioNotifications: adminSettings.audioNotifications !== false,
+        voiceNotifications: adminSettings.voiceNotifications !== false
       });
     }
   }, [adminSettings]);
@@ -439,6 +458,9 @@ export default function Admin({
     if (loginMode === 'login') {
       setPassword(prev => prev + num);
       if (loginError) setLoginError('');
+    } else if (loginMode === 'enter_pin') {
+      setEnteredPin(prev => (prev + num).slice(0, 6));
+      if (recoveryError) setRecoveryError('');
     } else if (loginMode === 'reset') {
       setNewPassword(prev => prev + num);
       if (recoveryError) setRecoveryError('');
@@ -448,6 +470,8 @@ export default function Admin({
   const handlePinDelete = () => {
     if (loginMode === 'login') {
       setPassword(prev => prev.slice(0, -1));
+    } else if (loginMode === 'enter_pin') {
+      setEnteredPin(prev => prev.slice(0, -1));
     } else if (loginMode === 'reset') {
       setNewPassword(prev => prev.slice(0, -1));
     }
@@ -456,6 +480,8 @@ export default function Admin({
   const handlePinClear = () => {
     if (loginMode === 'login') {
       setPassword('');
+    } else if (loginMode === 'enter_pin') {
+      setEnteredPin('');
     } else if (loginMode === 'reset') {
       setNewPassword('');
     }
@@ -472,13 +498,85 @@ export default function Admin({
     }
   };
 
-  const handleRecoverySubmit = (e) => {
+  const handleRecoverySubmit = async (e) => {
     if (e) e.preventDefault();
-    if (recoveryAnswer.trim().toLowerCase() === adminAnswer.trim().toLowerCase()) {
+    if (recoveryEmail.trim().toLowerCase() !== adminEmail.toLowerCase()) {
+      setRecoveryError('El correo electrónico no coincide con el registrado.');
+      return;
+    }
+
+    const generatedPin = String(Math.floor(100000 + Math.random() * 900000));
+    const expiresAt = Date.now() + 5 * 60 * 1000;
+
+    const updatedSettings = {
+      ...adminSettings,
+      recoveryPin: generatedPin,
+      recoveryExpiresAt: expiresAt
+    };
+    onUpdateAdminSettings(updatedSettings);
+
+    const serviceId = adminSettings?.emailjsServiceId;
+    const templateId = adminSettings?.emailjsTemplateId;
+    const publicKey = adminSettings?.emailjsPublicKey;
+
+    if (serviceId && templateId && publicKey) {
+      try {
+        const response = await fetch('https://api.emailjs.com/api/v1.0/email/send', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            service_id: serviceId,
+            template_id: templateId,
+            user_id: publicKey,
+            template_params: {
+              to_name: 'Administrador',
+              to_email: adminEmail,
+              recovery_pin: generatedPin,
+              expires_in: '5 minutos'
+            }
+          })
+        });
+
+        if (response.ok) {
+          console.log('Correo de recuperación enviado con éxito.');
+        } else {
+          console.warn('Fallo al enviar correo con EmailJS. Código devuelto:', response.status);
+        }
+      } catch (err) {
+        console.error('Error al realizar envío por EmailJS:', err);
+      }
+    } else {
+      console.log('⚠️ EmailJS no configurado. Código de recuperación generado:', generatedPin);
+      alert(`[Modo Desarrollo] EmailJS no configurado en Seguridad. Tu código PIN de 6 dígitos es: ${generatedPin}`);
+    }
+
+    setLoginMode('enter_pin');
+    setRecoveryError('');
+    setEnteredPin('');
+  };
+
+  const handlePinVerificationSubmit = (e) => {
+    if (e) e.preventDefault();
+    const storedPin = adminSettings?.recoveryPin;
+    const expiresAt = adminSettings?.recoveryExpiresAt;
+
+    if (!storedPin || !expiresAt) {
+      setRecoveryError('No se encontró ningún PIN de recuperación activo.');
+      return;
+    }
+
+    if (Date.now() > expiresAt) {
+      setRecoveryError('El PIN de recuperación ha expirado. Genere uno nuevo.');
+      return;
+    }
+
+    if (enteredPin === storedPin) {
       setLoginMode('reset');
       setRecoveryError('');
     } else {
-      setRecoveryError('Respuesta incorrecta. Intente de nuevo.');
+      setRecoveryError('PIN de recuperación incorrecto.');
     }
   };
 
@@ -490,7 +588,9 @@ export default function Admin({
     }
     const updated = {
       ...adminSettings,
-      password: newPassword.trim()
+      password: newPassword.trim(),
+      recoveryPin: null,
+      recoveryExpiresAt: null
     };
     onUpdateAdminSettings(updated);
     
@@ -510,6 +610,10 @@ export default function Admin({
       alert('La ruta segura no puede estar vacía.');
       return;
     }
+    if (!securityForm.adminEmail.trim()) {
+      alert('El correo electrónico de administración no puede estar vacío.');
+      return;
+    }
     
     const normalizedHash = securityForm.secureHash.trim().replace(/[^a-zA-Z0-9_-]/g, '');
     if (!normalizedHash) {
@@ -518,10 +622,17 @@ export default function Admin({
     }
 
     const updated = {
+      ...adminSettings,
       password: securityForm.password.trim(),
       secureHash: normalizedHash,
       securityQuestion: securityForm.securityQuestion.trim(),
-      securityAnswer: securityForm.securityAnswer.trim()
+      securityAnswer: securityForm.securityAnswer.trim(),
+      adminEmail: securityForm.adminEmail.trim(),
+      emailjsServiceId: securityForm.emailjsServiceId.trim(),
+      emailjsTemplateId: securityForm.emailjsTemplateId.trim(),
+      emailjsPublicKey: securityForm.emailjsPublicKey.trim(),
+      audioNotifications: securityForm.audioNotifications !== false,
+      voiceNotifications: securityForm.voiceNotifications !== false
     };
 
     onUpdateAdminSettings(updated);
@@ -648,7 +759,7 @@ export default function Admin({
                 onClick={() => {
                   setLoginMode('recovery');
                   setRecoveryError('');
-                  setRecoveryAnswer('');
+                  setRecoveryEmail('');
                 }} 
                 className="btn btn-secondary" 
                 style={{ width: '100%', textTransform: 'none', border: '1px solid var(--border-color)', marginBottom: '12px', height: '44px' }}
@@ -665,25 +776,20 @@ export default function Admin({
               </div>
               <h3 className="modal-title" style={{ textAlign: 'center', marginBottom: '10px' }}>Recuperación de Contraseña</h3>
               <p style={{ color: 'var(--text-secondary)', fontSize: '0.9rem', marginBottom: '24px' }}>
-                Responda la pregunta de seguridad configurada para restablecer su contraseña.
+                Ingrese su dirección de correo electrónico administrador registrado para recibir un PIN de 6 dígitos.
               </p>
-
-              <div style={{ backgroundColor: 'var(--bg-secondary)', border: '1px solid var(--border-color)', padding: '16px', borderRadius: '8px', marginBottom: '20px', textAlign: 'left' }}>
-                <span style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', fontWeight: 'bold', textTransform: 'uppercase' }}>Pregunta de Seguridad:</span>
-                <p style={{ margin: '4px 0 0 0', fontSize: '1.05rem', fontWeight: '600', color: 'var(--text-primary)' }}>{adminQuestion}</p>
-              </div>
 
               <form onSubmit={handleRecoverySubmit}>
                 <div className="form-group" style={{ marginBottom: '20px' }}>
                   <input
-                    type="text"
-                    value={recoveryAnswer}
+                    type="email"
+                    value={recoveryEmail}
                     onChange={(e) => {
-                      setRecoveryAnswer(e.target.value);
+                      setRecoveryEmail(e.target.value);
                       if (recoveryError) setRecoveryError('');
                     }}
                     className="form-control"
-                    placeholder="Escriba su respuesta aquí"
+                    placeholder="ejemplo@correo.com"
                     style={{ textAlign: 'center', fontSize: '1.1rem', height: '52px' }}
                     required
                     autoFocus
@@ -692,7 +798,7 @@ export default function Admin({
                 </div>
 
                 <button type="submit" className="btn btn-primary" style={{ width: '100%', height: '50px', fontSize: '1rem', marginBottom: '16px' }}>
-                  Verificar Respuesta
+                  Enviar PIN de Recuperación
                 </button>
               </form>
               
@@ -706,6 +812,66 @@ export default function Admin({
                 style={{ width: '100%', textTransform: 'none', border: '1px solid var(--border-color)', height: '44px' }}
               >
                 <ArrowLeft size={16} style={{ marginRight: '6px' }} /> Volver al Login
+              </button>
+            </>
+          )}
+
+          {loginMode === 'enter_pin' && (
+            <>
+              <div className="success-icon-wrapper" style={{ backgroundColor: 'var(--accent-gold-light)', margin: '0 auto 20px' }}>
+                <Key size={24} className="text-gold" />
+              </div>
+              <h3 className="modal-title" style={{ textAlign: 'center', marginBottom: '10px' }}>Verificar PIN</h3>
+              <p style={{ color: 'var(--text-secondary)', fontSize: '0.9rem', marginBottom: '20px' }}>
+                Hemos enviado un código PIN al correo electrónico. Ingréselo a continuación.
+              </p>
+
+              <form onSubmit={handlePinVerificationSubmit}>
+                <div className="form-group" style={{ marginBottom: '15px' }}>
+                  <input
+                    type="text"
+                    value={enteredPin}
+                    onChange={(e) => {
+                      setEnteredPin(e.target.value.replace(/\D/g, '').slice(0, 6));
+                      if (recoveryError) setRecoveryError('');
+                    }}
+                    className="form-control"
+                    placeholder="PIN de 6 dígitos"
+                    style={{ textAlign: 'center', fontSize: '1.5rem', letterSpacing: '8px', fontWeight: 'bold', height: '52px' }}
+                    required
+                    autoFocus
+                  />
+                  {recoveryError && <p className="form-error" style={{ textAlign: 'center', marginTop: '8px' }}>{recoveryError}</p>}
+                </div>
+
+                {renderPinPad()}
+
+                <button type="submit" className="btn btn-primary" style={{ width: '100%', height: '50px', fontSize: '1rem', marginTop: '24px', marginBottom: '16px' }}>
+                  Verificar PIN
+                </button>
+              </form>
+              
+              <button 
+                onClick={() => {
+                  setLoginMode('recovery');
+                  setRecoveryError('');
+                }} 
+                className="btn btn-secondary" 
+                style={{ width: '100%', textTransform: 'none', border: '1px solid var(--border-color)', marginBottom: '12px', height: '44px' }}
+              >
+                Volver a enviar código
+              </button>
+
+              <button 
+                onClick={() => {
+                  setLoginMode('login');
+                  setLoginError('');
+                  setPassword('');
+                }} 
+                className="btn btn-secondary" 
+                style={{ width: '100%', textTransform: 'none', border: '1px solid var(--border-color)', height: '44px' }}
+              >
+                Cancelar
               </button>
             </>
           )}
@@ -780,11 +946,11 @@ export default function Admin({
           </div>
           
           <div style={{ display: 'flex', gap: '12px' }}>
-            <button onClick={onGoBack} className="btn btn-secondary" style={{ textTransform: 'none' }}>
+            <button onClick={onGoBack} className="pos-tactile-btn" style={{ textTransform: 'none' }}>
               <ArrowLeft size={16} /> Volver al Sitio
             </button>
             {activeTab === 'menu' && (
-              <button onClick={openAddModal} className="btn btn-primary" style={{ textTransform: 'none' }}>
+              <button onClick={openAddModal} className="pos-tactile-btn primary" style={{ textTransform: 'none' }}>
                 <Plus size={16} /> Agregar Producto
               </button>
             )}
@@ -792,28 +958,28 @@ export default function Admin({
         </div>
 
         {/* Tab Selector */}
-        <div className="admin-tabs animate-slide-up" style={{ display: 'flex', gap: '12px', marginBottom: '24px', borderBottom: '1px solid var(--border-color)', paddingBottom: '14px', flexWrap: 'wrap' }}>
+        <div className="admin-tabs animate-slide-up" style={{ display: 'flex', gap: '12px', marginBottom: '24px', borderBottom: '1px solid var(--border-color)', paddingBottom: '18px', flexWrap: 'wrap' }}>
           <button 
             type="button"
             onClick={() => setActiveTab('pedidos')} 
-            className={`btn ${activeTab === 'pedidos' ? 'btn-primary' : 'btn-secondary'}`}
-            style={{ textTransform: 'none', borderRadius: '8px', padding: '10px 20px', display: 'flex', alignItems: 'center', gap: '8px', border: activeTab !== 'pedidos' ? '1px solid var(--border-color)' : undefined }}
+            className={`pos-tactile-btn ${activeTab === 'pedidos' ? 'primary' : ''}`}
+            style={{ textTransform: 'none', display: 'flex', alignItems: 'center', gap: '8px', flexGrow: 1 }}
           >
             📋 Pedidos en Vivo ({orders.length})
           </button>
           <button 
             type="button"
             onClick={() => setActiveTab('menu')} 
-            className={`btn ${activeTab === 'menu' ? 'btn-primary' : 'btn-secondary'}`}
-            style={{ textTransform: 'none', borderRadius: '8px', padding: '10px 20px', display: 'flex', alignItems: 'center', gap: '8px', border: activeTab !== 'menu' ? '1px solid var(--border-color)' : undefined }}
+            className={`pos-tactile-btn ${activeTab === 'menu' ? 'primary' : ''}`}
+            style={{ textTransform: 'none', display: 'flex', alignItems: 'center', gap: '8px', flexGrow: 1 }}
           >
             🍔 Gestionar Menú ({menuItems.length})
           </button>
           <button 
             type="button"
             onClick={() => setActiveTab('seguridad')} 
-            className={`btn ${activeTab === 'seguridad' ? 'btn-primary' : 'btn-secondary'}`}
-            style={{ textTransform: 'none', borderRadius: '8px', padding: '10px 20px', display: 'flex', alignItems: 'center', gap: '8px', border: activeTab !== 'seguridad' ? '1px solid var(--border-color)' : undefined }}
+            className={`pos-tactile-btn ${activeTab === 'seguridad' ? 'primary' : ''}`}
+            style={{ textTransform: 'none', display: 'flex', alignItems: 'center', gap: '8px', flexGrow: 1 }}
           >
             🔒 Seguridad
           </button>
@@ -972,13 +1138,13 @@ export default function Admin({
 
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', width: '100%', marginTop: '8px' }}>
                       <span style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', fontWeight: 'bold', textTransform: 'uppercase' }}>Actualizar Estado (POS Táctil)</span>
-                      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))', gap: '8px' }}>
+                      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(115px, 1fr))', gap: '8px' }}>
                         {[
-                          { value: 'pendiente', label: '🕒 Pendiente', color: '#de8e00' },
-                          { value: 'en cocina', label: '🍳 Cocina', color: '#d4ac0d' },
-                          { value: 'en camino', label: '🛵 Camino', color: '#3498db' },
-                          { value: 'entregado', label: '✅ Entregado', color: '#25d366' },
-                          { value: 'cancelado', label: '❌ Cancelar', color: '#ff453a' }
+                          { value: 'pendiente', label: '🕒 Pendiente', colorClass: 'warning' },
+                          { value: 'en cocina', label: '🍳 Cocina', colorClass: 'primary' },
+                          { value: 'en camino', label: '🛵 Camino', colorClass: 'info' },
+                          { value: 'entregado', label: '✅ Entregado', colorClass: 'success' },
+                          { value: 'cancelado', label: '❌ Cancelar', colorClass: 'danger' }
                         ].map((btn) => {
                           const isActive = order.status === btn.value;
                           return (
@@ -986,22 +1152,11 @@ export default function Admin({
                               key={btn.value}
                               type="button"
                               onClick={() => onUpdateOrderStatus(order.id, btn.value)}
+                              className={`pos-tactile-btn ${isActive ? btn.colorClass : ''}`}
                               style={{
-                                padding: '12px 8px',
+                                flexGrow: 1,
                                 fontSize: '0.9rem',
-                                fontWeight: 'bold',
-                                borderRadius: '8px',
-                                border: isActive ? `2px solid ${btn.color}` : '1px solid var(--border-color)',
-                                backgroundColor: isActive ? btn.color : 'var(--bg-primary)',
-                                color: isActive ? '#fff' : btn.color,
-                                cursor: 'pointer',
-                                display: 'flex',
-                                alignItems: 'center',
-                                justifyContent: 'center',
-                                gap: '4px',
-                                minHeight: '48px',
-                                touchAction: 'manipulation',
-                                transition: 'all 0.15s ease'
+                                padding: '8px'
                               }}
                             >
                               {btn.label}
@@ -1014,24 +1169,17 @@ export default function Admin({
                     <div style={{ borderTop: '1px solid var(--border-color)', width: '100%' }}></div>
 
                     {/* Bottom Actions Row */}
-                    <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '12px', alignItems: 'center', flexWrap: 'wrap' }}>
+                    <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '12px', alignItems: 'center', flexWrap: 'wrap', width: '100%', marginTop: '4px' }}>
                       {order.status === 'pendiente' && (
                         <button
                           type="button"
                           onClick={() => handleAcceptOrder(order)}
-                          className="btn btn-primary"
+                          className="pos-tactile-btn success"
                           style={{
                             textTransform: 'none',
-                            fontSize: '0.85rem',
-                            padding: '8px 16px',
-                            backgroundColor: '#25d366',
-                            borderColor: '#25d366',
-                            color: '#ffffff',
-                            borderRadius: '30px',
-                            display: 'flex',
-                            alignItems: 'center',
-                            gap: '6px',
-                            fontWeight: '600'
+                            fontSize: '0.9rem',
+                            flexGrow: 1,
+                            fontWeight: '700'
                           }}
                         >
                           🟢 Tomar Pedido / Aceptar
@@ -1042,15 +1190,12 @@ export default function Admin({
                         <button
                           type="button"
                           onClick={() => onUpdateOrderStatus(order.id, 'en cocina')}
-                          className="btn btn-secondary"
+                          className="pos-tactile-btn success"
                           style={{
                             textTransform: 'none',
-                            fontSize: '0.85rem',
-                            padding: '8px 16px',
-                            borderColor: '#25d366',
-                            color: '#25d366',
-                            backgroundColor: 'transparent',
-                            borderRadius: '30px'
+                            fontSize: '0.9rem',
+                            flexGrow: 1,
+                            fontWeight: '700'
                           }}
                         >
                           ✓ Validar Transferencia
@@ -1060,38 +1205,33 @@ export default function Admin({
                       <button
                         type="button"
                         onClick={() => sendStatusWhatsApp(order)}
-                        className="btn btn-secondary"
+                        className="pos-tactile-btn"
                         style={{
                           textTransform: 'none',
-                          fontSize: '0.85rem',
-                          padding: '8px 16px',
-                          borderColor: '#25d366',
-                          color: '#25d366',
-                          backgroundColor: 'transparent',
-                          borderRadius: '30px',
+                          fontSize: '0.9rem',
+                          flexGrow: 1,
                           display: 'flex',
                           alignItems: 'center',
-                          gap: '6px'
+                          justifyContent: 'center',
+                          gap: '6px',
+                          borderColor: '#25d366',
+                          color: '#25d366'
                         }}
                       >
                         <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor">
                           <path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946C.06 5.348 5.397.01 12.008.01c3.202.001 6.212 1.246 8.477 3.514 2.266 2.268 3.507 5.28 3.505 8.484-.004 6.657-5.34 11.997-11.953 11.997-2.005-.001-3.973-.502-5.724-1.457L0 24zm6.59-4.846c1.6.95 3.188 1.449 4.825 1.451 5.436 0 9.86-4.37 9.864-9.799.002-2.63-1.023-5.101-2.885-6.968C16.592 1.97 14.12 .946 11.5 .946c-5.423 0-9.842 4.37-9.846 9.8.001 1.93.523 3.8 1.511 5.4l-.993 3.625 3.73-.977zm11.536-6.52c-.27-.135-1.595-.788-1.842-.877-.248-.09-.427-.135-.607.135-.179.27-.697.877-.854 1.057-.158.18-.315.202-.586.067-1.18-.592-1.96-1.01-2.735-2.338-.204-.352.204-.326.583-1.085.09-.18.045-.337-.022-.472-.068-.135-.608-1.464-.833-2.005-.22-.529-.462-.458-.63-.466-.153-.008-.329-.01-.505-.01-.176 0-.463.067-.704.326-.241.26-.92.9-.92 2.196 0 1.297.945 2.546 1.077 2.726.133.18 1.861 2.842 4.508 3.982.63.272 1.12.434 1.503.555.632.201 1.21.172 1.665.105.508-.075 1.595-.653 1.82-.1282.225-.63.225-1.17.157-1.26-.068-.09-.248-.135-.518-.27z" />
                         </svg>
-                        Notificar WhatsApp
+                        WhatsApp
                       </button>
                       
                       <button
                         type="button"
                         onClick={() => printComanda(order)}
-                        className="btn btn-primary"
+                        className="pos-tactile-btn primary"
                         style={{
                           textTransform: 'none',
-                          fontSize: '0.85rem',
-                          padding: '8px 16px',
-                          display: 'flex',
-                          alignItems: 'center',
-                          gap: '6px',
-                          borderRadius: '30px'
+                          fontSize: '0.9rem',
+                          flexGrow: 1
                         }}
                       >
                         🖨️ Imprimir Comanda
@@ -1202,12 +1342,13 @@ export default function Admin({
 
         {activeTab === 'seguridad' && (
           <div className="order-card animate-fade-in" style={{ backgroundColor: 'var(--bg-secondary)', border: '1px solid var(--border-color)', borderRadius: '12px', padding: '24px', textAlign: 'left' }}>
-            <h3 style={{ fontSize: '1.25rem', fontWeight: 'bold', marginBottom: '16px', color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <h3 style={{ fontSize: '1.25rem', fontWeight: 'bold', marginBottom: '20px', color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '8px' }}>
               <Lock size={20} className="text-gold" style={{ flexShrink: 0 }} /> Parámetros de Acceso y Seguridad
             </h3>
 
             <form onSubmit={handleSecurityFormSubmit}>
-              <div className="admin-form-grid" style={{ marginBottom: '20px' }}>
+              <h4 style={{ fontSize: '1rem', fontWeight: 'bold', marginBottom: '12px', color: 'var(--accent-gold)', borderBottom: '1px solid var(--border-color)', paddingBottom: '6px' }}>Credenciales de Acceso</h4>
+              <div className="admin-form-grid" style={{ marginBottom: '24px' }}>
                 <div className="form-group">
                   <label className="form-label" style={{ fontWeight: '600' }}>Contraseña de Administrador</label>
                   <input
@@ -1236,32 +1377,82 @@ export default function Admin({
                 </div>
               </div>
 
-              <div className="admin-form-grid" style={{ marginBottom: '20px' }}>
+              <h4 style={{ fontSize: '1rem', fontWeight: 'bold', marginBottom: '12px', color: 'var(--accent-gold)', borderBottom: '1px solid var(--border-color)', paddingBottom: '6px' }}>Configuración de Recuperación de PIN por Correo</h4>
+              <div className="admin-form-grid" style={{ marginBottom: '16px' }}>
                 <div className="form-group">
-                  <label className="form-label" style={{ fontWeight: '600' }}>Pregunta Secreta de Recuperación</label>
+                  <label className="form-label" style={{ fontWeight: '600' }}>Correo Electrónico de Recuperación</label>
                   <input
-                    type="text"
-                    value={securityForm.securityQuestion}
-                    onChange={(e) => setSecurityForm(prev => ({ ...prev, securityQuestion: e.target.value }))}
+                    type="email"
+                    value={securityForm.adminEmail}
+                    onChange={(e) => setSecurityForm(prev => ({ ...prev, adminEmail: e.target.value }))}
                     className="form-control"
-                    placeholder="Pregunta de Seguridad"
+                    placeholder="ej: admin@correo.com"
                     style={{ fontSize: '1.05rem', height: '48px' }}
                     required
+                  />
+                  <small style={{ color: 'var(--text-secondary)', display: 'block', marginTop: '4px' }}>Donde llegará el PIN de 6 dígitos en caso de olvido.</small>
+                </div>
+
+                <div className="form-group">
+                  <label className="form-label" style={{ fontWeight: '600' }}>EmailJS Service ID</label>
+                  <input
+                    type="text"
+                    value={securityForm.emailjsServiceId}
+                    onChange={(e) => setSecurityForm(prev => ({ ...prev, emailjsServiceId: e.target.value }))}
+                    className="form-control"
+                    placeholder="ej: service_xxxxxxx"
+                    style={{ fontSize: '1.05rem', height: '48px' }}
+                  />
+                </div>
+              </div>
+
+              <div className="admin-form-grid" style={{ marginBottom: '24px' }}>
+                <div className="form-group">
+                  <label className="form-label" style={{ fontWeight: '600' }}>EmailJS Template ID</label>
+                  <input
+                    type="text"
+                    value={securityForm.emailjsTemplateId}
+                    onChange={(e) => setSecurityForm(prev => ({ ...prev, emailjsTemplateId: e.target.value }))}
+                    className="form-control"
+                    placeholder="ej: template_xxxxxxx"
+                    style={{ fontSize: '1.05rem', height: '48px' }}
                   />
                 </div>
 
                 <div className="form-group">
-                  <label className="form-label" style={{ fontWeight: '600' }}>Respuesta Secreta de Recuperación</label>
+                  <label className="form-label" style={{ fontWeight: '600' }}>EmailJS Public Key</label>
                   <input
                     type="text"
-                    value={securityForm.securityAnswer}
-                    onChange={(e) => setSecurityForm(prev => ({ ...prev, securityAnswer: e.target.value }))}
+                    value={securityForm.emailjsPublicKey}
+                    onChange={(e) => setSecurityForm(prev => ({ ...prev, emailjsPublicKey: e.target.value }))}
                     className="form-control"
-                    placeholder="Respuesta de Seguridad"
+                    placeholder="ej: xxxxxxx-xxxxxxxx"
                     style={{ fontSize: '1.05rem', height: '48px' }}
-                    required
                   />
                 </div>
+              </div>
+
+              <h4 style={{ fontSize: '1rem', fontWeight: 'bold', marginBottom: '12px', color: 'var(--accent-gold)', borderBottom: '1px solid var(--border-color)', paddingBottom: '6px' }}>Notificaciones de Nuevos Pedidos (Caja Registradora / POS)</h4>
+              <div style={{ display: 'flex', gap: '16px', flexWrap: 'wrap', marginBottom: '32px' }}>
+                <button
+                  type="button"
+                  onClick={() => setSecurityForm(prev => ({ ...prev, audioNotifications: !prev.audioNotifications }))}
+                  className={`pos-tactile-btn ${securityForm.audioNotifications ? 'success' : ''}`}
+                  style={{ flex: 1, minWidth: '220px', textTransform: 'none' }}
+                >
+                  {securityForm.audioNotifications ? <Volume2 size={20} /> : <VolumeX size={20} />}
+                  <span>{securityForm.audioNotifications ? '🔊 Timbre de Alerta Activado' : '🔇 Timbre de Alerta Desactivado'}</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setSecurityForm(prev => ({ ...prev, voiceNotifications: !prev.voiceNotifications }))}
+                  className={`pos-tactile-btn ${securityForm.voiceNotifications ? 'success' : ''}`}
+                  style={{ flex: 1, minWidth: '220px', textTransform: 'none' }}
+                >
+                  {securityForm.voiceNotifications ? <Volume2 size={20} /> : <VolumeX size={20} />}
+                  <span>{securityForm.voiceNotifications ? '🗣️ Anuncio de Voz Activado' : '🔇 Anuncio de Voz Desactivado'}</span>
+                </button>
               </div>
 
               {/* Secure Link Info Box & Copier */}
@@ -1297,21 +1488,8 @@ export default function Admin({
                 <button
                   type="button"
                   onClick={handleCopyLink}
-                  className="btn"
-                  style={{
-                    display: 'inline-flex',
-                    alignItems: 'center',
-                    gap: '8px',
-                    backgroundColor: copied ? 'rgba(37, 211, 102, 0.15)' : 'var(--accent-gold-light)',
-                    border: copied ? '1px solid #25d366' : '1px solid var(--accent-gold)',
-                    color: copied ? '#25d366' : 'var(--accent-gold)',
-                    padding: '10px 16px',
-                    borderRadius: '6px',
-                    fontSize: '0.9rem',
-                    fontWeight: 'bold',
-                    cursor: 'pointer',
-                    minHeight: '44px'
-                  }}
+                  className={`pos-tactile-btn ${copied ? 'success' : ''}`}
+                  style={{ textTransform: 'none' }}
                 >
                   {copied ? <Check size={16} /> : <Copy size={16} />}
                   {copied ? '¡Copiado con éxito!' : 'Copiar Enlace Secreto'}
@@ -1320,16 +1498,12 @@ export default function Admin({
 
               <button
                 type="submit"
-                className="btn btn-primary"
+                className="pos-tactile-btn primary"
                 style={{
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  gap: '8px',
                   width: '100%',
-                  height: '50px',
-                  fontSize: '1rem',
-                  fontWeight: 'bold'
+                  height: '54px',
+                  fontSize: '1.05rem',
+                  textTransform: 'none'
                 }}
               >
                 <Save size={18} /> Guardar Configuración de Seguridad
@@ -1403,22 +1577,10 @@ export default function Admin({
                         key={cat.value}
                         type="button"
                         onClick={() => setFormData(prev => ({ ...prev, category: cat.value }))}
+                        className={`pos-tactile-btn ${isSel ? 'primary' : ''}`}
                         style={{
-                          padding: '12px 10px',
                           fontSize: '0.9rem',
-                          fontWeight: '600',
-                          borderRadius: '8px',
-                          border: isSel ? '2px solid var(--accent-gold)' : '1px solid var(--border-color)',
-                          backgroundColor: isSel ? 'var(--accent-gold-light)' : 'var(--bg-primary)',
-                          color: isSel ? 'var(--accent-gold)' : 'var(--text-primary)',
-                          cursor: 'pointer',
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                          gap: '6px',
-                          minHeight: '48px',
-                          touchAction: 'manipulation',
-                          transition: 'all 0.15s ease'
+                          padding: '10px'
                         }}
                       >
                         {cat.label}
