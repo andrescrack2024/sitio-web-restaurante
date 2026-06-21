@@ -628,28 +628,88 @@ button {
 
 /* Menu/Catalog Section */
 .menu-categories {
-  display: flex;
-  justify-content: center;
-  flex-wrap: wrap;
-  gap: 12px;
-  margin-bottom: 40px;
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 16px;
+  max-width: 900px;
+  margin: 0 auto 40px auto;
 }
 
 .category-btn {
-  padding: 10px 24px;
-  border-radius: 30px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 16px 8px;
+  border-radius: 16px;
   background-color: var(--bg-secondary);
-  border: 1px solid var(--border-color);
-  font-weight: 500;
-  font-size: 0.9rem;
-  transition: all var(--transition-fast);
+  border: 2px solid var(--border-color);
+  font-weight: 700;
+  font-size: 0.95rem;
+  color: var(--text-primary);
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+  cursor: pointer;
+  touch-action: manipulation;
+  transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+  min-height: 105px;
 }
 
-.category-btn.active,
+.category-btn .category-icon {
+  font-size: 2.2rem;
+  transition: transform 0.2s ease;
+}
+
+.category-btn .category-label {
+  font-size: 0.9rem;
+  text-align: center;
+}
+
 .category-btn:hover {
+  border-color: var(--accent-gold);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 12px rgba(212, 163, 89, 0.12);
+}
+
+.category-btn:hover .category-icon {
+  transform: scale(1.12);
+}
+
+.category-btn:active {
+  transform: translateY(1px);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.category-btn.active {
   background-color: var(--accent-gold);
   border-color: var(--accent-gold);
   color: #1a1a18;
+  box-shadow: 0 6px 12px rgba(212, 163, 89, 0.25);
+  transform: scale(0.98);
+}
+
+@media (max-width: 992px) {
+  .menu-categories {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+  }
+}
+
+@media (max-width: 480px) {
+  .menu-categories {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+  }
+  .category-btn {
+    min-height: 95px;
+    padding: 12px 6px;
+  }
+  .category-btn .category-icon {
+    font-size: 1.8rem;
+  }
+  .category-btn .category-label {
+    font-size: 0.85rem;
+  }
 }
 
 .menu-grid {

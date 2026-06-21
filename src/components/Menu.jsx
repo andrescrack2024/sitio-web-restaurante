@@ -251,12 +251,12 @@ export default function Menu({ menuItems = [], addToCart, cartItems, loading }) 
   const [selectedSauces, setSelectedSauces] = useState(['Rosada', 'Roja']);
 
   const categories = [
-    { id: 'todos', label: 'Todos' },
-    { id: 'hamburguesas', label: 'Hamburguesas' },
-    { id: 'perros', label: 'Perros' },
-    { id: 'salchipapas', label: 'Salchipapas' },
-    { id: 'bebidas', label: 'Bebidas' },
-    { id: 'especiales', label: 'Especiales / Combos' }
+    { id: 'todos', label: 'Todos', icon: '🍽️' },
+    { id: 'hamburguesas', label: 'Hamburguesas', icon: '🍔' },
+    { id: 'perros', label: 'Perros', icon: '🌭' },
+    { id: 'salchipapas', label: 'Salchipapas', icon: '🍟' },
+    { id: 'bebidas', label: 'Bebidas', icon: '🥤' },
+    { id: 'especiales', label: 'Especiales / Combos', icon: '🍱' }
   ];
 
   const getCategoryLabel = (cat) => {
@@ -354,7 +354,8 @@ export default function Menu({ menuItems = [], addToCart, cartItems, loading }) 
               onClick={() => setActiveCategory(cat.id)}
               className={`category-btn ${activeCategory === cat.id ? 'active' : ''}`}
             >
-              {cat.label}
+              <span className="category-icon">{cat.icon}</span>
+              <span className="category-label">{cat.label}</span>
             </button>
           ))}
         </div>
