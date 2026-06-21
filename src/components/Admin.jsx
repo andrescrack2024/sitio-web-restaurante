@@ -44,6 +44,7 @@ export default function Admin({
   const [errors, setErrors] = useState({});
   const [isUploading, setIsUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
+  const [orderSearchTerm, setOrderSearchTerm] = useState('');
 
   // Recovery & PIN states
   const [loginMode, setLoginMode] = useState('login'); // 'login', 'recovery', 'enter_pin', 'reset'
@@ -935,6 +936,27 @@ export default function Admin({
     );
   }
 
+  // Filter active and history orders
+  const activeOrders = orders.filter(order => 
+    order.status === 'pendiente' || 
+    order.status === 'cocina' || 
+    order.status === 'camino'
+  );
+
+  const rawHistoryOrders = orders.filter(order => 
+    order.status === 'entregado' || 
+    order.status === 'cancelado'
+  );
+
+  const historyOrders = rawHistoryOrders.filter(order => {
+    if (!orderSearchTerm.trim()) return true;
+    const client = order.clientName || '';
+    const items = order.items || [];
+    const itemsString = items.map(i => i.name).join(' ');
+    const searchString = `${client} ${order.id || ''} ${itemsString}`.toLowerCase();
+    return searchString.includes(orderSearchTerm.toLowerCase().trim());
+  });
+
   return (
     <section className="admin-section">
       <div className="container">
@@ -961,11 +983,19 @@ export default function Admin({
         <div className="admin-tabs animate-slide-up" style={{ display: 'flex', gap: '12px', marginBottom: '24px', borderBottom: '1px solid var(--border-color)', paddingBottom: '18px', flexWrap: 'wrap' }}>
           <button 
             type="button"
-            onClick={() => setActiveTab('pedidos')} 
+            onClick={() => { setActiveTab('pedidos'); setOrderSearchTerm(''); }} 
             className={`pos-tactile-btn ${activeTab === 'pedidos' ? 'primary' : ''}`}
             style={{ textTransform: 'none', display: 'flex', alignItems: 'center', gap: '8px', flexGrow: 1 }}
           >
-            📋 Pedidos en Vivo ({orders.length})
+            📋 Pedidos Activos ({activeOrders.length})
+          </button>
+          <button 
+            type="button"
+            onClick={() => { setActiveTab('historial'); setOrderSearchTerm(''); }} 
+            className={`pos-tactile-btn ${activeTab === 'historial' ? 'primary' : ''}`}
+            style={{ textTransform: 'none', display: 'flex', alignItems: 'center', gap: '8px', flexGrow: 1 }}
+          >
+            ⏳ Historial ({historyOrders.length})
           </button>
           <button 
             type="button"
@@ -1004,7 +1034,11 @@ export default function Admin({
           <Info size={24} className="text-gold" style={{ flexShrink: 0 }} />
           {activeTab === 'pedidos' ? (
             <p>
-              Aquí puedes ver los pedidos a domicilio entrantes en tiempo real. Utiliza el botón <b>Validar Transferencia</b> para confirmar pagos por Nequi/Bancolombia, o presiona <b>Imprimir Comanda</b> para generar el ticket físico para la cocina.
+              Aquí puedes ver los pedidos a domicilio en curso. Utiliza el botón <b>Validar Transferencia</b> para verificar pagos, o presiona <b>Imprimir Comanda</b> para la cocina. Al completarlos o cancelarlos pasarán al historial.
+            </p>
+          ) : activeTab === 'historial' ? (
+            <p>
+              Historial de pedidos atendidos (Entregados o Cancelados). Puedes utilizar el buscador táctil en la parte superior para localizar rápidamente un pedido por nombre, ID o productos.
             </p>
           ) : activeTab === 'menu' ? (
             <p>
@@ -1012,7 +1046,7 @@ export default function Admin({
             </p>
           ) : (
             <p>
-              Configura los parámetros de seguridad del panel: cambia tu contraseña de acceso, la pregunta y respuesta secreta para recuperación, y personaliza el enlace cifrado para ocultar el panel a usuarios no deseados.
+              Configura los parámetros de seguridad del panel: cambia tu contraseña de acceso, el correo de recuperación y personaliza las notificaciones táctiles de pedidos.
             </p>
           )}
         </div>
@@ -1020,12 +1054,12 @@ export default function Admin({
         {activeTab === 'pedidos' && (
           /* Pedidos en Vivo Grid list */
           <div className="orders-container animate-fade-in" style={{ display: 'flex', flexDirection: 'column', gap: '16px', textAlign: 'left' }}>
-            {orders.length === 0 ? (
+            {activeOrders.length === 0 ? (
               <div style={{ padding: '40px', textAlign: 'center', color: 'var(--text-secondary)', backgroundColor: 'var(--bg-secondary)', borderRadius: '12px', border: '1px solid var(--border-color)' }}>
-                No hay pedidos registrados aún. Los pedidos en tiempo real de los clientes aparecerán aquí.
+                No hay pedidos activos por preparar o entregar en este momento.
               </div>
             ) : (
-              orders.map((order) => {
+              activeOrders.map((order) => {
                 const dateObj = new Date(order.createdAt);
                 const timeString = dateObj.toLocaleTimeString('es-CO', { hour: '2-digit', minute: '2-digit' });
                 const dateString = dateObj.toLocaleDateString('es-CO');
@@ -1065,16 +1099,14 @@ export default function Admin({
                             padding: '6px 12px',
                             borderRadius: '20px',
                             textTransform: 'uppercase',
-                            backgroundColor: order.status === 'pendiente' ? 'rgba(222, 142, 0, 0.15)' : order.status === 'cancelado' ? 'rgba(255, 69, 58, 0.15)' : 'rgba(37, 211, 102, 0.15)',
-                            color: order.status === 'pendiente' ? '#de8e00' : order.status === 'cancelado' ? '#ff453a' : '#25d366',
+                            backgroundColor: order.status === 'pendiente' ? 'rgba(222, 142, 0, 0.15)' : 'rgba(37, 211, 102, 0.15)',
+                            color: order.status === 'pendiente' ? '#de8e00' : '#25d366',
                             border: '1px solid currentColor'
                           }}
                         >
                           {order.status === 'pendiente' && '🕒 Pendiente'}
                           {order.status === 'en cocina' && '🍳 En Cocina'}
                           {order.status === 'en camino' && '🛵 En Camino'}
-                          {order.status === 'entregado' && '✅ Entregado'}
-                          {order.status === 'cancelado' && '❌ Cancelado'}
                         </span>
                       </div>
                     </div>
@@ -1252,7 +1284,240 @@ export default function Admin({
                           width: '36px',
                           height: '36px'
                         }}
-                        title="Eliminar de historial"
+                        title="Eliminar de la lista"
+                      >
+                        <Trash2 size={16} />
+                      </button>
+                    </div>
+                  </div>
+                );
+              })
+            )}
+          </div>
+        )}
+
+        {activeTab === 'historial' && (
+          <div className="orders-container animate-fade-in" style={{ display: 'flex', flexDirection: 'column', gap: '16px', textAlign: 'left' }}>
+            {/* Search Box */}
+            <div style={{ 
+              backgroundColor: 'var(--bg-secondary)', 
+              border: '1px solid var(--border-color)', 
+              borderRadius: '12px', 
+              padding: '16px',
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '8px'
+            }}>
+              <label className="form-label" style={{ fontWeight: '600', margin: 0 }}>Buscar Pedidos Históricos</label>
+              <input
+                type="text"
+                value={orderSearchTerm}
+                onChange={(e) => setOrderSearchTerm(e.target.value)}
+                className="form-control"
+                placeholder="🔍 Escribe el nombre del cliente, ID del pedido o platos..."
+                style={{ fontSize: '1.05rem', height: '48px', width: '100%' }}
+              />
+            </div>
+
+            {historyOrders.length === 0 ? (
+              <div style={{ padding: '40px', textAlign: 'center', color: 'var(--text-secondary)', backgroundColor: 'var(--bg-secondary)', borderRadius: '12px', border: '1px solid var(--border-color)' }}>
+                {orderSearchTerm ? 'No se encontraron pedidos que coincidan con la búsqueda.' : 'No hay pedidos en el historial (entregados o cancelados) todavía.'}
+              </div>
+            ) : (
+              historyOrders.map((order) => {
+                const dateObj = new Date(order.createdAt);
+                const timeString = dateObj.toLocaleTimeString('es-CO', { hour: '2-digit', minute: '2-digit' });
+                const dateString = dateObj.toLocaleDateString('es-CO');
+                const orderNum = order.id ? order.id.slice(-4).toUpperCase() : 'N/A';
+
+                return (
+                  <div 
+                    key={order.id} 
+                    className="order-card animate-slide-up"
+                    style={{
+                      backgroundColor: 'var(--bg-secondary)',
+                      border: '1px solid var(--border-color)',
+                      borderRadius: '12px',
+                      padding: '20px',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      gap: '16px',
+                      boxShadow: 'var(--shadow-sm)',
+                      opacity: 0.9
+                    }}
+                  >
+                    {/* Top Row: Order ID, Time and Status */}
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '12px' }}>
+                      <div>
+                        <span style={{ fontWeight: 'bold', fontSize: '1.25rem', color: 'var(--text-primary)' }}>
+                          Pedido #{orderNum}
+                        </span>
+                        <span style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', marginLeft: '12px' }}>
+                          {dateString} • {timeString}
+                        </span>
+                      </div>
+                      
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        <span 
+                          style={{ 
+                            fontWeight: 'bold', 
+                            fontSize: '0.85rem',
+                            padding: '6px 12px',
+                            borderRadius: '20px',
+                            textTransform: 'uppercase',
+                            backgroundColor: order.status === 'cancelado' ? 'rgba(255, 69, 58, 0.15)' : 'rgba(37, 211, 102, 0.15)',
+                            color: order.status === 'cancelado' ? '#ff453a' : '#25d366',
+                            border: '1px solid currentColor'
+                          }}
+                        >
+                          {order.status === 'entregado' && '✅ Entregado'}
+                          {order.status === 'cancelado' && '❌ Cancelado'}
+                        </span>
+                      </div>
+                    </div>
+
+                    <div style={{ borderTop: '1px solid var(--border-color)', width: '100%' }}></div>
+
+                    {/* Content Section: Domicilio & Productos */}
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '20px' }}>
+                      {/* Left: Shipping details */}
+                      <div>
+                        <h4 style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', textTransform: 'uppercase', marginBottom: '10px', letterSpacing: '0.5px', fontWeight: '700' }}>Datos de Entrega</h4>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                          <p style={{ margin: 0, fontSize: '1.05rem' }}>👤 <b>{order.clientName}</b></p>
+                          <p style={{ margin: 0, fontSize: '0.95rem' }}>
+                            📞 <a href={`tel:${order.clientPhone}`} style={{ color: 'var(--accent-gold)', textDecoration: 'underline' }}>{order.clientPhone}</a>
+                          </p>
+                          <p style={{ margin: 0, fontSize: '0.95rem', lineHeight: '1.4' }}>📍 {order.clientAddress}</p>
+                          <p style={{ margin: '8px 0 0 0', fontSize: '0.95rem' }}>
+                            Pago: 
+                            <span 
+                              style={{ 
+                                marginLeft: '6px', 
+                                fontWeight: '600',
+                                padding: '2px 8px',
+                                borderRadius: '4px',
+                                backgroundColor: (order.paymentMethod === 'transfiya' || order.paymentMethod === 'nequi') ? 'rgba(37,211,102,0.1)' : 'rgba(222,142,0,0.1)',
+                                color: (order.paymentMethod === 'transfiya' || order.paymentMethod === 'nequi') ? '#25d366' : 'var(--accent-gold)'
+                              }}
+                            >
+                              {(order.paymentMethod === 'transfiya' || order.paymentMethod === 'nequi') ? '💳 Transferencia' : '💵 Contra Entrega'}
+                            </span>
+                          </p>
+                        </div>
+                      </div>
+
+                      {/* Right: Order list */}
+                      <div>
+                        <h4 style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', textTransform: 'uppercase', marginBottom: '10px', letterSpacing: '0.5px', fontWeight: '700' }}>Detalles del Pedido</h4>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                          {order.items && order.items.map((item, idx) => (
+                            <div key={idx} style={{ display: 'flex', flexDirection: 'column', fontSize: '0.95rem', borderBottom: '1px solid var(--border-color)', paddingBottom: '4px', marginBottom: '4px' }}>
+                              <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                                <span>• {item.name} <b style={{ color: 'var(--accent-gold)' }}>x{item.quantity}</b></span>
+                                <span style={{ color: 'var(--text-secondary)' }}>{formatPrice(item.price * item.quantity)}</span>
+                              </div>
+                              {item.sauces && item.sauces.length > 0 && (
+                                <span style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', fontStyle: 'italic', paddingLeft: '12px' }}>
+                                  Salsas: {item.sauces.join(', ')}
+                                </span>
+                              )}
+                            </div>
+                          ))}
+                        </div>
+                        <div style={{ borderTop: '1px dashed var(--border-color)', margin: '14px 0 8px 0' }}></div>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', fontWeight: 'bold', fontSize: '1.2rem' }}>
+                          <span>TOTAL:</span>
+                          <span style={{ color: 'var(--accent-gold)' }}>{formatPrice(order.total)}</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', width: '100%', marginTop: '8px' }}>
+                      <span style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', fontWeight: 'bold', textTransform: 'uppercase' }}>Actualizar Estado (POS Táctil)</span>
+                      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(115px, 1fr))', gap: '8px' }}>
+                        {[
+                          { value: 'pendiente', label: '🕒 Pendiente', colorClass: 'warning' },
+                          { value: 'en cocina', label: '🍳 Cocina', colorClass: 'primary' },
+                          { value: 'en camino', label: '🛵 Camino', colorClass: 'info' },
+                          { value: 'entregado', label: '✅ Entregado', colorClass: 'success' },
+                          { value: 'cancelado', label: '❌ Cancelar', colorClass: 'danger' }
+                        ].map((btn) => {
+                          const isActive = order.status === btn.value;
+                          return (
+                            <button
+                              key={btn.value}
+                              type="button"
+                              onClick={() => onUpdateOrderStatus(order.id, btn.value)}
+                              className={`pos-tactile-btn ${isActive ? btn.colorClass : ''}`}
+                              style={{
+                                flexGrow: 1,
+                                fontSize: '0.9rem',
+                                padding: '8px'
+                              }}
+                            >
+                              {btn.label}
+                            </button>
+                          );
+                        })}
+                      </div>
+                    </div>
+
+                    <div style={{ borderTop: '1px solid var(--border-color)', width: '100%' }}></div>
+
+                    {/* Bottom Actions Row */}
+                    <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '12px', alignItems: 'center', flexWrap: 'wrap', width: '100%', marginTop: '4px' }}>
+                      <button
+                        type="button"
+                        onClick={() => sendStatusWhatsApp(order)}
+                        className="pos-tactile-btn"
+                        style={{
+                          textTransform: 'none',
+                          fontSize: '0.9rem',
+                          flexGrow: 1,
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          gap: '6px',
+                          borderColor: '#25d366',
+                          color: '#25d366'
+                        }}
+                      >
+                        <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor">
+                          <path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946C.06 5.348 5.397.01 12.008.01c3.202.001 6.212 1.246 8.477 3.514 2.266 2.268 3.507 5.28 3.505 8.484-.004 6.657-5.34 11.997-11.953 11.997-2.005-.001-3.973-.502-5.724-1.457L0 24zm6.59-4.846c1.6.95 3.188 1.449 4.825 1.451 5.436 0 9.86-4.37 9.864-9.799.002-2.63-1.023-5.101-2.885-6.968C16.592 1.97 14.12 .946 11.5 .946c-5.423 0-9.842 4.37-9.846 9.8.001 1.93.523 3.8 1.511 5.4l-.993 3.625 3.73-.977zm11.536-6.52c-.27-.135-1.595-.788-1.842-.877-.248-.09-.427-.135-.607.135-.179.27-.697.877-.854 1.057-.158.18-.315.202-.586.067-1.18-.592-1.96-1.01-2.735-2.338-.204-.352.204-.326.583-1.085.09-.18.045-.337-.022-.472-.068-.135-.608-1.464-.833-2.005-.22-.529-.462-.458-.63-.466-.153-.008-.329-.01-.505-.01-.176 0-.463.067-.704.326-.241.26-.92.9-.92 2.196 0 1.297.945 2.546 1.077 2.726.133.18 1.861 2.842 4.508 3.982.63.272 1.12.434 1.503.555.632.201 1.21.172 1.665.105.508-.075 1.595-.653 1.82-.1282.225-.63.225-1.17.157-1.26-.068-.09-.248-.135-.518-.27z" />
+                        </svg>
+                        WhatsApp
+                      </button>
+                      
+                      <button
+                        type="button"
+                        onClick={() => printComanda(order)}
+                        className="pos-tactile-btn primary"
+                        style={{
+                          textTransform: 'none',
+                          fontSize: '0.9rem',
+                          flexGrow: 1
+                        }}
+                      >
+                        🖨️ Imprimir Comanda
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={() => onDeleteOrder(order.id)}
+                        className="btn-delete-action"
+                        style={{
+                          padding: '8px',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          borderRadius: '50%',
+                          border: '1px solid rgba(255,0,0,0.15)',
+                          backgroundColor: 'transparent',
+                          width: '36px',
+                          height: '36px'
+                        }}
+                        title="Eliminar del historial"
                       >
                         <Trash2 size={16} />
                       </button>
