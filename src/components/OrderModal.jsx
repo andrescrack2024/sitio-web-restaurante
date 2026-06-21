@@ -672,7 +672,7 @@ Quedo atento a su confirmación. ¡Muchas gracias!`;
               style={{ 
                 position: 'relative', 
                 width: '100%',
-                marginTop: activeModalHint === 'submit' ? '40px' : '0px',
+                marginTop: activeModalHint === 'submit' ? '55px' : '0px',
                 transition: 'margin-top 0.3s ease'
               }}
             >
