@@ -26,7 +26,8 @@ export default function OrderModal({ isOpen, onClose, cartItems, clearCart, onPl
   });
   const [errors, setErrors] = useState({});
   const [isSuccess, setIsSuccess] = useState(false);
-  const [paymentMethod, setPaymentMethod] = useState('efectivo'); // efectivo, transfiya
+  const [paymentMethod, setPaymentMethod] = useState('efectivo'); // efectivo, transfiya, mixto
+  const displayPaymentNote = paymentMethod === 'transfiya' || paymentMethod === 'mixto';
   const [deliveryMethod, setDeliveryMethod] = useState('domicilio'); // domicilio, local
   const [barrio, setBarrio] = useState('El Jardín / Alrededores');
   const [copiedText, setCopiedText] = useState('');
@@ -137,7 +138,7 @@ ${itemsText}
 • Envío: ${formatPrice(deliveryFee)}
 • *Total a Pagar:* ${formatPrice(finalTotal)}
 
-*Método de Pago:* ${paymentMethod === 'transfiya' ? 'Pago por Llave / Transfiya (Comprobante adjunto)' : 'Efectivo (Contra entrega)'}
+*Método de Pago:* ${paymentMethod === 'transfiya' ? 'Pago por Llave / Transfiya (Comprobante adjunto)' : paymentMethod === 'mixto' ? 'Pago Mixto (Llave + Efectivo)' : 'Efectivo (Contra entrega)'}
 
 *Método de Entrega:*
 ${deliveryDetail}
@@ -188,7 +189,7 @@ Quedo atento a su confirmación. ¡Muchas gracias!`;
     e.preventDefault();
     if (!validate()) return;
 
-    if (paymentMethod === 'transfiya') {
+    if (paymentMethod === 'transfiya' || paymentMethod === 'mixto') {
       setShowTransferReminder(true);
       setCountdown(10); // Start 10 second countdown
     } else {
@@ -264,7 +265,7 @@ Quedo atento a su confirmación. ¡Muchas gracias!`;
               <span>Total a Pagar:</span>
               <span className="text-gold">{formatPrice(finalTotal)}</span>
             </div>
-            {paymentMethod === 'transfiya' && (
+            {displayPaymentNote && (
               <div style={{ marginTop: '12px', padding: '10px', backgroundColor: 'rgba(37, 211, 102, 0.08)', borderRadius: '6px', fontSize: '0.8rem', color: 'var(--text-primary)', border: '1px solid rgba(37, 211, 102, 0.2)' }}>
                 <strong>Nota:</strong> No olvides enviar el soporte de pago por Llave al chat de WhatsApp.
               </div>
@@ -521,7 +522,7 @@ Quedo atento a su confirmación. ¡Muchas gracias!`;
               </div>
             )}
             <label className="form-label" style={{ fontSize: '0.85rem', fontWeight: '600' }}>Método de Pago</label>
-            <div id="tour-payment-selector" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px', marginTop: '4px' }}>
+            <div id="tour-payment-selector" style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '8px', marginTop: '4px' }}>
               <button
                 type="button"
                 className={`payment-method-btn ${paymentMethod === 'efectivo' ? 'active' : ''}`}
@@ -535,7 +536,7 @@ Quedo atento a su confirmación. ¡Muchas gracias!`;
                   flexDirection: 'column',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  padding: '10px 6px',
+                  padding: '10px 4px',
                   borderRadius: '10px',
                   border: paymentMethod === 'efectivo' ? '2px solid var(--accent-gold)' : '1px solid var(--border-color)',
                   backgroundColor: paymentMethod === 'efectivo' ? 'var(--accent-gold-light)' : 'var(--bg-primary)',
@@ -545,7 +546,7 @@ Quedo atento a su confirmación. ¡Muchas gracias!`;
                 }}
               >
                 <span style={{ fontSize: '1.2rem' }}>💵</span>
-                <span style={{ fontSize: '0.8rem', fontWeight: '600' }}>Efectivo</span>
+                <span style={{ fontSize: '0.75rem', fontWeight: '600' }}>Efectivo</span>
               </button>
               <button
                 type="button"
@@ -560,7 +561,7 @@ Quedo atento a su confirmación. ¡Muchas gracias!`;
                   flexDirection: 'column',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  padding: '10px 6px',
+                  padding: '10px 4px',
                   borderRadius: '10px',
                   border: paymentMethod === 'transfiya' ? '2px solid #25D366' : '1px solid var(--border-color)',
                   backgroundColor: paymentMethod === 'transfiya' ? 'rgba(37, 211, 102, 0.08)' : 'var(--bg-primary)',
@@ -570,19 +571,47 @@ Quedo atento a su confirmación. ¡Muchas gracias!`;
                 }}
               >
                 <span style={{ fontSize: '1.2rem' }}>💳</span>
-                <span style={{ fontSize: '0.8rem', fontWeight: '600' }}>Llave (Transfiya)</span>
+                <span style={{ fontSize: '0.75rem', fontWeight: '600' }}>Llave</span>
+              </button>
+              <button
+                type="button"
+                className={`payment-method-btn ${paymentMethod === 'mixto' ? 'active' : ''}`}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setPaymentMethod('mixto');
+                  setActiveModalHint('copy_number');
+                }}
+                style={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  padding: '10px 4px',
+                  borderRadius: '10px',
+                  border: paymentMethod === 'mixto' ? '2px solid #3498db' : '1px solid var(--border-color)',
+                  backgroundColor: paymentMethod === 'mixto' ? 'rgba(52, 152, 219, 0.08)' : 'var(--bg-primary)',
+                  color: 'var(--text-primary)',
+                  cursor: 'pointer',
+                  gap: '2px'
+                }}
+              >
+                <span style={{ fontSize: '1.2rem' }}>🔄</span>
+                <span style={{ fontSize: '0.75rem', fontWeight: '600' }}>Mixto</span>
               </button>
             </div>
           </div>
 
           {/* Transfiya Instructions Box */}
-          {paymentMethod === 'transfiya' && (
+          {(paymentMethod === 'transfiya' || paymentMethod === 'mixto') && (
             <div 
               onClick={() => setActiveModalHint('copy_number')}
               style={{ padding: '12px', backgroundColor: 'rgba(37, 211, 102, 0.04)', border: '1px solid rgba(37, 211, 102, 0.2)', borderRadius: '10px', marginBottom: '14px' }}
             >
               <p style={{ fontSize: '0.78rem', margin: '0 0 6px 0', color: 'var(--text-primary)', lineHeight: '1.4' }}>
-                Transfiere por <strong>Transfiya / Nequi / Daviplata</strong> al número del local. Recuerda enviar la captura de pantalla del comprobante.
+                {paymentMethod === 'mixto'
+                  ? <>Transfiere la parte acordada por <strong>Transfiya / Nequi</strong> al número del local y el resto en efectivo. Recuerda enviar el comprobante.</>
+                  : <>Transfiere por <strong>Transfiya / Nequi / Daviplata</strong> al número del local. Recuerda enviar la captura de pantalla del comprobante.</>
+                }
               </p>
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '6px 10px', backgroundColor: 'var(--bg-primary)', border: '1px solid var(--border-color)', borderRadius: '8px' }}>
                 <span style={{ fontSize: '0.85rem', fontWeight: '700', color: 'var(--text-primary)' }}>312 660 2583</span>

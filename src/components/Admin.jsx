@@ -296,10 +296,10 @@ export default function Admin({
             </div>
             
             <div class="solid-divider"></div>
-                       <div style="font-size: 24px; margin-bottom: 15px;"><b>PAGO:</b> ${(order.paymentMethod === 'transfiya' || order.paymentMethod === 'nequi') ? '💳 TRANSFERENCIA (TRANSFIYA)' : '💵 EFECTIVO CONTRA ENTREGA'}</div>
+            <div style="font-size: 24px; margin-bottom: 15px;"><b>PAGO:</b> ${order.paymentMethod === 'transfiya' || order.paymentMethod === 'nequi' || order.paymentMethod === 'mixto' ? (order.paymentMethod === 'mixto' ? '🔄 PAGO MIXTO (TRANSFERENCIA + EFECTIVO)' : '💳 TRANSFERENCIA (LLAVE/NEQUI)') : '💵 EFECTIVO CONTRA ENTREGA'}</div>
             
             <div class="badge">
-              ${order.status === 'pendiente' && (order.paymentMethod === 'transfiya' || order.paymentMethod === 'nequi') 
+              ${order.status === 'pendiente' && (order.paymentMethod === 'transfiya' || order.paymentMethod === 'nequi' || order.paymentMethod === 'mixto') 
                 ? '⚠️ PAGO POR VERIFICAR (WhatsApp)' 
                 : '⚠️ PEDIDO AUTORIZADO - COCINA'}
             </div>
@@ -322,7 +322,46 @@ export default function Admin({
     printWindow.document.close();
   };
 
+  const handleStatusChange = (order, newStatus) => {
+    if ((newStatus === 'en cocina' || newStatus === 'en camino' || newStatus === 'entregado') && 
+        order.status === 'pendiente' && 
+        (order.paymentMethod === 'transfiya' || order.paymentMethod === 'nequi' || order.paymentMethod === 'mixto')) {
+      const confirmed = window.confirm(
+        `🚨 CONTROL DE PAGO 🚨\n\nEste pedido requiere pago por TRANSFERENCIA (Transfiya/Nequi/Mixto).\n\n¿Ya verificaste el comprobante de pago o captura en WhatsApp y recibiste la transferencia?`
+      );
+      if (!confirmed) {
+        const openWA = window.confirm(`¿Deseas abrir el chat de WhatsApp de ${order.clientName} para verificar el comprobante?`);
+        if (openWA) {
+          let phone = order.clientPhone.replace(/\D/g, '');
+          if (phone.length === 10 && !phone.startsWith('57')) {
+            phone = '57' + phone;
+          }
+          window.open(`https://wa.me/${phone}`, '_blank');
+        }
+        return;
+      }
+    }
+    onUpdateOrderStatus(order.id, newStatus);
+  };
+
   const handleAcceptOrder = (order) => {
+    if (order.paymentMethod === 'transfiya' || order.paymentMethod === 'nequi' || order.paymentMethod === 'mixto') {
+      const confirmed = window.confirm(
+        `🚨 CONTROL DE PAGO 🚨\n\nEste pedido requiere pago por TRANSFERENCIA (Transfiya/Nequi/Mixto).\n\n¿Ya verificaste el comprobante de pago o captura en WhatsApp y recibiste la transferencia?`
+      );
+      if (!confirmed) {
+        const openWA = window.confirm(`¿Deseas abrir el chat de WhatsApp de ${order.clientName} para verificar el comprobante?`);
+        if (openWA) {
+          let phone = order.clientPhone.replace(/\D/g, '');
+          if (phone.length === 10 && !phone.startsWith('57')) {
+            phone = '57' + phone;
+          }
+          window.open(`https://wa.me/${phone}`, '_blank');
+        }
+        return;
+      }
+    }
+
     // 1. Change status to 'en cocina'
     onUpdateOrderStatus(order.id, 'en cocina');
     
@@ -957,6 +996,27 @@ export default function Admin({
     return searchString.includes(orderSearchTerm.toLowerCase().trim());
   });
 
+  const audioMuted = adminSettings?.audioNotifications === false;
+  const voiceMuted = adminSettings?.voiceNotifications === false;
+
+  const toggleQuickAudio = () => {
+    const updated = {
+      ...adminSettings,
+      audioNotifications: audioMuted
+    };
+    setSecurityForm(prev => ({ ...prev, audioNotifications: audioMuted }));
+    onUpdateAdminSettings(updated);
+  };
+
+  const toggleQuickVoice = () => {
+    const updated = {
+      ...adminSettings,
+      voiceNotifications: voiceMuted
+    };
+    setSecurityForm(prev => ({ ...prev, voiceNotifications: voiceMuted }));
+    onUpdateAdminSettings(updated);
+  };
+
   return (
     <section className="admin-section">
       <div className="container">
@@ -967,7 +1027,29 @@ export default function Admin({
             <p>Gestión de pedidos en tiempo real y catálogo de platos del restaurante.</p>
           </div>
           
-          <div style={{ display: 'flex', gap: '12px' }}>
+          <div style={{ display: 'flex', gap: '12px', alignItems: 'center', flexWrap: 'wrap' }}>
+            {/* Quick Mute Toggles */}
+            <button 
+              type="button"
+              onClick={toggleQuickAudio}
+              className={`pos-tactile-btn ${audioMuted ? 'danger' : 'success'}`} 
+              style={{ padding: '8px 12px', minHeight: '44px', textTransform: 'none' }}
+              title={audioMuted ? "Activar Sonido" : "Mutear Sonido"}
+            >
+              {audioMuted ? <VolumeX size={18} /> : <Volume2 size={18} />}
+              <span>{audioMuted ? "🔇 Mudo" : "🔊 Sonido"}</span>
+            </button>
+            <button 
+              type="button"
+              onClick={toggleQuickVoice}
+              className={`pos-tactile-btn ${voiceMuted ? 'danger' : 'success'}`} 
+              style={{ padding: '8px 12px', minHeight: '44px', textTransform: 'none' }}
+              title={voiceMuted ? "Activar Voz" : "Mutear Voz"}
+            >
+              {voiceMuted ? <VolumeX size={18} /> : <Volume2 size={18} />}
+              <span>{voiceMuted ? "🔇 Voz" : "🗣️ Voz"}</span>
+            </button>
+
             <button onClick={onGoBack} className="pos-tactile-btn" style={{ textTransform: 'none' }}>
               <ArrowLeft size={16} /> Volver al Sitio
             </button>
@@ -1132,11 +1214,23 @@ export default function Admin({
                                 fontWeight: '600',
                                 padding: '2px 8px',
                                 borderRadius: '4px',
-                                backgroundColor: (order.paymentMethod === 'transfiya' || order.paymentMethod === 'nequi') ? 'rgba(37,211,102,0.1)' : 'rgba(222,142,0,0.1)',
-                                color: (order.paymentMethod === 'transfiya' || order.paymentMethod === 'nequi') ? '#25d366' : 'var(--accent-gold)'
+                                backgroundColor: order.paymentMethod === 'mixto'
+                                  ? 'rgba(52, 152, 219, 0.15)'
+                                  : (order.paymentMethod === 'transfiya' || order.paymentMethod === 'nequi')
+                                    ? 'rgba(37,211,102,0.1)'
+                                    : 'rgba(222,142,0,0.1)',
+                                color: order.paymentMethod === 'mixto'
+                                  ? '#3498db'
+                                  : (order.paymentMethod === 'transfiya' || order.paymentMethod === 'nequi')
+                                    ? '#25d366'
+                                    : 'var(--accent-gold)'
                               }}
                             >
-                              {(order.paymentMethod === 'transfiya' || order.paymentMethod === 'nequi') ? '💳 Transferencia' : '💵 Contra Entrega'}
+                              {order.paymentMethod === 'mixto'
+                                ? '🔄 Pago Mixto'
+                                : (order.paymentMethod === 'transfiya' || order.paymentMethod === 'nequi')
+                                  ? '💳 Transferencia'
+                                  : '💵 Contra Entrega'}
                             </span>
                           </p>
                         </div>
@@ -1183,7 +1277,7 @@ export default function Admin({
                             <button
                               key={btn.value}
                               type="button"
-                              onClick={() => onUpdateOrderStatus(order.id, btn.value)}
+                              onClick={() => handleStatusChange(order, btn.value)}
                               className={`pos-tactile-btn ${isActive ? btn.colorClass : ''}`}
                               style={{
                                 flexGrow: 1,
@@ -1397,11 +1491,23 @@ export default function Admin({
                                 fontWeight: '600',
                                 padding: '2px 8px',
                                 borderRadius: '4px',
-                                backgroundColor: (order.paymentMethod === 'transfiya' || order.paymentMethod === 'nequi') ? 'rgba(37,211,102,0.1)' : 'rgba(222,142,0,0.1)',
-                                color: (order.paymentMethod === 'transfiya' || order.paymentMethod === 'nequi') ? '#25d366' : 'var(--accent-gold)'
+                                backgroundColor: order.paymentMethod === 'mixto'
+                                  ? 'rgba(52, 152, 219, 0.15)'
+                                  : (order.paymentMethod === 'transfiya' || order.paymentMethod === 'nequi')
+                                    ? 'rgba(37,211,102,0.1)'
+                                    : 'rgba(222,142,0,0.1)',
+                                color: order.paymentMethod === 'mixto'
+                                  ? '#3498db'
+                                  : (order.paymentMethod === 'transfiya' || order.paymentMethod === 'nequi')
+                                    ? '#25d366'
+                                    : 'var(--accent-gold)'
                               }}
                             >
-                              {(order.paymentMethod === 'transfiya' || order.paymentMethod === 'nequi') ? '💳 Transferencia' : '💵 Contra Entrega'}
+                              {order.paymentMethod === 'mixto'
+                                ? '🔄 Pago Mixto'
+                                : (order.paymentMethod === 'transfiya' || order.paymentMethod === 'nequi')
+                                  ? '💳 Transferencia'
+                                  : '💵 Contra Entrega'}
                             </span>
                           </p>
                         </div>
@@ -1448,7 +1554,7 @@ export default function Admin({
                             <button
                               key={btn.value}
                               type="button"
-                              onClick={() => onUpdateOrderStatus(order.id, btn.value)}
+                              onClick={() => handleStatusChange(order, btn.value)}
                               className={`pos-tactile-btn ${isActive ? btn.colorClass : ''}`}
                               style={{
                                 flexGrow: 1,
