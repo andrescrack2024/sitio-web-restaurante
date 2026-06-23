@@ -27,21 +27,32 @@ export default function CelebrationParticles({ theme }) {
         case 'soccer':
           return {
             emojiList: ['⚽', '🏆', '🎉', '⚽'],
-            count: 35,
-            subtleCount: 8,
+            count: 22,
+            subtleCount: 5,
             minSpeedY: 1.0,
-            maxSpeedY: 2.8,
+            maxSpeedY: 2.5,
             minSize: 16,
             maxSize: 28,
+            rotation: true
+          };
+        case 'champions':
+          return {
+            emojiList: ['⚽', '🏆', '⭐', '⚽'],
+            count: 22,
+            subtleCount: 5,
+            minSpeedY: 0.9,
+            maxSpeedY: 2.4,
+            minSize: 15,
+            maxSize: 26,
             rotation: true
           };
         case 'christmas':
           return {
             emojiList: ['❄️', '❅', '❆', '⭐', '❄️'],
-            count: 50,
-            subtleCount: 12,
+            count: 28,
+            subtleCount: 7,
             minSpeedY: 0.5,
-            maxSpeedY: 1.8,
+            maxSpeedY: 1.6,
             minSize: 12,
             maxSize: 24,
             rotation: false // Snowflakes sway gently without heavy spinning
@@ -49,12 +60,34 @@ export default function CelebrationParticles({ theme }) {
         case 'halloween':
           return {
             emojiList: ['🎃', '👻', '🦇', '🕷️', '💀'],
-            count: 28,
-            subtleCount: 6,
+            count: 16,
+            subtleCount: 4,
             minSpeedY: 0.7,
-            maxSpeedY: 2.2,
+            maxSpeedY: 2.0,
             minSize: 18,
             maxSize: 32,
+            rotation: true
+          };
+        case 'valentine':
+          return {
+            emojiList: ['💖', '❤️', '🌹', '💕', '❤️'],
+            count: 18,
+            subtleCount: 4,
+            minSpeedY: 0.6,
+            maxSpeedY: 1.8,
+            minSize: 16,
+            maxSize: 26,
+            rotation: true
+          };
+        case 'mothers':
+          return {
+            emojiList: ['🌸', '🌹', '❤️', '🌷', '🌸'],
+            count: 18,
+            subtleCount: 4,
+            minSpeedY: 0.6,
+            maxSpeedY: 1.8,
+            minSize: 16,
+            maxSize: 26,
             rotation: true
           };
         default:

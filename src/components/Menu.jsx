@@ -355,26 +355,51 @@ export default function Menu({ menuItems = [], addToCart, cartItems, loading, ce
             fontSize: '1.05rem',
             animation: 'pulse-glow 3s infinite alternate',
             background: celebrationTheme === 'soccer' 
-              ? 'linear-gradient(135deg, #15803d 0%, #22c55e 100%)' 
+              ? 'linear-gradient(135deg, #15803d 0%, #22c55e 100%)'
+              : celebrationTheme === 'champions'
+              ? 'linear-gradient(135deg, #0f172a 0%, #1e3a8a 100%)'
               : celebrationTheme === 'christmas' 
               ? 'linear-gradient(135deg, #991b1b 0%, #dc2626 100%)' 
-              : 'linear-gradient(135deg, #7c2d12 0%, #ea580c 100%)',
+              : celebrationTheme === 'halloween'
+              ? 'linear-gradient(135deg, #7c2d12 0%, #ea580c 100%)'
+              : celebrationTheme === 'valentine'
+              ? 'linear-gradient(135deg, #db2777 0%, #ec4899 100%)'
+              : 'linear-gradient(135deg, #be185d 0%, #f43f5e 100%)',
             border: celebrationTheme === 'soccer'
               ? '2px solid #ffd700'
+              : celebrationTheme === 'champions'
+              ? '2px solid #fbbf24'
               : celebrationTheme === 'christmas'
               ? '2px solid #fbbf24'
-              : '2px solid #a855f7'
+              : celebrationTheme === 'halloween'
+              ? '2px solid #a855f7'
+              : celebrationTheme === 'valentine'
+              ? '2px solid #fdf2f8'
+              : '2px solid #fef2f2'
           }}>
             <span style={{ fontSize: '1.5rem' }}>
-              {celebrationTheme === 'soccer' ? '⚽' : celebrationTheme === 'christmas' ? '🎄' : '🎃'}
+              {celebrationTheme === 'soccer' && '⚽'}
+              {celebrationTheme === 'champions' && '🏆'}
+              {celebrationTheme === 'christmas' && '🎄'}
+              {celebrationTheme === 'halloween' && '🎃'}
+              {celebrationTheme === 'valentine' && '💖'}
+              {celebrationTheme === 'mothers' && '🌸'}
             </span>
             <span>
               {celebrationTheme === 'soccer' && '¡VIVE EL MUNDIAL EN RÁPIDO & DELI! ⚽ Disfruta los mejores platos para acompañar tu pasión. 🏆'}
+              {celebrationTheme === 'champions' && '⚽ ¡NOCHES DE CHAMPIONS EN RÁPIDO & DELI! 🏆 Vive el mejor fútbol con un sabor estelar. ⭐'}
               {celebrationTheme === 'christmas' && '🎄 ¡FELIZ NAVIDAD Y PRÓSPERO AÑO NUEVO! 🎅 Celebra con el sabor más deli de Quibdó. 🎁'}
               {celebrationTheme === 'halloween' && '🎃 ¡SABOR DE MIEDO EN HALLOWEEN! 👻 Disfruta nuestras delicias espeluznantes. 🦇'}
+              {celebrationTheme === 'valentine' && '💖 ¡ESPECIAL DE SAN VALENTÍN! 💕 Comparte el amor y el sabor más deli con esa persona especial. 🌹'}
+              {celebrationTheme === 'mothers' && '🌸 ¡FELIZ DÍA DE LA MADRE! 🤱 Consiente a mamá con el sabor exquisito que ella se merece. 🌷'}
             </span>
             <span style={{ fontSize: '1.5rem' }}>
-              {celebrationTheme === 'soccer' ? '🍔' : celebrationTheme === 'christmas' ? '🎅' : '👻'}
+              {celebrationTheme === 'soccer' && '🍔'}
+              {celebrationTheme === 'champions' && '⭐'}
+              {celebrationTheme === 'christmas' && '🎅'}
+              {celebrationTheme === 'halloween' && '👻'}
+              {celebrationTheme === 'valentine' && '🌹'}
+              {celebrationTheme === 'mothers' && '🤱'}
             </span>
           </div>
         )}

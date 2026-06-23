@@ -10,6 +10,7 @@ import Admin from './components/Admin';
 import OnboardingTour from './components/OnboardingTour';
 import OrderModal from './components/OrderModal';
 import CelebrationParticles from './components/CelebrationParticles';
+import CelebrationIntro from './components/CelebrationIntro';
 import { db, isFirebaseSupported } from './firebase';
 import { collection, onSnapshot, doc, setDoc, deleteDoc } from 'firebase/firestore';
 import { ShoppingBag } from 'lucide-react';
@@ -223,6 +224,14 @@ export default function App() {
       const month = now.getMonth(); // 0-11 (Jan-Dec)
       const date = now.getDate(); // 1-31
 
+      // Valentine's Day: Feb 12 - Feb 16
+      if (month === 1 && date >= 12 && date <= 16) {
+        return 'valentine';
+      }
+      // Mother's Day (approximate range containing second Sunday of May): May 8 - May 15
+      if (month === 4 && date >= 8 && date <= 15) {
+        return 'mothers';
+      }
       // Halloween: Oct 15 - Nov 2
       if ((month === 9 && date >= 15) || (month === 10 && date <= 2)) {
         return 'halloween';
@@ -612,6 +621,7 @@ export default function App() {
   return (
     <>
       <CelebrationParticles theme={effectiveCelebrationTheme} />
+      <CelebrationIntro theme={effectiveCelebrationTheme} />
 
       <Navbar
         theme={theme}

@@ -1833,13 +1833,16 @@ export default function Admin({
               <p style={{ color: 'var(--text-secondary)', fontSize: '0.85rem', marginBottom: '16px' }}>
                 Activa decoraciones interactivas y colores especiales en la tienda en tiempo real según la época del año o eventos importantes.
               </p>
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))', gap: '10px', marginBottom: '32px' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(120px, 1fr))', gap: '8px', marginBottom: '32px' }}>
                 {[
                   { value: 'auto', label: '🤖 Automático', icon: '📅' },
                   { value: 'normal', label: '🏠 Clásico', icon: '🍔' },
-                  { value: 'soccer', label: '⚽ Mundial / Fútbol', icon: '⚽' },
+                  { value: 'soccer', label: '⚽ Mundial', icon: '⚽' },
+                  { value: 'champions', label: '🏆 Champions', icon: '⭐' },
                   { value: 'christmas', label: '🎄 Navidad', icon: '🎅' },
-                  { value: 'halloween', label: '🎃 Halloween', icon: '👻' }
+                  { value: 'halloween', label: '🎃 Halloween', icon: '👻' },
+                  { value: 'valentine', label: '💖 Valentín', icon: '💕' },
+                  { value: 'mothers', label: '🌸 Día Madre', icon: '🌷' }
                 ].map((themeOpt) => {
                   const isSel = securityForm.celebrationTheme === themeOpt.value;
                   return (
@@ -1849,20 +1852,20 @@ export default function Admin({
                       onClick={() => setSecurityForm(prev => ({ ...prev, celebrationTheme: themeOpt.value }))}
                       className={`pos-tactile-btn ${isSel ? 'primary' : ''}`}
                       style={{
-                        padding: '12px 6px',
+                        padding: '12px 4px',
                         display: 'flex',
                         flexDirection: 'column',
                         alignItems: 'center',
                         justifyContent: 'center',
-                        gap: '6px',
-                        height: '76px',
-                        fontSize: '0.85rem',
+                        gap: '4px',
+                        height: '78px',
+                        fontSize: '0.82rem',
                         textTransform: 'none',
                         textAlign: 'center'
                       }}
                     >
                       <span style={{ fontSize: '1.3rem', lineHeight: '1' }}>{themeOpt.icon}</span>
-                      <span style={{ whiteSpace: 'nowrap' }}>{themeOpt.label}</span>
+                      <span style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', width: '100%' }}>{themeOpt.label}</span>
                     </button>
                   );
                 })}

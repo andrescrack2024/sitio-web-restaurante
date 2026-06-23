@@ -37,14 +37,26 @@ export default function Navbar({ theme, toggleTheme, cartCount, openCart, startT
             {celebrationTheme === 'soccer' && (
               <span style={{ position: 'absolute', bottom: '-4px', right: '-4px', fontSize: '15px', pointerEvents: 'none', zIndex: 10 }}>⚽</span>
             )}
+            {celebrationTheme === 'champions' && (
+              <span style={{ position: 'absolute', bottom: '-4px', right: '-4px', fontSize: '15px', pointerEvents: 'none', zIndex: 10 }}>🏆</span>
+            )}
             {celebrationTheme === 'halloween' && (
               <span style={{ position: 'absolute', top: '-12px', right: '-8px', fontSize: '18px', pointerEvents: 'none', zIndex: 10 }}>🎃</span>
+            )}
+            {celebrationTheme === 'valentine' && (
+              <span style={{ position: 'absolute', top: '-12px', right: '-8px', fontSize: '18px', pointerEvents: 'none', zIndex: 10 }}>💖</span>
+            )}
+            {celebrationTheme === 'mothers' && (
+              <span style={{ position: 'absolute', top: '-12px', right: '-8px', fontSize: '18px', pointerEvents: 'none', zIndex: 10 }}>🌸</span>
             )}
           </div>
           <span>
             {celebrationTheme === 'soccer' && '⚽'}
+            {celebrationTheme === 'champions' && '🏆'}
             {celebrationTheme === 'christmas' && '🎄'}
             {celebrationTheme === 'halloween' && '👻'}
+            {celebrationTheme === 'valentine' && '💖'}
+            {celebrationTheme === 'mothers' && '🌸'}
             {' '}Rápido & Deli
           </span>
         </a>

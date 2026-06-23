@@ -70,6 +70,19 @@
   --accent-gold-light: rgba(34, 197, 94, 0.15);
 }
 
+/* Champions League Theme */
+[data-celebration="champions"] {
+  --accent-gold: #1e40af; /* Champions Blue */
+  --accent-gold-hover: #1d4ed8;
+  --accent-gold-light: rgba(30, 64, 175, 0.12);
+}
+
+[data-celebration="champions"][data-theme="dark"] {
+  --accent-gold: #60a5fa; /* Star Blue */
+  --accent-gold-hover: #3b82f6;
+  --accent-gold-light: rgba(96, 165, 250, 0.15);
+}
+
 /* Christmas / Navidad Theme */
 [data-celebration="christmas"] {
   --accent-gold: #dc2626; /* Christmas Red */
@@ -96,6 +109,32 @@
   --accent-gold-light: rgba(249, 115, 22, 0.15);
 }
 
+/* Valentine Theme */
+[data-celebration="valentine"] {
+  --accent-gold: #db2777; /* Valentine Pink */
+  --accent-gold-hover: #c01a65;
+  --accent-gold-light: rgba(219, 39, 119, 0.12);
+}
+
+[data-celebration="valentine"][data-theme="dark"] {
+  --accent-gold: #f472b6; /* Soft Pink */
+  --accent-gold-hover: #ec4899;
+  --accent-gold-light: rgba(244, 114, 182, 0.15);
+}
+
+/* Mothers Day Theme */
+[data-celebration="mothers"] {
+  --accent-gold: #be185d; /* Dark Rose */
+  --accent-gold-hover: #9d174d;
+  --accent-gold-light: rgba(190, 24, 93, 0.12);
+}
+
+[data-celebration="mothers"][data-theme="dark"] {
+  --accent-gold: #fb7185; /* Soft Rose */
+  --accent-gold-hover: #f43f5e;
+  --accent-gold-light: rgba(251, 113, 133, 0.15);
+}
+
 /* Pulse Glow Animation for Celebration Banners */
 @keyframes pulse-glow {
   0% {
@@ -105,6 +144,53 @@
   100% {
     box-shadow: 0 10px 20px -3px rgba(0, 0, 0, 0.3), 0 0 18px var(--accent-gold);
     transform: scale(1.008);
+  }
+}
+
+/* Doodle Celebration Intro Animations */
+@keyframes zoom-in-bounce {
+  0% {
+    opacity: 0;
+    transform: scale(0.3);
+  }
+  70% {
+    opacity: 1;
+    transform: scale(1.05);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes slide-up-exit {
+  0% {
+    transform: scale(1) translateY(0);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(0.8) translateY(-120px);
+    opacity: 0;
+  }
+}
+
+@keyframes fade-out-overlay {
+  0% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    pointer-events: none;
+    visibility: hidden;
+  }
+}
+
+@keyframes wiggle {
+  0% {
+    transform: rotate(-10deg) scale(1);
+  }
+  100% {
+    transform: rotate(10deg) scale(1.1);
   }
 }
 
