@@ -9,6 +9,7 @@ import Footer from './components/Footer';
 import Admin from './components/Admin';
 import OnboardingTour from './components/OnboardingTour';
 import OrderModal from './components/OrderModal';
+import CelebrationParticles from './components/CelebrationParticles';
 import { db, isFirebaseSupported } from './firebase';
 import { collection, onSnapshot, doc, setDoc, deleteDoc } from 'firebase/firestore';
 import { ShoppingBag } from 'lucide-react';
@@ -55,7 +56,8 @@ export default function App() {
       emailjsTemplateId: '',
       emailjsPublicKey: '',
       audioNotifications: true,
-      voiceNotifications: true
+      voiceNotifications: true,
+      celebrationTheme: 'auto'
     };
   });
 
@@ -198,7 +200,8 @@ export default function App() {
           emailjsTemplateId: '',
           emailjsPublicKey: '',
           audioNotifications: true,
-          voiceNotifications: true
+          voiceNotifications: true,
+          celebrationTheme: 'auto'
         };
         try {
           await setDoc(docRef, defaultSettings);
@@ -214,10 +217,36 @@ export default function App() {
     return () => unsubscribe();
   }, []);
 
+  const getEffectiveCelebrationTheme = (themeSetting) => {
+    if (themeSetting === 'auto') {
+      const now = new Date();
+      const month = now.getMonth(); // 0-11 (Jan-Dec)
+      const date = now.getDate(); // 1-31
+
+      // Halloween: Oct 15 - Nov 2
+      if ((month === 9 && date >= 15) || (month === 10 && date <= 2)) {
+        return 'halloween';
+      }
+      // Christmas: Dec 1 - Jan 6
+      if (month === 11 || (month === 0 && date <= 6)) {
+        return 'christmas';
+      }
+      return 'normal';
+    }
+    return themeSetting || 'normal';
+  };
+
+  const effectiveCelebrationTheme = getEffectiveCelebrationTheme(adminSettings?.celebrationTheme);
+
   // Apply theme class to document element
   useEffect(() => {
     document.documentElement.setAttribute('data-theme', theme);
   }, [theme]);
+
+  // Apply celebration theme class to document element
+  useEffect(() => {
+    document.documentElement.setAttribute('data-celebration', effectiveCelebrationTheme);
+  }, [effectiveCelebrationTheme]);
 
   // Auto-dismiss cart hint when cart is opened
   useEffect(() => {
@@ -582,6 +611,8 @@ export default function App() {
 
   return (
     <>
+      <CelebrationParticles theme={effectiveCelebrationTheme} />
+
       <Navbar
         theme={theme}
         toggleTheme={toggleTheme}
@@ -594,6 +625,7 @@ export default function App() {
         }}
         hasAddedToCart={hasAddedToCart}
         dismissCartHint={() => setHasAddedToCart(false)}
+        celebrationTheme={effectiveCelebrationTheme}
       />
 
       <main style={{ marginTop: '80px' }}>
@@ -604,6 +636,7 @@ export default function App() {
           addToCart={addToCart}
           cartItems={cartItems}
           loading={loading}
+          celebrationTheme={effectiveCelebrationTheme}
         />
         <Testimonials />
       </main>

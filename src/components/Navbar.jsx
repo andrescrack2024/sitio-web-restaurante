@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { ShoppingBag, Sun, Moon, Menu as MenuIcon, X, HelpCircle } from 'lucide-react';
 
-export default function Navbar({ theme, toggleTheme, cartCount, openCart, startTour, hasAddedToCart, dismissCartHint }) {
+export default function Navbar({ theme, toggleTheme, cartCount, openCart, startTour, hasAddedToCart, dismissCartHint, celebrationTheme }) {
   const [scrolled, setScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
@@ -29,8 +29,24 @@ export default function Navbar({ theme, toggleTheme, cartCount, openCart, startT
     <header className={`header ${scrolled ? 'scrolled' : ''}`}>
       <div className="container navbar-container">
         <a href="#inicio" className="logo" style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-          <img src="/logo.png" alt="Rápido & Deli Logo" style={{ height: '42px', width: '42px', objectFit: 'contain', borderRadius: '50%' }} />
-          <span>Rápido & Deli</span>
+          <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
+            <img src="/logo.png" alt="Rápido & Deli Logo" style={{ height: '42px', width: '42px', objectFit: 'contain', borderRadius: '50%' }} />
+            {celebrationTheme === 'christmas' && (
+              <span style={{ position: 'absolute', top: '-15px', left: '-10px', fontSize: '24px', transform: 'rotate(-20deg)', pointerEvents: 'none', zIndex: 10 }}>🎅</span>
+            )}
+            {celebrationTheme === 'soccer' && (
+              <span style={{ position: 'absolute', bottom: '-4px', right: '-4px', fontSize: '15px', pointerEvents: 'none', zIndex: 10 }}>⚽</span>
+            )}
+            {celebrationTheme === 'halloween' && (
+              <span style={{ position: 'absolute', top: '-12px', right: '-8px', fontSize: '18px', pointerEvents: 'none', zIndex: 10 }}>🎃</span>
+            )}
+          </div>
+          <span>
+            {celebrationTheme === 'soccer' && '⚽'}
+            {celebrationTheme === 'christmas' && '🎄'}
+            {celebrationTheme === 'halloween' && '👻'}
+            {' '}Rápido & Deli
+          </span>
         </a>
 
         {/* Desktop & Mobile Navigation Links */}

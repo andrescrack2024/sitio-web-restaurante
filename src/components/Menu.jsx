@@ -244,7 +244,7 @@ export const MENU_ITEMS = [
   }
 ];
 
-export default function Menu({ menuItems = [], addToCart, cartItems, loading }) {
+export default function Menu({ menuItems = [], addToCart, cartItems, loading, celebrationTheme }) {
   const [activeCategory, setActiveCategory] = useState('todos');
   const [addedAnimationIds, setAddedAnimationIds] = useState({});
   const [selectedProduct, setSelectedProduct] = useState(null);
@@ -338,6 +338,47 @@ export default function Menu({ menuItems = [], addToCart, cartItems, loading }) 
   return (
     <section id="menu" className="section-padding" style={{ backgroundColor: 'var(--bg-secondary)' }}>
       <div className="container">
+        {/* Celebration Banner */}
+        {celebrationTheme && celebrationTheme !== 'normal' && (
+          <div className={`celebration-banner ${celebrationTheme}`} style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: '12px',
+            padding: '16px 24px',
+            borderRadius: '12px',
+            marginBottom: '32px',
+            boxShadow: 'var(--shadow-md)',
+            textAlign: 'center',
+            color: '#fff',
+            fontWeight: '600',
+            fontSize: '1.05rem',
+            animation: 'pulse-glow 3s infinite alternate',
+            background: celebrationTheme === 'soccer' 
+              ? 'linear-gradient(135deg, #15803d 0%, #22c55e 100%)' 
+              : celebrationTheme === 'christmas' 
+              ? 'linear-gradient(135deg, #991b1b 0%, #dc2626 100%)' 
+              : 'linear-gradient(135deg, #7c2d12 0%, #ea580c 100%)',
+            border: celebrationTheme === 'soccer'
+              ? '2px solid #ffd700'
+              : celebrationTheme === 'christmas'
+              ? '2px solid #fbbf24'
+              : '2px solid #a855f7'
+          }}>
+            <span style={{ fontSize: '1.5rem' }}>
+              {celebrationTheme === 'soccer' ? '⚽' : celebrationTheme === 'christmas' ? '🎄' : '🎃'}
+            </span>
+            <span>
+              {celebrationTheme === 'soccer' && '¡VIVE EL MUNDIAL EN RÁPIDO & DELI! ⚽ Disfruta los mejores platos para acompañar tu pasión. 🏆'}
+              {celebrationTheme === 'christmas' && '🎄 ¡FELIZ NAVIDAD Y PRÓSPERO AÑO NUEVO! 🎅 Celebra con el sabor más deli de Quibdó. 🎁'}
+              {celebrationTheme === 'halloween' && '🎃 ¡SABOR DE MIEDO EN HALLOWEEN! 👻 Disfruta nuestras delicias espeluznantes. 🦇'}
+            </span>
+            <span style={{ fontSize: '1.5rem' }}>
+              {celebrationTheme === 'soccer' ? '🍔' : celebrationTheme === 'christmas' ? '🎅' : '👻'}
+            </span>
+          </div>
+        )}
+
         <p className="section-subtitle" style={{ textTransform: 'uppercase', letterSpacing: '2px', color: 'var(--accent-gold)', marginBottom: '8px', fontWeight: '600' }}>
           Selección Gastronómica
         </p>
