@@ -11,6 +11,7 @@ export default function CelebrationParticles({ theme }) {
 
     const ctx = canvas.getContext('2d');
     let animationFrameId;
+    let fadeToSubtle = false;
 
     // Set canvas dimensions to full window size
     const resizeCanvas = () => {
@@ -27,6 +28,7 @@ export default function CelebrationParticles({ theme }) {
           return {
             emojiList: ['⚽', '🏆', '🎉', '⚽'],
             count: 35,
+            subtleCount: 8,
             minSpeedY: 1.0,
             maxSpeedY: 2.8,
             minSize: 16,
@@ -37,6 +39,7 @@ export default function CelebrationParticles({ theme }) {
           return {
             emojiList: ['❄️', '❅', '❆', '⭐', '❄️'],
             count: 50,
+            subtleCount: 12,
             minSpeedY: 0.5,
             maxSpeedY: 1.8,
             minSize: 12,
@@ -47,6 +50,7 @@ export default function CelebrationParticles({ theme }) {
           return {
             emojiList: ['🎃', '👻', '🦇', '🕷️', '💀'],
             count: 28,
+            subtleCount: 6,
             minSpeedY: 0.7,
             maxSpeedY: 2.2,
             minSize: 18,
@@ -79,20 +83,30 @@ export default function CelebrationParticles({ theme }) {
         this.spin = (Math.random() - 0.5) * 0.02; // rotation rate
         this.opacity = Math.random() * 0.4 + 0.6; // opacity between 0.6 and 1.0
         this.swaySeed = Math.random() * 100;
+        this.active = true;
       }
 
       update() {
+        if (!this.active) return;
         this.y += this.speedY;
         this.x += this.speedX + Math.sin((this.y / 40) + this.swaySeed) * 0.25; // elegant wave movement
         this.angle += this.spin;
 
         // Reset particle state if it floats off-screen boundaries
         if (this.y > canvas.height + 50 || this.x < -50 || this.x > canvas.width + 50) {
+          if (fadeToSubtle) {
+            const activeCount = particles.filter((p) => p.active).length;
+            if (activeCount > config.subtleCount) {
+              this.active = false;
+              return;
+            }
+          }
           this.reset(false);
         }
       }
 
       draw() {
+        if (!this.active) return;
         ctx.save();
         ctx.globalAlpha = this.opacity;
         ctx.translate(this.x, this.y);
@@ -110,6 +124,11 @@ export default function CelebrationParticles({ theme }) {
     // Initialize particle array
     const particles = Array.from({ length: config.count }, () => new Particle());
 
+    // Fade to subtle ambient level after 3 seconds
+    const fadeTimer = setTimeout(() => {
+      fadeToSubtle = true;
+    }, 3000);
+
     // Main animation loop
     const animate = () => {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -122,10 +141,11 @@ export default function CelebrationParticles({ theme }) {
 
     animate();
 
-    // Clean up event listeners and animation frames
+    // Clean up event listeners, timers, and animation frames
     return () => {
       window.removeEventListener('resize', resizeCanvas);
       cancelAnimationFrame(animationFrameId);
+      clearTimeout(fadeTimer);
     };
   }, [theme]);
 
