@@ -40,6 +40,9 @@ export default function Navbar({ theme, toggleTheme, cartCount, openCart, startT
             {celebrationTheme === 'champions' && (
               <span style={{ position: 'absolute', bottom: '-4px', right: '-4px', fontSize: '15px', pointerEvents: 'none', zIndex: 10 }}>🏆</span>
             )}
+            {celebrationTheme === 'colombia' && (
+              <span style={{ position: 'absolute', bottom: '-4px', right: '-4px', fontSize: '15px', pointerEvents: 'none', zIndex: 10 }}>🇨🇴</span>
+            )}
             {celebrationTheme === 'halloween' && (
               <span style={{ position: 'absolute', top: '-12px', right: '-8px', fontSize: '18px', pointerEvents: 'none', zIndex: 10 }}>🎃</span>
             )}
@@ -53,6 +56,7 @@ export default function Navbar({ theme, toggleTheme, cartCount, openCart, startT
           <span>
             {celebrationTheme === 'soccer' && '⚽'}
             {celebrationTheme === 'champions' && '🏆'}
+            {celebrationTheme === 'colombia' && '🇨🇴'}
             {celebrationTheme === 'christmas' && '🎄'}
             {celebrationTheme === 'halloween' && '👻'}
             {celebrationTheme === 'valentine' && '💖'}

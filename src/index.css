@@ -83,6 +83,19 @@
   --accent-gold-light: rgba(96, 165, 250, 0.15);
 }
 
+/* Colombia Selection Theme */
+[data-celebration="colombia"] {
+  --accent-gold: #eab308; /* Tricolor Yellow */
+  --accent-gold-hover: #d97706;
+  --accent-gold-light: rgba(234, 179, 8, 0.12);
+}
+
+[data-celebration="colombia"][data-theme="dark"] {
+  --accent-gold: #facc15; /* Bright Yellow for contrast */
+  --accent-gold-hover: #eab308;
+  --accent-gold-light: rgba(250, 204, 21, 0.15);
+}
+
 /* Christmas / Navidad Theme */
 [data-celebration="christmas"] {
   --accent-gold: #dc2626; /* Christmas Red */

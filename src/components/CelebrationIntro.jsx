@@ -65,6 +65,13 @@ export default function CelebrationIntro({ theme }) {
           icon: '🌷',
           color: '#f43f5e'
         };
+      case 'colombia':
+        return {
+          title: '¡APOYANDO A LA SELECCIÓN! 🇨🇴',
+          subtitle: '¡Vamos Colombia! Vive la pasión tricolor con Rápido & Deli 💛💙❤️',
+          icon: '🇨🇴',
+          color: '#facc15'
+        };
       default:
         return null;
     }

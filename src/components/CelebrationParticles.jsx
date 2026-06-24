@@ -90,6 +90,17 @@ export default function CelebrationParticles({ theme }) {
             maxSize: 26,
             rotation: true
           };
+        case 'colombia':
+          return {
+            emojiList: ['⚽', '🇨🇴', '💛', '💙', '❤️', '⚽'],
+            count: 22,
+            subtleCount: 5,
+            minSpeedY: 1.0,
+            maxSpeedY: 2.5,
+            minSize: 16,
+            maxSize: 28,
+            rotation: true
+          };
         default:
           return null;
       }

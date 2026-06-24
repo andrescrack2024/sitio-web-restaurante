@@ -1839,6 +1839,7 @@ export default function Admin({
                   { value: 'normal', label: '🏠 Clásico', icon: '🍔' },
                   { value: 'soccer', label: '⚽ Mundial', icon: '⚽' },
                   { value: 'champions', label: '🏆 Champions', icon: '⭐' },
+                  { value: 'colombia', label: '🇨🇴 Colombia', icon: '⚽' },
                   { value: 'christmas', label: '🎄 Navidad', icon: '🎅' },
                   { value: 'halloween', label: '🎃 Halloween', icon: '👻' },
                   { value: 'valentine', label: '💖 Valentín', icon: '💕' },

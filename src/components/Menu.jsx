@@ -358,6 +358,8 @@ export default function Menu({ menuItems = [], addToCart, cartItems, loading, ce
               ? 'linear-gradient(135deg, #15803d 0%, #22c55e 100%)'
               : celebrationTheme === 'champions'
               ? 'linear-gradient(135deg, #0f172a 0%, #1e3a8a 100%)'
+              : celebrationTheme === 'colombia'
+              ? 'linear-gradient(135deg, #eab308 0%, #2563eb 50%, #dc2626 100%)'
               : celebrationTheme === 'christmas' 
               ? 'linear-gradient(135deg, #991b1b 0%, #dc2626 100%)' 
               : celebrationTheme === 'halloween'
@@ -369,6 +371,8 @@ export default function Menu({ menuItems = [], addToCart, cartItems, loading, ce
               ? '2px solid #ffd700'
               : celebrationTheme === 'champions'
               ? '2px solid #fbbf24'
+              : celebrationTheme === 'colombia'
+              ? '2px solid #eab308'
               : celebrationTheme === 'christmas'
               ? '2px solid #fbbf24'
               : celebrationTheme === 'halloween'
@@ -380,6 +384,7 @@ export default function Menu({ menuItems = [], addToCart, cartItems, loading, ce
             <span style={{ fontSize: '1.5rem' }}>
               {celebrationTheme === 'soccer' && '⚽'}
               {celebrationTheme === 'champions' && '🏆'}
+              {celebrationTheme === 'colombia' && '🇨🇴'}
               {celebrationTheme === 'christmas' && '🎄'}
               {celebrationTheme === 'halloween' && '🎃'}
               {celebrationTheme === 'valentine' && '💖'}
@@ -388,6 +393,7 @@ export default function Menu({ menuItems = [], addToCart, cartItems, loading, ce
             <span>
               {celebrationTheme === 'soccer' && '¡VIVE EL MUNDIAL EN RÁPIDO & DELI! ⚽ Disfruta los mejores platos para acompañar tu pasión. 🏆'}
               {celebrationTheme === 'champions' && '⚽ ¡NOCHES DE CHAMPIONS EN RÁPIDO & DELI! 🏆 Vive el mejor fútbol con un sabor estelar. ⭐'}
+              {celebrationTheme === 'colombia' && '🇨🇴 ¡APOYANDO A LA SELECCIÓN COLOMBIA! ⚽ Vive la pasión tricolor con Rápido & Deli. 💛💙❤️'}
               {celebrationTheme === 'christmas' && '🎄 ¡FELIZ NAVIDAD Y PRÓSPERO AÑO NUEVO! 🎅 Celebra con el sabor más deli de Quibdó. 🎁'}
               {celebrationTheme === 'halloween' && '🎃 ¡SABOR DE MIEDO EN HALLOWEEN! 👻 Disfruta nuestras delicias espeluznantes. 🦇'}
               {celebrationTheme === 'valentine' && '💖 ¡ESPECIAL DE SAN VALENTÍN! 💕 Comparte el amor y el sabor más deli con esa persona especial. 🌹'}
@@ -396,6 +402,7 @@ export default function Menu({ menuItems = [], addToCart, cartItems, loading, ce
             <span style={{ fontSize: '1.5rem' }}>
               {celebrationTheme === 'soccer' && '🍔'}
               {celebrationTheme === 'champions' && '⭐'}
+              {celebrationTheme === 'colombia' && '⚽'}
               {celebrationTheme === 'christmas' && '🎅'}
               {celebrationTheme === 'halloween' && '👻'}
               {celebrationTheme === 'valentine' && '🌹'}
