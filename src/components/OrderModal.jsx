@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { X, Send, CheckCircle2, Copy, Check } from 'lucide-react';
 
 const WHATSAPP_NUMBER = '573126602583';
@@ -34,6 +34,178 @@ export default function OrderModal({ isOpen, onClose, cartItems, clearCart, onPl
 
   const [showTransferReminder, setShowTransferReminder] = useState(false);
   const [countdown, setCountdown] = useState(10);
+
+  const [gpsCoords, setGpsCoords] = useState(null); // { lat, lng }
+  const [isMapOpen, setIsMapOpen] = useState(false);
+  const [isLoadingGps, setIsLoadingGps] = useState(false);
+  const [mapAddressLoading, setMapAddressLoading] = useState(false);
+  const [tempCoords, setTempCoords] = useState(null);
+  const [tempAddress, setTempAddress] = useState('');
+  const [forceMapInit, setForceMapInit] = useState(0);
+  const mapInstanceRef = useRef(null);
+
+  // Load Leaflet dynamically when map is opened
+  useEffect(() => {
+    if (!isMapOpen) return;
+    if (window.L) return;
+
+    const link = document.createElement('link');
+    link.rel = 'stylesheet';
+    link.href = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.css';
+    link.integrity = 'sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=';
+    link.crossOrigin = '';
+    document.head.appendChild(link);
+
+    const script = document.createElement('script');
+    script.src = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.js';
+    script.integrity = 'sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=';
+    script.crossOrigin = '';
+    script.onload = () => {
+      setForceMapInit(prev => prev + 1);
+    };
+    document.body.appendChild(script);
+  }, [isMapOpen]);
+
+  // Map Initialization Effect
+  useEffect(() => {
+    if (!isMapOpen || !window.L) return;
+
+    const timer = setTimeout(() => {
+      const defaultCenter = [5.69188, -76.65825]; // Quibdó
+      
+      const map = window.L.map('map-leaflet-mount', {
+        zoomControl: false,
+        attributionControl: false
+      }).setView(defaultCenter, 15);
+
+      window.L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        maxZoom: 19
+      }).addTo(map);
+
+      mapInstanceRef.current = map;
+
+      const handleMapMove = async () => {
+        const center = map.getCenter();
+        const coords = { lat: center.lat, lng: center.lng };
+        setTempCoords(coords);
+        
+        setMapAddressLoading(true);
+        try {
+          const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${center.lat}&lon=${center.lng}&zoom=18&addressdetails=1`, {
+            headers: { 'User-Agent': 'RapidoDeliRestaurante/1.0' }
+          });
+          const data = await res.json();
+          if (data && data.display_name) {
+            const addressParts = data.address;
+            const road = addressParts.road || addressParts.pedestrian || '';
+            const house = addressParts.house_number || '';
+            const neighbourhood = addressParts.neighbourhood || addressParts.suburb || addressParts.residential || '';
+            const simplified = `${road} ${house}${neighbourhood ? `, Barrio ${neighbourhood}` : ''}`.trim() || data.display_name;
+            setTempAddress(simplified);
+          } else {
+            setTempAddress(`${center.lat.toFixed(5)}, ${center.lng.toFixed(5)}`);
+          }
+        } catch (error) {
+          console.error("Reverse geocoding error:", error);
+          setTempAddress(`${center.lat.toFixed(5)}, ${center.lng.toFixed(5)}`);
+        } finally {
+          setMapAddressLoading(false);
+        }
+      };
+
+      map.on('moveend', handleMapMove);
+      handleMapMove();
+
+      // Autodetect GPS to center map on load
+      if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(
+          (position) => {
+            const { latitude, longitude } = position.coords;
+            map.setView([latitude, longitude], 17);
+          },
+          (err) => {
+            console.warn("Initial map GPS centering skipped:", err);
+          },
+          { enableHighAccuracy: true, timeout: 5000 }
+        );
+      }
+    }, 200);
+
+    return () => {
+      clearTimeout(timer);
+      if (mapInstanceRef.current) {
+        mapInstanceRef.current.remove();
+        mapInstanceRef.current = null;
+      }
+    };
+  }, [isMapOpen, forceMapInit]);
+
+  const recenterMapOnUserGps = () => {
+    if (!navigator.geolocation || !mapInstanceRef.current) return;
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        const { latitude, longitude } = position.coords;
+        mapInstanceRef.current.setView([latitude, longitude], 17);
+      },
+      (err) => {
+        alert("No se pudo obtener tu ubicación actual.");
+      },
+      { enableHighAccuracy: true, timeout: 5000 }
+    );
+  };
+
+  const confirmMapSelection = () => {
+    if (tempCoords) {
+      setGpsCoords(tempCoords);
+      setFormData(prev => ({ ...prev, direccion: tempAddress }));
+      setIsMapOpen(false);
+      setActiveModalHint('payment');
+    }
+  };
+
+  const handleUseGps = () => {
+    if (!navigator.geolocation) {
+      alert('La geolocalización no es soportada por tu navegador.');
+      return;
+    }
+
+    setIsLoadingGps(true);
+    navigator.geolocation.getCurrentPosition(
+      async (position) => {
+        const { latitude, longitude } = position.coords;
+        setGpsCoords({ lat: latitude, lng: longitude });
+
+        try {
+          const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}&zoom=18&addressdetails=1`, {
+            headers: { 'User-Agent': 'RapidoDeliRestaurante/1.0' }
+          });
+          const data = await res.json();
+          if (data && data.display_name) {
+            const addressParts = data.address;
+            const road = addressParts.road || addressParts.pedestrian || '';
+            const house = addressParts.house_number || '';
+            const neighbourhood = addressParts.neighbourhood || addressParts.suburb || addressParts.residential || '';
+            const simplified = `${road} ${house}${neighbourhood ? `, Barrio ${neighbourhood}` : ''}`.trim() || data.display_name;
+            setFormData(prev => ({ ...prev, direccion: simplified }));
+          } else {
+            setFormData(prev => ({ ...prev, direccion: `Ubicación GPS (${latitude.toFixed(5)}, ${longitude.toFixed(5)})` }));
+          }
+        } catch (error) {
+          console.error("Reverse geocoding error:", error);
+          setFormData(prev => ({ ...prev, direccion: `Ubicación GPS (${latitude.toFixed(5)}, ${longitude.toFixed(5)})` }));
+        } finally {
+          setIsLoadingGps(false);
+          setActiveModalHint('payment');
+        }
+      },
+      (error) => {
+        console.warn("Geolocation error:", error);
+        alert('No se pudo acceder a tu ubicación GPS. Por favor, asegúrate de dar permisos de ubicación o escribe tu dirección manualmente.');
+        setIsLoadingGps(false);
+      },
+      { enableHighAccuracy: true, timeout: 8000 }
+    );
+  };
 
   // Handle countdown for transfer payment reminder
   useEffect(() => {
@@ -146,7 +318,7 @@ ${deliveryDetail}
 *Datos del Cliente:*
 👤 *Nombre:* ${formData.nombre}
 📞 *Teléfono:* ${cleanPhone}
-${deliveryMethod === 'domicilio' ? `📍 *Dirección:* ${formData.direccion}` : ''}
+${deliveryMethod === 'domicilio' ? `📍 *Dirección:* ${formData.direccion}${gpsCoords ? `\n🗺️ *Ubicación GPS:* https://www.google.com/maps?q=${gpsCoords.lat},${gpsCoords.lng}` : ''}` : ''}
 
 Quedo atento a su confirmación. ¡Muchas gracias!`;
 
@@ -169,6 +341,8 @@ Quedo atento a su confirmación. ¡Muchas gracias!`;
         clientName: formData.nombre,
         clientPhone: cleanPhone,
         clientAddress: deliveryMethod === 'domicilio' ? formData.direccion : 'Recoge en Local',
+        latitude: deliveryMethod === 'domicilio' && gpsCoords ? gpsCoords.lat : null,
+        longitude: deliveryMethod === 'domicilio' && gpsCoords ? gpsCoords.lng : null,
         status: 'pendiente'
       };
       onPlaceOrder(orderData);
@@ -488,7 +662,54 @@ Quedo atento a su confirmación. ¡Muchas gracias!`;
                   <span>Ingresa la dirección de entrega</span>
                 </div>
               )}
-              <label className="form-label" htmlFor="direccion" style={{ fontSize: '0.85rem', fontWeight: '600' }}>Dirección de Entrega</label>
+              <label className="form-label" htmlFor="direccion" style={{ fontSize: '0.85rem', fontWeight: '600', display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%', flexWrap: 'wrap', gap: '6px' }}>
+                <span>Dirección de Entrega</span>
+                <div style={{ display: 'flex', gap: '6px' }}>
+                  <button
+                    type="button"
+                    onClick={handleUseGps}
+                    className="pos-tactile-btn"
+                    disabled={isLoadingGps}
+                    style={{
+                      height: '28px',
+                      padding: '0 8px',
+                      fontSize: '0.72rem',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '4px',
+                      backgroundColor: 'var(--accent-gold-light)',
+                      border: '1px solid var(--accent-gold)',
+                      borderRadius: '6px',
+                      color: 'var(--accent-gold)',
+                      textTransform: 'none',
+                      boxShadow: 'none'
+                    }}
+                  >
+                    <span>{isLoadingGps ? '🔄 GPS...' : '📍 GPS Rápido'}</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setIsMapOpen(true)}
+                    className="pos-tactile-btn"
+                    style={{
+                      height: '28px',
+                      padding: '0 8px',
+                      fontSize: '0.72rem',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '4px',
+                      backgroundColor: 'var(--accent-gold-light)',
+                      border: '1px solid var(--accent-gold)',
+                      borderRadius: '6px',
+                      color: 'var(--accent-gold)',
+                      textTransform: 'none',
+                      boxShadow: 'none'
+                    }}
+                  >
+                    <span>🗺️ Ver Mapa</span>
+                  </button>
+                </div>
+              </label>
               <textarea
                 id="direccion"
                 name="direccion"
@@ -695,6 +916,130 @@ Quedo atento a su confirmación. ¡Muchas gracias!`;
           </div>
         </form>
       </div>
+      
+      {/* Map modal overlay rendered as absolute layer outside the main modal contents */}
+      {isMapOpen && (
+        <div className="modal-overlay" style={{ zIndex: 10000, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <div className="modal-content animate-slide-up" style={{ 
+            maxWidth: '680px', 
+            width: '100%', 
+            height: '90vh', 
+            maxHeight: '90vh', 
+            display: 'flex', 
+            flexDirection: 'column',
+            padding: '0',
+            overflow: 'hidden',
+            position: 'relative'
+          }}>
+            {/* Map Header */}
+            <div style={{ padding: '14px 20px', borderBottom: '1px solid var(--border-color)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <div>
+                <h3 className="modal-title" style={{ margin: 0, fontSize: '1.15rem' }}>Selecciona tu ubicación</h3>
+                <p className="modal-subtitle" style={{ margin: '2px 0 0', fontSize: '0.78rem' }}>Mueve el mapa para centrar el pin en tu casa</p>
+              </div>
+              <button 
+                type="button"
+                onClick={() => setIsMapOpen(false)} 
+                className="btn-icon-round"
+                style={{ width: '32px', height: '32px', position: 'absolute', top: '14px', right: '20px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+              >
+                <X size={16} />
+              </button>
+            </div>
+
+            {/* Map Container Wrapper */}
+            <div style={{ flexGrow: 1, position: 'relative', width: '100%', backgroundColor: 'var(--bg-tertiary)' }}>
+              {/* Leaflet Mount Container */}
+              <div id="map-leaflet-mount" style={{ width: '100%', height: '100%' }}></div>
+
+              {/* Uber-style Fixed Center Pin Overlay */}
+              <div style={{
+                position: 'absolute',
+                top: '50%',
+                left: '50%',
+                transform: 'translate(-50%, -100%)',
+                pointerEvents: 'none',
+                zIndex: 1000,
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center'
+              }}>
+                {/* SVG Marker Pin */}
+                <svg width="38" height="38" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M12 2C8.13 2 5 5.13 5 9C5 14.25 12 22 12 22C12 22 19 14.25 19 9C19 5.13 15.87 2 12 2ZM12 11.5C10.62 11.5 9.5 10.38 9.5 9C9.5 7.62 10.62 6.5 12 6.5C13.38 6.5 14.5 7.62 14.5 9C14.5 10.38 13.38 11.5 12 11.5Z" 
+                        fill="var(--accent-gold)" 
+                        stroke="#000" 
+                        strokeWidth="1.5"
+                  />
+                </svg>
+                <div style={{
+                  width: '6px',
+                  height: '6px',
+                  borderRadius: '50%',
+                  backgroundColor: 'rgba(0,0,0,0.4)',
+                  marginTop: '-3px',
+                  boxShadow: '0 0 3px rgba(0,0,0,0.5)'
+                }}></div>
+              </div>
+
+              {/* Floating Controls (GPS Centering) */}
+              <button
+                type="button"
+                onClick={recenterMapOnUserGps}
+                className="pos-tactile-btn"
+                style={{
+                  position: 'absolute',
+                  bottom: '16px',
+                  right: '16px',
+                  zIndex: 1000,
+                  backgroundColor: 'var(--bg-secondary)',
+                  border: '1px solid var(--border-color)',
+                  borderRadius: '50%',
+                  width: '44px',
+                  height: '44px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  boxShadow: 'var(--shadow-md)',
+                  padding: 0
+                }}
+                title="Centrar en mi ubicación"
+              >
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                  <circle cx="12" cy="12" r="8"/>
+                  <line x1="12" y1="1" x2="12" y2="4"/>
+                  <line x1="12" y1="20" x2="12" y2="23"/>
+                  <line x1="1" y1="12" x2="4" y2="12"/>
+                  <line x1="20" y1="12" x2="23" y2="12"/>
+                  <circle cx="12" cy="12" r="3" fill="currentColor"/>
+                </svg>
+              </button>
+            </div>
+
+            {/* Map Footer (Address preview and Confirmation) */}
+            <div style={{ padding: '16px 20px', backgroundColor: 'var(--bg-secondary)', borderTop: '1px solid var(--border-color)' }}>
+              <div style={{ marginBottom: '12px', textAlign: 'left' }}>
+                <span style={{ fontSize: '0.72rem', fontWeight: 'bold', color: 'var(--accent-gold)', textTransform: 'uppercase' }}>
+                  Dirección Detectada:
+                </span>
+                <p style={{ margin: '4px 0 0', fontSize: '0.9rem', color: 'var(--text-primary)', minHeight: '20px', fontWeight: '500', lineHeight: '1.3' }}>
+                  {mapAddressLoading ? '🔄 Obteniendo dirección...' : tempAddress || 'Desplaza el mapa para ubicar tu casa'}
+                </p>
+              </div>
+              
+              <button
+                type="button"
+                onClick={confirmMapSelection}
+                className="pos-tactile-btn primary"
+                style={{ width: '100%', height: '48px', fontSize: '0.95rem', textTransform: 'none' }}
+                disabled={mapAddressLoading || !tempCoords}
+              >
+                📍 Confirmar esta Ubicación
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

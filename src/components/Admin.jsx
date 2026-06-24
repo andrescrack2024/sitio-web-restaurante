@@ -1208,7 +1208,35 @@ export default function Admin({
                           <p style={{ margin: 0, fontSize: '0.95rem' }}>
                             📞 <a href={`tel:${order.clientPhone}`} style={{ color: 'var(--accent-gold)', textDecoration: 'underline' }}>{order.clientPhone}</a>
                           </p>
-                          <p style={{ margin: 0, fontSize: '0.95rem', lineHeight: '1.4' }}>📍 {order.clientAddress}</p>
+                          <p style={{ margin: 0, fontSize: '0.95rem', lineHeight: '1.4' }}>
+                            📍 {order.clientAddress}
+                            {order.latitude && order.longitude && (
+                              <a
+                                href={`https://www.google.com/maps?q=${order.latitude},${order.longitude}`}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="pos-tactile-btn"
+                                style={{
+                                  display: 'inline-flex',
+                                  alignItems: 'center',
+                                  gap: '4px',
+                                  padding: '2px 8px',
+                                  fontSize: '0.75rem',
+                                  height: '24px',
+                                  marginLeft: '8px',
+                                  backgroundColor: 'rgba(234, 179, 8, 0.12)',
+                                  border: '1px solid var(--accent-gold)',
+                                  borderRadius: '4px',
+                                  color: 'var(--accent-gold)',
+                                  textTransform: 'none',
+                                  boxShadow: 'none',
+                                  verticalAlign: 'middle'
+                                }}
+                              >
+                                🗺️ Ver GPS
+                              </a>
+                            )}
+                          </p>
                           <p style={{ margin: '8px 0 0 0', fontSize: '0.95rem' }}>
                             Pago: 
                             <span 
@@ -1485,7 +1513,35 @@ export default function Admin({
                           <p style={{ margin: 0, fontSize: '0.95rem' }}>
                             📞 <a href={`tel:${order.clientPhone}`} style={{ color: 'var(--accent-gold)', textDecoration: 'underline' }}>{order.clientPhone}</a>
                           </p>
-                          <p style={{ margin: 0, fontSize: '0.95rem', lineHeight: '1.4' }}>📍 {order.clientAddress}</p>
+                          <p style={{ margin: 0, fontSize: '0.95rem', lineHeight: '1.4' }}>
+                            📍 {order.clientAddress}
+                            {order.latitude && order.longitude && (
+                              <a
+                                href={`https://www.google.com/maps?q=${order.latitude},${order.longitude}`}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="pos-tactile-btn"
+                                style={{
+                                  display: 'inline-flex',
+                                  alignItems: 'center',
+                                  gap: '4px',
+                                  padding: '2px 8px',
+                                  fontSize: '0.75rem',
+                                  height: '24px',
+                                  marginLeft: '8px',
+                                  backgroundColor: 'rgba(234, 179, 8, 0.12)',
+                                  border: '1px solid var(--accent-gold)',
+                                  borderRadius: '4px',
+                                  color: 'var(--accent-gold)',
+                                  textTransform: 'none',
+                                  boxShadow: 'none',
+                                  verticalAlign: 'middle'
+                                }}
+                              >
+                                🗺️ Ver GPS
+                              </a>
+                            )}
+                          </p>
                           <p style={{ margin: '8px 0 0 0', fontSize: '0.95rem' }}>
                             Pago: 
                             <span 
